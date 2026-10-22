@@ -3,12 +3,14 @@ from langgraph.graph import StateGraph, START, END
 from graph.nodes import supervisor_node, worker_search, worker_summarize, critic_node, followup_node
 from graph.state import SupervisorState
 
+from logger import logger
+
 def route(state: SupervisorState):
-    print("route")
+    logger.info("route")
     return state['next']
 
 def after_critic(state: SupervisorState):
-    print("after_critic")
+    logger.info("after_critic")
     if "通过" in state['critique'] or state['revision_count'] >= state['critique_times']:
         return "finish"
     return "supervisor"

@@ -2,8 +2,10 @@ from graph.state import SupervisorState
 from tools.arxiv_tool import search_papers
 from llm import invoke_llm
 
+from logger import logger
+
 def supervisor_node(state: SupervisorState):
-    print(f"supervisor_node")
+    logger.info(f"supervisor_node")
     if not state.get("topic") or not state["topic"].strip():
         topic = input("请输入研究主题：\n")
         if not topic:
@@ -40,17 +42,17 @@ def supervisor_node(state: SupervisorState):
 输出要求：只输出一个小写英文单词，不要标点、解释、换行或代码块。"""
 
     responses = invoke_llm(message)
-    next_step = responses.content.strip().lower()
+    next_step = responses.strip().lower()
     if next_step not in {"search", "summarize", "critic"}:
         next_step = "critic" if summary else "search"
     return {'next': next_step}
 
 def worker_search(state: SupervisorState):
-    print("worker_search")
+    logger.info("worker_search")
     return {'papers': search_papers(state['topic'])}
 
 def worker_summarize(state: SupervisorState):
-    print("worker_summarize")
+    logger.info("worker_summarize")
     paper_texts = "\n".join([
         f"- {p.title}: {p.summary[:150]}" for p in state["papers"]
     ])
@@ -58,10 +60,10 @@ def worker_summarize(state: SupervisorState):
     if state.get("critique"):
         message += f"\n\n需要根据审评意见{state['critique']}进行精炼汇总。"
     responses = invoke_llm(message)
-    return {'summary': responses.content.strip()}
+    return {'summary': responses.strip()}
 
 def critic_node(state: SupervisorState):
-    print("critic_node")
+    logger.info("critic_node")
     """评审 summary 质量，决定通过还是打回重做"""
     prompt = f"""请评审以下论文总结的质量：
     主题：{state['topic']}
@@ -75,14 +77,14 @@ def critic_node(state: SupervisorState):
     如果质量达标，只回复：通过。
     如果不达标，回复具体修改意见（1-2条）。"""
     result = invoke_llm(prompt)
-    return {"critique": result.content.strip(), "revision_count": state["revision_count"]+1}
+    return {"critique": result.strip(), "revision_count": state["revision_count"]+1}
 
 def followup_node(state: SupervisorState):
-    print("followup_node")
+    logger.info("followup_node")
     prompt = f"""基于以下研究主题和内容，推荐 2-3 个用户可能想进一步了解的方向：
 主题：{state["topic"]}
 总结：{state['summary']}
 
 每个方向一句话，用序号列出。"""
     result = invoke_llm(prompt)
-    return {"followup": result.content.strip()}
+    return {"followup": result.strip()}

@@ -3,6 +3,8 @@ import arxiv
 from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 
+from logger import logger
+
 class PaperMeta(BaseModel):
     title: str = Field(description="论文标题")
     authors: list[str] = Field(description="作者列表")
@@ -15,7 +17,10 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
     输入：搜索关键词（如 "LangGraph agent"），最多返回几篇
     输出：论文元数据列表
     """
-    print("search_papers")
+    logger.info("search_papers")
+
+    max_results = max(1, min(int(max_results), 50))
+
     search_client = arxiv.Client(
         page_size=10,
         num_retries=5,
@@ -40,8 +45,10 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
                 )
             )
     except arxiv.HTTPError as e:
-        print(e)
-    print(f'===search_papers，查到 {len(papers)} 条数据。并返回 {len(papers)} 条数据。===')
+        logger.info(f"arXiv API 请求失败: {e}")
+    except Exception as e:
+        logger.info(f"arXiv 搜索异常: {e}")
+    logger.info(f'===search_papers，查到 {len(papers)} 条数据。并返回 {len(papers)} 条数据。===')
     return papers
 
 @tool("search_papers")
@@ -55,5 +62,5 @@ def search_papers_tool(query: str, field: str = 'all', max_results: int = 5) -> 
     if field != "all":
         query = f"{field}:{query}"
     papers = search_papers(query, max_results)
-    print(f'===search_papers_tool，查到 {len(papers)} 条数据。并返回 {len(papers)} 条数据。===')
+    logger.info(f'===search_papers_tool，查到 {len(papers)} 条数据。并返回 {len(papers)} 条数据。===')
     return [p.model_dump() for p in papers]
