@@ -19,6 +19,7 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
     """
     logger.info("search_papers")
 
+    # 调用函数时，预防不可预估的值
     max_results = max(1, min(int(max_results), 50))
 
     search_client = arxiv.Client(

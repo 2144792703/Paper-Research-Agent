@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, START, END
 
-from graph.nodes import supervisor_node, worker_search, worker_summarize, critic_node, followup_node
+from graph.nodes import supervisor_node, worker_search, worker_summarize, critic_node, followup_node, worker_select
 from graph.state import SupervisorState
 
 from logger import logger
@@ -18,12 +18,14 @@ def after_critic(state: SupervisorState):
 graph = StateGraph(SupervisorState)
 graph.add_node("supervisor", supervisor_node)
 graph.add_node("search", worker_search)
+graph.add_node("select", worker_select)
 graph.add_node("summarize", worker_summarize)
 graph.add_node("critic", critic_node)
 graph.add_node("followup", followup_node)
 
 graph.add_edge(START, "supervisor")
-graph.add_edge('search', 'supervisor')
+graph.add_edge('search', 'select')
+graph.add_edge('select', 'supervisor')
 graph.add_edge('summarize', 'supervisor')
 
 graph.add_conditional_edges(

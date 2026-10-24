@@ -2,7 +2,19 @@ from graph.state import SupervisorState
 from tools.arxiv_tool import search_papers
 from llm import invoke_llm
 
+from pydantic import BaseModel, Field
+
 from logger import logger
+
+class SelectedPaper(BaseModel):
+    """选中的一篇论文"""
+    title: str = Field(description="论文标题")
+    reason: str = Field(description="为什么这篇与主题相关，一句话")
+
+class SelectionResult(BaseModel):
+    """LLM 筛选结果"""
+    selected: list[SelectedPaper] = Field(description="选中的论文，3-5篇")
+
 
 def supervisor_node(state: SupervisorState):
     logger.info(f"supervisor_node")
@@ -50,6 +62,39 @@ def supervisor_node(state: SupervisorState):
 def worker_search(state: SupervisorState):
     logger.info("worker_search")
     return {'papers': search_papers(state['topic'])}
+
+def worker_select(state: SupervisorState):
+    """从搜索结果中筛选最相关的论文"""
+    logger.info("worker_select")
+    papers = state.get("papers") or []
+    if not papers:
+        return {"papers": []}
+    
+    paper_list = "\n".join([
+        f"[{i}]{p.title}\n      摘要：{p.summary[:150]}"
+        for i, p in enumerate(papers)
+    ])
+
+    prompt = f"""研究主题：{state['topic']}
+
+以下是搜索到的 {len(papers)} 篇论文，请选出最相关的 3-5 篇。
+每篇给出一句话理由（为什么与主题相关）。
+
+{paper_list}
+
+请以 JSON 格式返回，包含 selected 数组，每项有 title 和 reason。"""
+
+    result = invoke_llm(prompt)
+
+    try:
+        parsed = SelectionResult.model_validate_json(result)
+        selected_titles = {p.title for p in parsed.selected}
+        selected_papers = {p for p in papers if p.title in selected_titles}
+        logger.info(f"筛选后保留 {len(selected_papers)} / {len(papers)} 篇")
+        return {'papers': selected_papers}
+    except Exception as e:
+        logger.warning(f"筛选解析失败，保留全部论文：{e}")
+        return {"papers": papers}
 
 def worker_summarize(state: SupervisorState):
     logger.info("worker_summarize")
