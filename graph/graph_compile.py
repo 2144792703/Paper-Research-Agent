@@ -11,7 +11,7 @@ def route(state: SupervisorState):
 
 def after_critic(state: SupervisorState):
     logger.info("after_critic")
-    if "通过" in state['critique'] or state['revision_count'] >= state['critique_times']:
+    if state['critique'].strip() == "通过" or state['revision_count'] >= state['critique_times']:
         return "finish"
     return "supervisor"
 

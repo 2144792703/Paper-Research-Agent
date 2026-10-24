@@ -23,14 +23,14 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
     max_results = max(1, min(int(max_results), 50))
 
     search_client = arxiv.Client(
-        page_size=10,
-        num_retries=5,
+        page_size=15,
+        num_retries=3,
         delay_seconds=5.0,
     )
     search = arxiv.Search(
         query = query,
         max_results = max_results,   # 返回的搜索数量
-        sort_by = arxiv.SortCriterion.SubmittedDate,
+        sort_by = arxiv.SortCriterion.Relevance,
     )
     papers: list[PaperMeta] = []
 

@@ -1,47 +1,67 @@
-D:\Anaconda3\python.exe E:\testcode\day29\paper-research-agent\smoke_test.py
-=== 测试1: invoke_llm ===
-2026-10-22 18:46:59,890 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-检索增强生成（RAG）是一种技术框架，它通过先从外部知识库中检索相关文档来增强信息，再将这些信息作为上下文提供给大语言模型，从而生成更准确、有依据的回答。
+D:\Anaconda3\python.exe E:\testcode\day29\paper-research-agent\test\selection_test.py
+2026-10-24 12:19:30,406 [PaperAgent] INFO: supervisor_node
+2026-10-24 12:19:32,257 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:32,263 [PaperAgent] INFO: route
+2026-10-24 12:19:32,264 [PaperAgent] INFO: worker_search
+2026-10-24 12:19:32,264 [PaperAgent] INFO: search_papers
+2026-10-24 12:19:32,264 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-10-24 12:19:33,688 [arxiv] INFO: Got first page: 15 of 501293 total results
+2026-10-24 12:19:33,688 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
+2026-10-24 12:19:33,689 [PaperAgent] INFO: worker_select
+2026-10-24 12:19:37,568 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:37,573 [PaperAgent] INFO: 筛选后保留 5 / 15 篇
+2026-10-24 12:19:37,574 [PaperAgent] INFO: supervisor_node
+2026-10-24 12:19:43,959 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:43,962 [PaperAgent] INFO: route
+2026-10-24 12:19:43,963 [PaperAgent] INFO: worker_summarize
+2026-10-24 12:19:46,929 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:46,931 [PaperAgent] INFO: supervisor_node
+2026-10-24 12:19:47,512 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:47,524 [PaperAgent] INFO: route
+2026-10-24 12:19:47,524 [PaperAgent] INFO: critic_node
+2026-10-24 12:19:53,174 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:53,176 [PaperAgent] INFO: after_critic
+2026-10-24 12:19:53,177 [PaperAgent] INFO: supervisor_node
+2026-10-24 12:19:53,910 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:53,911 [PaperAgent] INFO: route
+2026-10-24 12:19:53,912 [PaperAgent] INFO: worker_summarize
+2026-10-24 12:19:56,779 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:56,782 [PaperAgent] INFO: supervisor_node
+2026-10-24 12:19:57,685 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:57,686 [PaperAgent] INFO: route
+2026-10-24 12:19:57,687 [PaperAgent] INFO: critic_node
+2026-10-24 12:19:59,605 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-24 12:19:59,606 [PaperAgent] INFO: after_critic
+2026-10-24 12:19:59,606 [PaperAgent] INFO: followup_node
+2026-10-24 12:19:59,766 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:19:59,767 [openai._base_client] INFO: Retrying request to /chat/completions in 0.409843 seconds
+2026-10-24 12:20:00,349 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:00,349 [openai._base_client] INFO: Retrying request to /chat/completions in 0.948822 seconds
+2026-10-24 12:20:01,761 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:01,763 [llm] WARNING: API限流，5秒后重试 (1/4)
+2026-10-24 12:20:07,594 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:07,594 [openai._base_client] INFO: Retrying request to /chat/completions in 0.464197 seconds
+2026-10-24 12:20:08,252 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:08,253 [openai._base_client] INFO: Retrying request to /chat/completions in 0.934318 seconds
+2026-10-24 12:20:09,361 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:09,362 [llm] WARNING: API限流，10秒后重试 (2/4)
+2026-10-24 12:20:20,071 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:20,072 [openai._base_client] INFO: Retrying request to /chat/completions in 0.477387 seconds
+2026-10-24 12:20:20,722 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:20,722 [openai._base_client] INFO: Retrying request to /chat/completions in 0.989363 seconds
+2026-10-24 12:20:21,918 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-24 12:20:21,919 [llm] WARNING: API限流，20秒后重试 (3/4)
+2026-10-24 12:20:45,629 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
 
-=== 测试2: stream_llm ===
-2026-10-22 18:47:23,216 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-LangGraph 是 LangChain 团队推出的用于构建有状态、循环和多智能体 AI 应用的框架，通过图结构来协调和编排复杂的代理工作流。
+=== 主题: graph neural network ===
+筛选后论文数: 5
+  - Graph Neural Network Training Systems: A Performance Compari
+  - Fast and Deep Graph Neural Networks
+  - Transformers are Graph Neural Networks
+  - Learning Universal Graph Neural Network Embeddings With Aid
+  - Modern graph neural networks do worse than classical greedy
+summary: 基于审评意见，原综述存在数据缺失与逻辑松散问题。修正后的综述聚焦于**现代GNN在组合优化任务中的局限性**这一核心结论，并补充具体数据支撑：
 
-=== 测试3: graph 冒烟 ===
-2026-10-22 18:47:23,977 [PaperAgent] INFO: supervisor_node
-2026-10-22 18:47:50,229 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:47:50,233 [PaperAgent] INFO: route
-2026-10-22 18:47:50,234 [PaperAgent] INFO: worker_search
-2026-10-22 18:47:50,234 [PaperAgent] INFO: search_papers
-2026-10-22 18:47:50,234 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=RAG+retrieval&id_list=&sortBy=submittedDate&sortOrder=descending&start=0&max_results=10
-2026-10-22 18:47:50,813 [arxiv] INFO: Got first page: 10 of 66899 total results
-2026-10-22 18:47:50,813 [PaperAgent] INFO: ===search_papers，查到 5 条数据。并返回 5 条数据。===
-2026-10-22 18:47:50,814 [PaperAgent] INFO: supervisor_node
-2026-10-22 18:47:53,258 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:47:53,259 [PaperAgent] INFO: route
-2026-10-22 18:47:53,259 [PaperAgent] INFO: worker_summarize
-2026-10-22 18:48:07,470 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:48:08,179 [PaperAgent] INFO: supervisor_node
-2026-10-22 18:48:13,756 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:48:14,513 [PaperAgent] INFO: route
-2026-10-22 18:48:14,514 [PaperAgent] INFO: critic_node
-2026-10-22 18:48:22,966 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:48:22,967 [PaperAgent] INFO: after_critic
-2026-10-22 18:48:22,967 [PaperAgent] INFO: supervisor_node
-2026-10-22 18:48:25,398 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:48:25,399 [PaperAgent] INFO: route
-2026-10-22 18:48:25,399 [PaperAgent] INFO: worker_summarize
-2026-10-22 18:48:42,081 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:48:42,083 [PaperAgent] INFO: supervisor_node
-2026-10-22 18:48:43,192 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:48:43,194 [PaperAgent] INFO: route
-2026-10-22 18:48:43,194 [PaperAgent] INFO: critic_node
-2026-10-22 18:48:46,022 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-22 18:48:46,023 [PaperAgent] INFO: after_critic
-2026-10-22 18:48:46,023 [PaperAgent] INFO: followup_node
-2026-10-22 18:49:09,625 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-summary: 针对RAG检索领域，现有研究主要聚焦于提升检索精度与效率。针对大规模代码库场景，Code Comprehensor通过构建层级文档体系并结合跨模态检索，有效解决复杂代码理解难题，提升了维护效率。在企业
-followup: 1. 探讨引入强化学习机制优化RAG检索策略，以量化评估其在提升特征匹配精度与降低噪声干扰方面的具体性能增益。
-2. 研究摄入层文档信息转换优化方案，深入分析如何解决“静默线索丢失”问题并保障Agen
+现有研究表明，
 
 进程已结束，退出代码为 0

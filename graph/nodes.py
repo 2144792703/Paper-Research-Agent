@@ -1,3 +1,5 @@
+import re
+
 from graph.state import SupervisorState
 from tools.arxiv_tool import search_papers
 from llm import invoke_llm
@@ -8,7 +10,7 @@ from logger import logger
 
 class SelectedPaper(BaseModel):
     """选中的一篇论文"""
-    title: str = Field(description="论文标题")
+    index: int = Field(description="候选论文的序号，对应列表中的 [i]")
     reason: str = Field(description="为什么这篇与主题相关，一句话")
 
 class SelectionResult(BaseModel):
@@ -17,7 +19,7 @@ class SelectionResult(BaseModel):
 
 
 def supervisor_node(state: SupervisorState):
-    logger.info(f"supervisor_node")
+    logger.info("supervisor_node")
     if not state.get("topic") or not state["topic"].strip():
         topic = input("请输入研究主题：\n")
         if not topic:
@@ -28,40 +30,49 @@ def supervisor_node(state: SupervisorState):
     papers = state.get("papers") or []
     summary = (state.get("summary") or "").strip()
     critique = (state.get("critique") or "").strip()
-    previous = (state.get("next") or "").strip() or "无（流程刚开始）"
-    revision_count = state.get("revision_count", 0)
-    critique_times = state.get("critique_times", 3)
+    previous = (state.get("next") or "").strip() or "none"
 
-    message = f"""你是论文研究助手的路由节点，负责决定下一步执行哪个节点。
-只从 search、summarize、critic 中选择一个，不要输出其他任何内容。
+    message = f"""你是论文研究助手的路由节点，根据当前进度决定下一步进入哪个节点。
+只能输出 search、summarize、critic 三者之一。
 
-当前状态：
+当前进度：
 - 研究主题：{state["topic"]}
-- 已检索论文数：{len(papers)}
-- 是否已有研究综述：{"是" if summary else "否"}
-- 上一步执行的节点：{previous}
+- 已检索并筛选后的论文数：{len(papers)}
+- 是否已有研究综述：{"yes" if summary else "no"}
+- 上一步进入的节点：{previous}（none=流程刚开始；search=刚完成“搜索+筛选”；summarize=刚写完综述；critic=刚收到评审意见）
 - 最近一次评审意见：{critique or "无"}
-- 已修改次数：{revision_count}/{critique_times}
 
-判断规则（从上往下，命中即停）：
-1. 上一步是 search：输出 summarize（即使没检索到论文也进入总结，避免重复搜索）。
-2. 已检索论文数为 0：输出 search。
-3. 上一步是 critic：输出 summarize（按评审意见修改综述）。
-4. 上一步是 summarize：输出 critic（提交评审）。
-5. 还没有研究综述：输出 summarize。
-6. 其他情况：输出 critic。
+决策规则（严格按顺序判断，命中即停，不要自行调整顺序）：
+1. 上一步是 search → 输出 summarize。
+   搜索和筛选刚结束，必须先写综述；即使论文数为 0 也进入 summarize，禁止立刻再次 search。
+2. 上一步是 critic → 输出 summarize。
+   评审未通过时才会回到这里，必须按最近评审意见重写综述，不要重复搜索或再次提交评审。
+3. 论文数为 0 → 输出 search。
+   还没有论文，只能先检索。
+4. 是否已有综述 = no → 输出 summarize。
+   有论文但还没写综述。
+5. 其余情况 → 输出 critic。
+   综述刚修改完成，提交评审。
 
-输出要求：只输出一个小写英文单词，不要标点、解释、换行或代码块。"""
+硬约束：
+- 论文数大于 0 时，禁止输出 search：同一主题重复搜索不会带来新论文。
+
+输出：只输出一个小写英文单词（search / summarize / critic），不要标点、引号、解释、换行或代码块。"""
 
     responses = invoke_llm(message)
     next_step = responses.strip().lower()
     if next_step not in {"search", "summarize", "critic"}:
-        next_step = "critic" if summary else "search"
+        logger.warning(f"路由输出不合法：{responses!r}，默认走 search")
+        next_step = "search"
     return {'next': next_step}
 
 def worker_search(state: SupervisorState):
     logger.info("worker_search")
-    return {'papers': search_papers(state['topic'])}
+    new_papers = search_papers(state['topic'], max_results=15)
+    existing = state.get("papers") or []
+    seen = {p.url for p in existing}
+    merged = existing + [p for p in new_papers if p.url not in seen]
+    return {'papers': merged}
 
 def worker_select(state: SupervisorState):
     """从搜索结果中筛选最相关的论文"""
@@ -71,25 +82,41 @@ def worker_select(state: SupervisorState):
         return {"papers": []}
     
     paper_list = "\n".join([
-        f"[{i}]{p.title}\n      摘要：{p.summary[:150]}"
+        f"[{i}] 标题：{p.title}\n      摘要：{p.summary[:150]}"
         for i, p in enumerate(papers)
     ])
 
     prompt = f"""研究主题：{state['topic']}
 
-以下是搜索到的 {len(papers)} 篇论文，请选出最相关的 3-5 篇。
-每篇给出一句话理由（为什么与主题相关）。
+以下是搜索到的 {len(papers)} 篇论文，请选出与主题最相关的 3-5 篇。
+用序号说明选择理由。
 
 {paper_list}
 
-请以 JSON 格式返回，包含 selected 数组，每项有 title 和 reason。"""
+请以 JSON 返回，格式为：
+{{"selected": [{{"index": 0, "reason": "这篇论文与主题的关系"}}]}}
+
+index 必须是上面列表中的序号。只返回 JSON，不要代码块或额外说明。"""
 
     result = invoke_llm(prompt)
+    result = re.sub(r"^\s*```(?:json)?\s*", "", result)
+    result = re.sub(r"\s*```\s*$", "", result)
 
     try:
         parsed = SelectionResult.model_validate_json(result)
-        selected_titles = {p.title for p in parsed.selected}
-        selected_papers = {p for p in papers if p.title in selected_titles}
+        selected_papers = []
+        seen = set()
+        for item in parsed.selected:
+            if not 0 <= item.index < len(papers):
+                continue
+            paper = papers[item.index]
+            if paper.url in seen:
+                continue
+            seen.add(paper.url)
+            selected_papers.append(paper)
+        if not selected_papers:
+            logger.warning("筛选结果为空或序号无效，保留全部论文")
+            return {"papers": papers}
         logger.info(f"筛选后保留 {len(selected_papers)} / {len(papers)} 篇")
         return {'papers': selected_papers}
     except Exception as e:

@@ -1,7 +1,7 @@
 from graph.graph_compile import graph
 
-topics = ["RAG retrieval", "LLM agent planning", "graph neural network"]
-
+# topics = ["RAG retrieval", "LLM agent planning", "graph neural network"]
+topics = ["graph neural network"]
 for topic in topics:
     result = graph.invoke({
         "topic": topic,
