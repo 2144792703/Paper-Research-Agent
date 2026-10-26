@@ -1,67 +1,27 @@
-D:\Anaconda3\python.exe E:\testcode\day29\paper-research-agent\test\selection_test.py
-2026-10-24 12:19:30,406 [PaperAgent] INFO: supervisor_node
-2026-10-24 12:19:32,257 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:32,263 [PaperAgent] INFO: route
-2026-10-24 12:19:32,264 [PaperAgent] INFO: worker_search
-2026-10-24 12:19:32,264 [PaperAgent] INFO: search_papers
-2026-10-24 12:19:32,264 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-10-24 12:19:33,688 [arxiv] INFO: Got first page: 15 of 501293 total results
-2026-10-24 12:19:33,688 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-2026-10-24 12:19:33,689 [PaperAgent] INFO: worker_select
-2026-10-24 12:19:37,568 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:37,573 [PaperAgent] INFO: 筛选后保留 5 / 15 篇
-2026-10-24 12:19:37,574 [PaperAgent] INFO: supervisor_node
-2026-10-24 12:19:43,959 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:43,962 [PaperAgent] INFO: route
-2026-10-24 12:19:43,963 [PaperAgent] INFO: worker_summarize
-2026-10-24 12:19:46,929 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:46,931 [PaperAgent] INFO: supervisor_node
-2026-10-24 12:19:47,512 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:47,524 [PaperAgent] INFO: route
-2026-10-24 12:19:47,524 [PaperAgent] INFO: critic_node
-2026-10-24 12:19:53,174 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:53,176 [PaperAgent] INFO: after_critic
-2026-10-24 12:19:53,177 [PaperAgent] INFO: supervisor_node
-2026-10-24 12:19:53,910 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:53,911 [PaperAgent] INFO: route
-2026-10-24 12:19:53,912 [PaperAgent] INFO: worker_summarize
-2026-10-24 12:19:56,779 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:56,782 [PaperAgent] INFO: supervisor_node
-2026-10-24 12:19:57,685 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:57,686 [PaperAgent] INFO: route
-2026-10-24 12:19:57,687 [PaperAgent] INFO: critic_node
-2026-10-24 12:19:59,605 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-24 12:19:59,606 [PaperAgent] INFO: after_critic
-2026-10-24 12:19:59,606 [PaperAgent] INFO: followup_node
-2026-10-24 12:19:59,766 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:19:59,767 [openai._base_client] INFO: Retrying request to /chat/completions in 0.409843 seconds
-2026-10-24 12:20:00,349 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:00,349 [openai._base_client] INFO: Retrying request to /chat/completions in 0.948822 seconds
-2026-10-24 12:20:01,761 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:01,763 [llm] WARNING: API限流，5秒后重试 (1/4)
-2026-10-24 12:20:07,594 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:07,594 [openai._base_client] INFO: Retrying request to /chat/completions in 0.464197 seconds
-2026-10-24 12:20:08,252 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:08,253 [openai._base_client] INFO: Retrying request to /chat/completions in 0.934318 seconds
-2026-10-24 12:20:09,361 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:09,362 [llm] WARNING: API限流，10秒后重试 (2/4)
-2026-10-24 12:20:20,071 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:20,072 [openai._base_client] INFO: Retrying request to /chat/completions in 0.477387 seconds
-2026-10-24 12:20:20,722 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:20,722 [openai._base_client] INFO: Retrying request to /chat/completions in 0.989363 seconds
-2026-10-24 12:20:21,918 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
-2026-10-24 12:20:21,919 [llm] WARNING: API限流，20秒后重试 (3/4)
-2026-10-24 12:20:45,629 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+D:\Anaconda3\python.exe E:\testcode\day29\paper-research-agent\test\pdf_text.py
+2026-10-26 13:44:31,897 [PaperAgent] INFO: search_papers
+2026-10-26 13:44:31,898 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=RAG+retrieval&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-10-26 13:44:34,200 [arxiv] INFO: Got first page: 15 of 67052 total results
+2026-10-26 13:44:34,201 [PaperAgent] INFO: ===search_papers，查到 1 条数据。并返回 1 条数据。===
+测试PDF: https://arxiv.org/pdf/2511.22858v1
+2026-10-26 13:44:34,201 [PaperAgent] INFO: 下载 PDF：https://arxiv.org/pdf/2511.22858v1
+提取文本长度: 2000
+前500字:
+RAG System for Supporting Japanese Litigation
+Procedures: Faithful Response Generation Complying
+with Legal Norms
+YuyaIshihara1,*, AtsushiKeyaki1,*, HiroakiYamada2, RyutaroOhara1,3 and MihokoSumida1
+1HitotsubashiUniversity,Japan
+2InstituteofScienceTokyo,Japan
+3Nakamura,Tsunoda&Matsumoto,Japan
+Abstract
+ThisstudydiscussestheessentialcomponentsthataRetrieval-AugmentedGeneration(RAG)-basedLLMsystem
+should possess in order to support Japanese medical litigation procedures complying with legal norms.
 
-=== 主题: graph neural network ===
-筛选后论文数: 5
-  - Graph Neural Network Training Systems: A Performance Compari
-  - Fast and Deep Graph Neural Networks
-  - Transformers are Graph Neural Networks
-  - Learning Universal Graph Neural Network Embeddings With Aid
-  - Modern graph neural networks do worse than classical greedy
-summary: 基于审评意见，原综述存在数据缺失与逻辑松散问题。修正后的综述聚焦于**现代GNN在组合优化任务中的局限性**这一核心结论，并补充具体数据支撑：
-
-现有研究表明，
+后200字:
+nd their knowledge of highly
+specialized or less common domains is not necessarily adequate. For these reasons, in professional
+domainssuchaslegal[3]andmedicine[4],recentresearchhasincreasinglyexplore
+✅ PDF解析测试通过
 
 进程已结束，退出代码为 0
