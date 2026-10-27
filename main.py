@@ -17,8 +17,9 @@ if __name__ == "__main__":
         "papers": [],
         "summary": "",
         "next": "",
-        "followup":"",
-        "critique":"",
+        "followup": "",
+        "critique": "",
+        "paper_summaries": [],
         "critique_times": 3,
         "revision_count": 0,
     })

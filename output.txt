@@ -1,27 +1,73 @@
-D:\Anaconda3\python.exe E:\testcode\day29\paper-research-agent\test\pdf_text.py
-2026-10-26 13:44:31,897 [PaperAgent] INFO: search_papers
-2026-10-26 13:44:31,898 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=RAG+retrieval&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-10-26 13:44:34,200 [arxiv] INFO: Got first page: 15 of 67052 total results
-2026-10-26 13:44:34,201 [PaperAgent] INFO: ===search_papers，查到 1 条数据。并返回 1 条数据。===
-测试PDF: https://arxiv.org/pdf/2511.22858v1
-2026-10-26 13:44:34,201 [PaperAgent] INFO: 下载 PDF：https://arxiv.org/pdf/2511.22858v1
-提取文本长度: 2000
-前500字:
-RAG System for Supporting Japanese Litigation
-Procedures: Faithful Response Generation Complying
-with Legal Norms
-YuyaIshihara1,*, AtsushiKeyaki1,*, HiroakiYamada2, RyutaroOhara1,3 and MihokoSumida1
-1HitotsubashiUniversity,Japan
-2InstituteofScienceTokyo,Japan
-3Nakamura,Tsunoda&Matsumoto,Japan
-Abstract
-ThisstudydiscussestheessentialcomponentsthataRetrieval-AugmentedGeneration(RAG)-basedLLMsystem
-should possess in order to support Japanese medical litigation procedures complying with legal norms.
+D:\Anaconda3\python.exe E:\testcode\day29\paper-research-agent\test\summary_test.py
+2026-10-27 10:50:03,337 [PaperAgent] INFO: supervisor_node
+2026-10-27 10:50:16,385 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:50:16,391 [PaperAgent] INFO: route
+2026-10-27 10:50:16,392 [PaperAgent] INFO: worker_search
+2026-10-27 10:50:16,392 [PaperAgent] INFO: search_papers
+2026-10-27 10:50:16,392 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-10-27 10:50:22,227 [arxiv] INFO: Got first page: 15 of 501909 total results
+2026-10-27 10:50:22,227 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
+2026-10-27 10:50:22,229 [PaperAgent] INFO: worker_select
+2026-10-27 10:50:35,374 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:50:35,375 [PaperAgent] INFO: 筛选后保留 4 / 15 篇
+2026-10-27 10:50:35,377 [PaperAgent] INFO: worker_summarize_one
+2026-10-27 10:51:02,057 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:51:02,059 [PaperAgent] INFO: 已总结：Transformers are Graph Neural Networks
+2026-10-27 10:51:31,514 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:51:31,516 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
+2026-10-27 10:51:46,423 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:51:46,424 [PaperAgent] INFO: 已总结：Fast and Deep Graph Neural Networks
+2026-10-27 10:51:49,033 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:51:49,036 [PaperAgent] INFO: 已总结：Learning Universal Graph Neural Network Embeddings
+2026-10-27 10:51:49,036 [PaperAgent] INFO: supervisor_node
+2026-10-27 10:51:50,389 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:51:51,864 [PaperAgent] INFO: route
+2026-10-27 10:51:51,864 [PaperAgent] INFO: worker_summarize
+2026-10-27 10:51:55,648 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:51:55,649 [PaperAgent] INFO: supervisor_node
+2026-10-27 10:52:05,120 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:52:05,122 [PaperAgent] INFO: route
+2026-10-27 10:52:05,122 [PaperAgent] INFO: critic_node
+2026-10-27 10:52:15,406 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:52:15,407 [PaperAgent] INFO: after_critic
+2026-10-27 10:52:15,407 [PaperAgent] INFO: supervisor_node
+2026-10-27 10:52:16,432 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:52:17,254 [PaperAgent] INFO: route
+2026-10-27 10:52:17,254 [PaperAgent] INFO: worker_summarize
+2026-10-27 10:52:36,344 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:52:36,346 [PaperAgent] INFO: supervisor_node
+2026-10-27 10:52:38,999 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:52:39,825 [PaperAgent] INFO: route
+2026-10-27 10:52:39,826 [PaperAgent] INFO: critic_node
+2026-10-27 10:52:59,968 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 10:52:59,968 [PaperAgent] INFO: after_critic
+2026-10-27 10:52:59,969 [PaperAgent] INFO: followup_node
+2026-10-27 10:53:13,396 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
 
-后200字:
-nd their knowledge of highly
-specialized or less common domains is not necessarily adequate. For these reasons, in professional
-domainssuchaslegal[3]andmedicine[4],recentresearchhasincreasinglyexplore
-✅ PDF解析测试通过
+=== 总结了 4 篇论文 ===
+
+📄 Transformers are Graph Neural Networks
+  问题: 建立Transformer与图神经网络之间的连接。
+  方法: 通过形式化方法证明两者的等价关系。
+  结果: 揭示了Transformer在图表示学习中的GNN特性。
+  局限: 摘要信息截断，具体局限性未详细说明。
+
+📄 Graph Neural Network Training Systems: A Performance Compari
+  问题: 对比全图和 minibatch 方法在图神经网络训练系统中的性能差异。
+  方法: 通过性能基准测试分析两种训练方法的效率与可扩展性。
+  结果: 评估两种方法在时间、资源消耗等方面的表现。
+  局限: 未探讨复杂图结构下的适用性及模型精度影响。
+
+📄 Fast and Deep Graph Neural Networks
+  问题: 解决深层图神经网络构建中的效率问题。
+  方法: 利用输入图作为动力系统固定点的思想来构建模型。
+  结果: 实现了快速且深层的图神经网络。
+  局限: 摘要未提及具体局限性，基于现有信息无法确定。
+
+📄 Learning Universal Graph Neural Network Embeddings With Aid
+  问题: Graph embeddings are highly task-specific and lack cross-domain generalization.
+  方法: A universal embedding framework utilizing transfer learning and meta-learning strategies.
+  结果: Achieves superior generalization across diverse graph tasks without task-specific training.
+  局限: Abstract is truncated, so computational overhead and scalability details are missing.
 
 进程已结束，退出代码为 0

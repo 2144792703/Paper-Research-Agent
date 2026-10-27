@@ -17,6 +17,12 @@ class SelectionResult(BaseModel):
     """LLM 筛选结果"""
     selected: list[SelectedPaper] = Field(description="选中的论文，3-5篇")
 
+class PaperSummary(BaseModel):
+    """单篇论文的结构化总结"""
+    problem: str = Field(description="用一句话总结这篇论文要解决什么问题")
+    method: str = Field(description="用一句话总结这篇论文用什么方法/模型")
+    result: str = Field(description="用一句话总结这篇论文的实验结果或者主要发现")
+    limitation: str = Field(description="用一句话总结该论文的局限性或者未来方向")
 
 def supervisor_node(state: SupervisorState):
     logger.info("supervisor_node")
@@ -122,6 +128,46 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
     except Exception as e:
         logger.warning(f"筛选解析失败，保留全部论文：{e}")
         return {"papers": papers}
+
+def worker_summarize_one(state: SupervisorState):
+    """对每篇论文做结构化总结"""
+    logger.info("worker_summarize_one")
+    paper = state.get("papers") or []
+    summaries = []
+
+    for p in paper:
+        prompt = f"""请阅读以下论文信息，提取结构化总结。
+
+标题：{p.title}
+摘要：{p.summary}
+
+请以 JSON 返回：
+{{"problem": "...", "method": "...", "result": "...", "limitation": "..."}}
+
+每个字段一句话，不要超过50字。只返回 JSON。"""
+
+        result = invoke_llm(prompt)
+
+        result = re.sub(r"^\s*```(?:json)?\s*", "", result)
+        result = re.sub(r"\s*```\s*$", "", result)
+
+        try:
+            parsed = PaperSummary.model_validate_json(result)
+            summaries.append({
+                "title": p.title,
+                "url": p.url,
+                "summary": parsed.model_dump(),
+            })
+            logger.info(f"已总结：{p.title[:50]}")
+        except Exception as e:
+            logger.warning(f"总结解析失败，跳过：{e}")
+            summaries.append({
+                "title": p.title,
+                "url": p.url,
+                "summary": {"problem": "", "method": "", "result": "", "limitation": ""}
+            })
+            
+    return {"paper_summaries": summaries}
 
 def worker_summarize(state: SupervisorState):
     logger.info("worker_summarize")

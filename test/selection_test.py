@@ -10,6 +10,7 @@ for topic in topics:
         "next": "",
         "followup": "",
         "critique": "",
+        "paper_summaries":[],
         "critique_times": 2,
         "revision_count": 0,
     })
