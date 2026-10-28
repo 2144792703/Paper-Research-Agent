@@ -26,7 +26,7 @@ def _get_client(i: int) -> ChatOpenAI:
         _clients[i] = ChatOpenAI(
             model=MODEL,
             api_key=API_KEYS[i],
-            http_client=httpx.Client(trust_env=False, timeout=60.0) ,
+            http_client=httpx.Client(trust_env=False, timeout=120.0) ,
             base_url=BASE_URL,
             timeout=float(REQUEST_TIMEOUT),
             max_retries=int(MAX_RETRIES),

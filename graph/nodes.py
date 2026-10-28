@@ -147,7 +147,7 @@ def worker_summarize_one(state: SupervisorState):
 每个字段一句话，不要超过50字。只返回 JSON。"""
 
         result = invoke_llm(prompt)
-
+        # 去 markdown 代码
         result = re.sub(r"^\s*```(?:json)?\s*", "", result)
         result = re.sub(r"\s*```\s*$", "", result)
 
@@ -171,12 +171,39 @@ def worker_summarize_one(state: SupervisorState):
 
 def worker_summarize(state: SupervisorState):
     logger.info("worker_summarize")
-    paper_texts = "\n".join([
-        f"- {p.title}: {p.summary[:150]}" for p in state["papers"]
-    ])
-    message = f"请根据以下论文写一段200字的研究综述：\n{paper_texts}"
+
+    paper_summaries = state.get("paper_summarizes") or []
+    papers = state.get("papers") or []
+
+    if paper_summaries:
+        # 用结构化总结 拼 综述输出
+        paper_texts = "\n".join([
+            f"- {s['title']}: "
+            f"- {s['url']}"
+            f"问题={s['summary'].get('problem','')}; "
+            f"方法={s['summary'].get('method','')}; "
+            f"结果={s['summary'].get('result','')}"
+            f"局限={s['summary'].get('limitation','')}"
+            for s in paper_summaries
+        ])
+    else:
+        # 使用原始摘要
+        paper_texts = "\n".join([
+            f"- {p.title}: {p.summary[:150]}" for p in papers
+        ])
+
+    message = f"""请根据以下论文总结，写一段 300 字的研究综述：
+{paper_texts}
+
+要求：
+1. 开头一句话概括研究现状
+2. 中间对比个篇论文的方法和贡献
+3. 结尾指出研究空白或者未来方向
+"""
+
     if state.get("critique"):
-        message += f"\n\n需要根据审评意见{state['critique']}进行精炼汇总。"
+        message += f"\n\n需要根据评审意见修改：{state['critique']}"
+        
     responses = invoke_llm(message)
     return {'summary': responses.strip()}
 

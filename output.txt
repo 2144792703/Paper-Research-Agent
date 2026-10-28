@@ -1,73 +1,71 @@
-D:\Anaconda3\python.exe E:\testcode\day29\paper-research-agent\test\summary_test.py
-2026-10-27 10:50:03,337 [PaperAgent] INFO: supervisor_node
-2026-10-27 10:50:16,385 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:50:16,391 [PaperAgent] INFO: route
-2026-10-27 10:50:16,392 [PaperAgent] INFO: worker_search
-2026-10-27 10:50:16,392 [PaperAgent] INFO: search_papers
-2026-10-27 10:50:16,392 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-10-27 10:50:22,227 [arxiv] INFO: Got first page: 15 of 501909 total results
-2026-10-27 10:50:22,227 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-2026-10-27 10:50:22,229 [PaperAgent] INFO: worker_select
-2026-10-27 10:50:35,374 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:50:35,375 [PaperAgent] INFO: 筛选后保留 4 / 15 篇
-2026-10-27 10:50:35,377 [PaperAgent] INFO: worker_summarize_one
-2026-10-27 10:51:02,057 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:51:02,059 [PaperAgent] INFO: 已总结：Transformers are Graph Neural Networks
-2026-10-27 10:51:31,514 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:51:31,516 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
-2026-10-27 10:51:46,423 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:51:46,424 [PaperAgent] INFO: 已总结：Fast and Deep Graph Neural Networks
-2026-10-27 10:51:49,033 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:51:49,036 [PaperAgent] INFO: 已总结：Learning Universal Graph Neural Network Embeddings
-2026-10-27 10:51:49,036 [PaperAgent] INFO: supervisor_node
-2026-10-27 10:51:50,389 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:51:51,864 [PaperAgent] INFO: route
-2026-10-27 10:51:51,864 [PaperAgent] INFO: worker_summarize
-2026-10-27 10:51:55,648 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:51:55,649 [PaperAgent] INFO: supervisor_node
-2026-10-27 10:52:05,120 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:52:05,122 [PaperAgent] INFO: route
-2026-10-27 10:52:05,122 [PaperAgent] INFO: critic_node
-2026-10-27 10:52:15,406 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:52:15,407 [PaperAgent] INFO: after_critic
-2026-10-27 10:52:15,407 [PaperAgent] INFO: supervisor_node
-2026-10-27 10:52:16,432 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:52:17,254 [PaperAgent] INFO: route
-2026-10-27 10:52:17,254 [PaperAgent] INFO: worker_summarize
-2026-10-27 10:52:36,344 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:52:36,346 [PaperAgent] INFO: supervisor_node
-2026-10-27 10:52:38,999 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:52:39,825 [PaperAgent] INFO: route
-2026-10-27 10:52:39,826 [PaperAgent] INFO: critic_node
-2026-10-27 10:52:59,968 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-27 10:52:59,968 [PaperAgent] INFO: after_critic
-2026-10-27 10:52:59,969 [PaperAgent] INFO: followup_node
-2026-10-27 10:53:13,396 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+D:\Anaconda3\envs\mybase\python.exe E:\testcode\day29\paper-research-agent\test\full_run_test.py
+2026-10-28 21:32:25,370 [PaperAgent] INFO: supervisor_node
+2026-10-28 21:32:25,441 [langchain_openai.chat_models._client_utils] WARNING: langchain-openai injected a custom httpx transport to apply `http_socket_options`, which disables httpx's proxy auto-detection (system proxy configuration detected). Set `LANGCHAIN_OPENAI_TCP_KEEPALIVE=0` or pass `http_socket_options=()` to restore default proxy behavior, or supply `openai_proxy` / your own `http_client` / `http_async_client` to take full control.
+2026-10-28 21:33:02,939 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:33:02,945 [PaperAgent] INFO: route
+2026-10-28 21:33:02,946 [PaperAgent] INFO: worker_search
+2026-10-28 21:33:02,946 [PaperAgent] INFO: search_papers
+2026-10-28 21:33:02,946 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=retrieval+augmented+generation&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-10-28 21:33:04,219 [arxiv] INFO: Got first page: 15 of 1029300 total results
+2026-10-28 21:33:04,219 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
+2026-10-28 21:33:04,220 [PaperAgent] INFO: worker_select
+2026-10-28 21:33:47,289 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:33:47,291 [PaperAgent] INFO: 筛选后保留 4 / 15 篇
+2026-10-28 21:33:47,292 [PaperAgent] INFO: worker_summarize_one
+2026-10-28 21:34:02,534 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:34:02,536 [PaperAgent] INFO: 已总结：Engineering the RAG Stack: A Comprehensive Review
+2026-10-28 21:34:23,456 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:34:23,457 [PaperAgent] INFO: 已总结：Ragas: Automated Evaluation of Retrieval Augmented
+2026-10-28 21:34:49,829 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:34:49,830 [PaperAgent] INFO: 已总结：EVOR: Evolving Retrieval for Code Generation
+2026-10-28 21:35:26,025 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:35:26,025 [PaperAgent] INFO: 已总结：RAGPart & RAGMask: Retrieval-Stage Defenses Agains
+2026-10-28 21:35:26,026 [PaperAgent] INFO: supervisor_node
+2026-10-28 21:36:45,488 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:36:45,491 [PaperAgent] INFO: route
+2026-10-28 21:36:45,492 [PaperAgent] INFO: worker_summarize
+2026-10-28 21:37:07,604 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:37:07,605 [PaperAgent] INFO: supervisor_node
+2026-10-28 21:37:31,868 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:37:31,871 [PaperAgent] INFO: route
+2026-10-28 21:37:31,871 [PaperAgent] INFO: critic_node
+2026-10-28 21:38:23,491 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:38:24,956 [PaperAgent] INFO: after_critic
+2026-10-28 21:38:24,957 [PaperAgent] INFO: supervisor_node
+2026-10-28 21:39:19,386 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:39:19,387 [PaperAgent] INFO: route
+2026-10-28 21:39:19,388 [PaperAgent] INFO: worker_summarize
+2026-10-28 21:39:27,451 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:39:27,453 [PaperAgent] INFO: supervisor_node
+2026-10-28 21:39:39,128 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:39:39,129 [PaperAgent] INFO: route
+2026-10-28 21:39:39,129 [PaperAgent] INFO: critic_node
+2026-10-28 21:39:54,134 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-28 21:39:54,136 [PaperAgent] INFO: after_critic
+2026-10-28 21:39:54,137 [PaperAgent] INFO: followup_node
+2026-10-28 21:40:13,777 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+============================================================
+主题: retrieval augmented generation
 
-=== 总结了 4 篇论文 ===
+--- 结构化总结 (4 篇) ---
+  📄 Engineering the RAG Stack: A Comprehensive Review
+     缺乏对RAG系统架构设计与信任框架的系统性综合综述。
+  📄 Ragas: Automated Evaluation of Retrieval Augmented
+     传统RAG评估依赖人工标注，成本高且缺乏自动化标准。
+  📄 EVOR: Evolving Retrieval for Code Generation
+     现有检索增强代码生成依赖静态知识库，无法动态适应需求。
+  📄 RAGPart & RAGMask: Retrieval-Stage Defenses Agains
+     针对RAG系统易受语料库投毒攻击，需检索阶段的防御机制以降低风险。
 
-📄 Transformers are Graph Neural Networks
-  问题: 建立Transformer与图神经网络之间的连接。
-  方法: 通过形式化方法证明两者的等价关系。
-  结果: 揭示了Transformer在图表示学习中的GNN特性。
-  局限: 摘要信息截断，具体局限性未详细说明。
+--- 研究综述 ---
+当前RAG系统研究已从架构构建延伸至评估与安全防护，但量化实证不足限制了技术落地。对比而言，Ragas框架通过参考无关评估解决了人工标注瓶颈，在事实一致性等指标上提供了标准化基准；EVOR将进化算法引入代码检索，通过迭代优化检索策略，在特定代码生成基准上相较于传统静态管道提升了检索命中率；RAGPart与RAGMask则针对语料投毒攻击提出检索阶段防御机制，实验数据显示其在受污染语料下仍能保持较高的鲁棒性，显著降低了模型幻觉率。现有研究的局限在于缺乏跨域通用的量化对比标准：Ragas侧重单一管道评估，EVOR限于代码域，而防御机制未与生成质量进行联合基准测试。未来研究需建立包含准确率、鲁棒性及效率的多维统一评估框架，并基于上述实验的具体失效案例推导系统性改进路径，而非仅依赖主观推断，以实现从局部优化到整体范式升级的实证突破。
 
-📄 Graph Neural Network Training Systems: A Performance Compari
-  问题: 对比全图和 minibatch 方法在图神经网络训练系统中的性能差异。
-  方法: 通过性能基准测试分析两种训练方法的效率与可扩展性。
-  结果: 评估两种方法在时间、资源消耗等方面的表现。
-  局限: 未探讨复杂图结构下的适用性及模型精度影响。
+--- 评审意见 ---
+总结缺乏具体量化数据支撑，且对RAGPart与RAGMask的实验结果描述模糊（如未给出具体鲁棒性或幻觉率降低的百分比/绝对值），建议补充关键性能指标的具体数值以增强实证性。
 
-📄 Fast and Deep Graph Neural Networks
-  问题: 解决深层图神经网络构建中的效率问题。
-  方法: 利用输入图作为动力系统固定点的思想来构建模型。
-  结果: 实现了快速且深层的图神经网络。
-  局限: 摘要未提及具体局限性，基于现有信息无法确定。
-
-📄 Learning Universal Graph Neural Network Embeddings With Aid
-  问题: Graph embeddings are highly task-specific and lack cross-domain generalization.
-  方法: A universal embedding framework utilizing transfer learning and meta-learning strategies.
-  结果: Achieves superior generalization across diverse graph tasks without task-specific training.
-  局限: Abstract is truncated, so computational overhead and scalability details are missing.
+--- 追问推荐 ---
+1. 如何构建并验证包含准确率、鲁棒性及效率的多维统一评估框架，以解决现有研究缺乏跨域通用量化对比标准的问题。
+2. 针对Ragas、EVOR及防御机制的具体失效案例，推导系统性改进路径以实现从局部优化到整体范式升级的实证突破。
+3. 将检索阶段防御机制（如RAGPart/RAGMask）与生成质量进行联合基准测试，量化其在受污染语料下对模型幻觉率及生成信度的综合影响。
 
 进程已结束，退出代码为 0
