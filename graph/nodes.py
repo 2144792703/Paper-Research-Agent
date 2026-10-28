@@ -172,7 +172,7 @@ def worker_summarize_one(state: SupervisorState):
 def worker_summarize(state: SupervisorState):
     logger.info("worker_summarize")
 
-    paper_summaries = state.get("paper_summarizes") or []
+    paper_summaries = state.get("paper_summaries") or []
     papers = state.get("papers") or []
 
     if paper_summaries:
