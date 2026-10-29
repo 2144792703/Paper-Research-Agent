@@ -3,7 +3,17 @@ import logging
 import httpx
 
 from langchain_openai import ChatOpenAI
-from openai import RateLimitError, AuthenticationError, PermissionDeniedError
+from openai import (
+    RateLimitError,
+    AuthenticationError,
+    PermissionDeniedError,
+    InternalServerError,
+    APIConnectionError,
+    APITimeoutError,
+)
+
+# 可轮换的"临时故障"异常集合：固定短暂冷却 + 换下一个 key，不计入限流退避
+_NETWORK_RETRYABLE = (InternalServerError, APIConnectionError, APITimeoutError)
 
 from config import MODEL, API_KEYS, BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, KEY_COOLDOWN
 
@@ -42,6 +52,12 @@ def _mark_limited(i: int):
     logger.warning(f"key#{i} 限流，退避 {delay:.0f}s，切换下一个 key")
 
 
+def _mark_server_err(i: int):
+    """5xx 服务端错误：短暂冷却（固定 5s），换下一个 key，不计入限流退避"""
+    _cooldown_until[i] = time.monotonic() + KEY_COOLDOWN
+    logger.warning(f"key#{i} 服务端错误(5xx)，短暂冷却 {KEY_COOLDOWN:.0f}s，切换下一个 key")
+
+
 def _mark_success(i: int):
     """成功：粘性指针指向该 key，全部冷却与限流计数清零"""
     global _current
@@ -75,8 +91,8 @@ def _next_target(order: list[int], tried: set[int]):
 
 
 def invoke_llm(prompt: str) -> str:
-    """调用模型；429 按 key 池轮换 + 退避，401/403 永久禁用，4 轮耗尽抛异常"""
-    last_err: RateLimitError | None = None
+    """调用模型；429/5xx 按 key 池轮换 + 退避，401/403 永久禁用，4 轮耗尽抛异常"""
+    last_err: Exception | None = None
     for _ in range(MAX_ROUNDS):
         order = _scan_order()
         if not order:
@@ -94,6 +110,10 @@ def invoke_llm(prompt: str) -> str:
             except (AuthenticationError, PermissionDeniedError) as e:
                 _disabled.add(target)
                 logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{e}")
+            except _NETWORK_RETRYABLE as e:
+                last_err = e
+                _mark_server_err(target)
+                logger.warning(f"key#{target} 临时网络/服务端错误（{type(e).__name__}），冷却后换下一个 key")
             except RateLimitError as e:
                 last_err = e
                 _mark_limited(target)
@@ -101,8 +121,8 @@ def invoke_llm(prompt: str) -> str:
 
 
 def stream_llm(prompt: str):
-    """流式调用，yield 每个 chunk 文本；首 chunk 前限流可换 key，中途限流标记冷却后直接抛出"""
-    last_err: RateLimitError | None = None
+    """流式调用，yield 每个 chunk 文本；首 chunk 前限流/5xx 可换 key，中途限流标记冷却后直接抛出"""
+    last_err: Exception | None = None
     for _ in range(MAX_ROUNDS):
         order = _scan_order()
         if not order:
@@ -120,6 +140,11 @@ def stream_llm(prompt: str):
                 _disabled.add(target)
                 logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{e}")
                 continue
+            except _NETWORK_RETRYABLE as e:
+                last_err = e
+                _mark_server_err(target)
+                logger.warning(f"key#{target} 临时网络/服务端错误（{type(e).__name__}），冷却后换下一个 key")
+                continue
             except RateLimitError as e:
                 last_err = e
                 _mark_limited(target)
@@ -129,8 +154,12 @@ def stream_llm(prompt: str):
             try:
                 for chunk in iterator:
                     yield chunk.content
-            except RateLimitError:
-                _mark_limited(target)  # 中途限流：标记冷却，不重试（避免内容重复）
+            except (RateLimitError, *_NETWORK_RETRYABLE) as e:
+                # 中途限流/网络/服务端故障：标记冷却，不重试（避免内容重复）
+                if isinstance(e, RateLimitError):
+                    _mark_limited(target)
+                else:
+                    _mark_server_err(target)
                 raise
             return
     raise last_err if last_err else RuntimeError("API 请求失败：重试轮次耗尽")

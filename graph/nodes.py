@@ -2,7 +2,7 @@ import re
 
 from graph.state import SupervisorState
 from tools.arxiv_tool import search_papers
-from llm import invoke_llm
+from llm import invoke_llm, stream_llm
 
 from pydantic import BaseModel, Field
 
@@ -34,36 +34,50 @@ def supervisor_node(state: SupervisorState):
         return {"topic": topic, "next": "search"}
 
     papers = state.get("papers") or []
+    paper_summaries = state.get("paper_summaries") or []
     summary = (state.get("summary") or "").strip()
     critique = (state.get("critique") or "").strip()
     previous = (state.get("next") or "").strip() or "none"
+    revision_count = state.get("revision_count", 0)
+    critique_times = state.get("critique_times", 3)
 
-    message = f"""你是论文研究助手的路由节点，根据当前进度决定下一步进入哪个节点。
-只能输出 search、summarize、critic 三者之一。
+    # 评审意见：只在上一步是 critic 时才是当前待处理的，否则标注过期截断
+    critique_display = "无"
+    if critique:
+        if previous == "critic":
+            critique_display = critique[:200] + ("..." if len(critique) > 200 else "")
+        else:
+            critique_display = critique[:120] + "...(已过期)"
 
-当前进度：
+    ps_total = len(papers)
+    ps_done = len(paper_summaries)
+
+    message = f"""你是论文研究助手的路由决策者。只能输出 search、summarize、critic 三者之一。
+
+当前状态：
 - 研究主题：{state["topic"]}
-- 已检索并筛选后的论文数：{len(papers)}
-- 是否已有研究综述：{"yes" if summary else "no"}
-- 上一步进入的节点：{previous}（none=流程刚开始；search=刚完成“搜索+筛选”；summarize=刚写完综述；critic=刚收到评审意见）
-- 最近一次评审意见：{critique or "无"}
+- 筛选后论文：{len(papers)} 篇
+- 单篇结构化总结：{ps_done}/{ps_total if ps_total else 0}
+- 研究综述：{"已生成" if summary else "未生成"}
+- 评审进度：{revision_count}/{critique_times}
+- 上次决策：{previous}
+  (none=初始；search=搜索→筛选→单篇总结 整条链已完成；summarize=综述刚写完；critic=刚收到评审意见)
+- 评审意见：{critique_display}
 
-决策规则（严格按顺序判断，命中即停，不要自行调整顺序）：
-1. 上一步是 search → 输出 summarize。
-   搜索和筛选刚结束，必须先写综述；即使论文数为 0 也进入 summarize，禁止立刻再次 search。
-2. 上一步是 critic → 输出 summarize。
-   评审未通过时才会回到这里，必须按最近评审意见重写综述，不要重复搜索或再次提交评审。
+决策规则（严格按优先级判断，命中即停）：
+1. 上次决策是 critic → 输出 summarize。
+   必须按评审意见修改综述，不要跳步去 search 或 critic。
+2. 已有综述（无论上次是什么，除非规则1命中）→ 输出 critic。
+   提交评审。上一步是 summarize 时必须走这条，禁止再次 summarize。
 3. 论文数为 0 → 输出 search。
-   还没有论文，只能先检索。
-4. 是否已有综述 = no → 输出 summarize。
-   有论文但还没写综述。
-5. 其余情况 → 输出 critic。
-   综述刚修改完成，提交评审。
+4. 综述未生成 + 有论文 → 输出 summarize。
+5. 初始状态（none）→ 输出 search。
 
 硬约束：
-- 论文数大于 0 时，禁止输出 search：同一主题重复搜索不会带来新论文。
+- 上一步是 summarize 时，绝对禁止再次输出 summarize（防死循环）。
+- 同一综述周期内有论文时，禁止重复 search。
 
-输出：只输出一个小写英文单词（search / summarize / critic），不要标点、引号、解释、换行或代码块。"""
+输出：只一个小写英文单词，不要其他任何内容。"""
 
     responses = invoke_llm(message)
     next_step = responses.strip().lower()
@@ -192,20 +206,31 @@ def worker_summarize(state: SupervisorState):
             f"- {p.title}: {p.summary[:150]}" for p in papers
         ])
 
-    message = f"""请根据以下论文总结，写一段 300 字的研究综述：
+    message = f"""请根据以下论文信息，写一份 Markdown 格式的研究报告：
+
 {paper_texts}
 
 要求：
-1. 开头一句话概括研究现状
-2. 中间对比个篇论文的方法和贡献
-3. 结尾指出研究空白或者未来方向
+1. 开头用 ## 研究背景 写一段现状概述
+2. 中间用 ## 论文对比 放一个 Markdown 表格（列：论文/问题/方法/结果）
+3. 结尾用 ## 研究空白 指出未来方向
+4. 总字数 300-500 字
 """
 
     if state.get("critique"):
         message += f"\n\n需要根据评审意见修改：{state['critique']}"
-        
-    responses = invoke_llm(message)
-    return {'summary': responses.strip()}
+
+    print("\n" + "=" * 60)
+    print("📝 正在生成研究报告...")
+    print("=" * 60 + "\n")
+
+    full_text = ""
+
+    for chunk in stream_llm(message):
+        print(chunk, end="", flush=True)
+        full_text += chunk
+
+    return {'summary': full_text.lstrip()}
 
 def critic_node(state: SupervisorState):
     logger.info("critic_node")
