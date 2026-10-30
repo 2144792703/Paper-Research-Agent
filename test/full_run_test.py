@@ -8,6 +8,7 @@ result = graph.invoke({
     "critique": "",
     "followup": "",
     "paper_summaries": [],
+    "critique_history": [],
     "critique_times": 2,
     "revision_count": 0,
 })
@@ -25,6 +26,9 @@ print(result['summary'])
 print(f"\n--- 评审意见 ---")
 print(result.get('critique', '无'))
 
+print(f"\n--- 评审意见历史 ---")
+print(result.get('critique_history', '无'))
+
 print(f"\n--- 追问推荐 ---")
 print(result.get('followup', '无'))
 
@@ -36,6 +40,7 @@ result1 = graph.invoke({
     "critique": "",
     "followup": "",
     "paper_summaries": [],
+    "critique_history": [],
     "critique_times": 2,
     "revision_count": 0,
 })
@@ -52,6 +57,9 @@ print(result1['summary'])
 
 print(f"\n--- 评审意见 ---")
 print(result1.get('critique', '无'))
+
+print(f"\n--- 评审意见历史 ---")
+print(result1.get('critique_history', '无'))
 
 print(f"\n--- 追问推荐 ---")
 print(result1.get('followup', '无'))

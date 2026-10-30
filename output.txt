@@ -1,215 +1,307 @@
 D:\Anaconda3\envs\mybase\python.exe E:\testcode\day29\paper-research-agent\test\full_run_test.py
-2026-10-29 10:30:57,725 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:31:00,596 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:31:00,603 [PaperAgent] INFO: route
-2026-10-29 10:31:00,603 [PaperAgent] INFO: worker_search
-2026-10-29 10:31:00,604 [PaperAgent] INFO: search_papers
-2026-10-29 10:31:00,604 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=retrieval+augmented+generation&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-10-29 10:31:01,567 [arxiv] INFO: Got first page: 15 of 1029300 total results
-2026-10-29 10:31:01,567 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-2026-10-29 10:31:01,568 [PaperAgent] INFO: worker_select
-2026-10-29 10:31:58,145 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:31:58,148 [PaperAgent] INFO: 筛选后保留 4 / 15 篇
-2026-10-29 10:31:58,148 [PaperAgent] INFO: worker_summarize_one
-2026-10-29 10:33:17,408 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:33:17,410 [PaperAgent] INFO: 已总结：Engineering the RAG Stack: A Comprehensive Review
-2026-10-29 10:35:53,934 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:35:53,936 [PaperAgent] INFO: 已总结：Ragas: Automated Evaluation of Retrieval Augmented
-2026-10-29 10:36:14,938 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:36:15,947 [PaperAgent] INFO: 已总结：FAIR-RAG: Faithful Adaptive Iterative Refinement f
-2026-10-29 10:36:32,911 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:36:32,912 [PaperAgent] INFO: 已总结：EVOR: Evolving Retrieval for Code Generation
-2026-10-29 10:36:32,912 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:36:48,942 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:36:48,943 [PaperAgent] INFO: route
-2026-10-29 10:36:48,943 [PaperAgent] INFO: worker_summarize
+2026-10-30 10:26:35,019 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:26:35,088 [langchain_openai.chat_models._client_utils] WARNING: langchain-openai injected a custom httpx transport to apply `http_socket_options`, which disables httpx's proxy auto-detection (system proxy configuration detected). Set `LANGCHAIN_OPENAI_TCP_KEEPALIVE=0` or pass `http_socket_options=()` to restore default proxy behavior, or supply `openai_proxy` / your own `http_client` / `http_async_client` to take full control.
+2026-10-30 10:26:36,969 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:26:36,970 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:26:48,839 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:26:48,847 [PaperAgent] INFO: route
+2026-10-30 10:26:48,847 [PaperAgent] INFO: worker_search
+2026-10-30 10:26:48,847 [PaperAgent] INFO: search_papers
+2026-10-30 10:26:48,847 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=retrieval+augmented+generation&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-10-30 10:26:50,266 [arxiv] INFO: Got first page: 15 of 1029518 total results
+2026-10-30 10:26:50,266 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
+2026-10-30 10:26:50,267 [PaperAgent] INFO: worker_select
+2026-10-30 10:26:50,912 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:26:50,913 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:26:52,447 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:26:52,447 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:26:57,981 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:26:57,985 [PaperAgent] INFO: 筛选后保留 4 / 15 篇
+2026-10-30 10:26:57,986 [PaperAgent] INFO: worker_summarize_one
+2026-10-30 10:27:34,813 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:27:34,815 [PaperAgent] INFO: 已总结：Engineering the RAG Stack: A Comprehensive Review
+2026-10-30 10:28:24,430 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:28:24,432 [PaperAgent] INFO: 已总结：FAIR-RAG: Faithful Adaptive Iterative Refinement f
+2026-10-30 10:28:27,762 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:28:27,765 [PaperAgent] INFO: 已总结：Utilizing Metadata for Better Retrieval-Augmented
+2026-10-30 10:28:32,470 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:28:32,471 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:28:44,469 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:28:44,470 [PaperAgent] INFO: 已总结：Ragas: Automated Evaluation of Retrieval Augmented
+2026-10-30 10:28:44,471 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:28:45,604 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:28:45,606 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:28:55,894 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:28:55,896 [PaperAgent] INFO: route
+2026-10-30 10:28:55,897 [PaperAgent] INFO: worker_summarize
 
 ============================================================
 📝 正在生成研究报告...
 ============================================================
 
-2026-10-29 10:37:20,589 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 503 Service Unavailable"
-2026-10-29 10:37:20,590 [llm] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s，切换下一个 key
-2026-10-29 10:37:47,490 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:28:56,771 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:28:56,773 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:28:58,353 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:28:58,354 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:29:00,055 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:29:00,056 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:29:00,057 [llm] WARNING: 所有 key 冷却中，等待 key#2 退避，剩余 2s
+2026-10-30 10:29:37,461 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
 ## 研究背景
-检索增强生成（RAG）作为提升大型语言模型事实一致性的关键技术，其工程化实践与评估体系正面临深度挑战。当前，尽管 RAG 应用广泛，但系统架构缺乏标准化综述，导致部署效率低下；同时，自动化评估手段及复杂查询下的忠实度生成仍存在瓶颈。现有研究多集中于单一维度的优化，缺乏对架构、信任框架及动态演进的全面系统化指南，亟需整合理论与实践以提升系统鲁棒性。
+随着生成式AI的普及，检索增强生成（RAG）已成为提升模型事实准确性与时效性的核心范式。然而，随着应用场景从简单问答向复杂推理及结构化数据领域扩展，现有的RAG系统面临架构割裂、信任机制缺失及评估标准模糊等挑战。工程界亟需建立标准化的架构指南与可信框架，学术界则聚焦于解决多跳推理与元数据利用等深层技术瓶颈，以实现从“能用”到“可靠”的跨越。
 
 ## 论文对比
 
 | 论文 | 问题 | 方法 | 结果 |
 | :--- | :--- | :--- | :--- |
-| Engineering the RAG Stack | 缺乏架构与信任框架的系统化综述及实践指南 | 系统综述 2018-2025 年学术研究、工业应用及部署案例 | 提供 RAG 系统工程化实践指南及详细架构信任框架分析 |
-| Ragas | 缺乏无需参考答案的自动化评估方法 | 提出 Ragas 框架，使用无参考指标评估 RAG 管道 | 实现 RAG 系统质量量化评估，无需人工标注 |
-| FAIR-RAG | 复杂多跳查询表现不佳，易产生幻觉 | 提出 FAIR-RAG 框架，通过忠实适应性迭代精炼优化过程 | 有效缓解复杂查询中的幻觉，提升生成忠实度 |
-| EVOR | 静态知识库缺乏动态演进能力，代码生成受限 | 提出 EVOR 框架，实现检索策略的迭代进化以优化代码生成 | 显著提升基准测试中代码生成的准确性与鲁棒性 |
+| **Engineering the RAG Stack** | 缺乏对RAG架构与信任框架的系统综述 | 2018-2025年学术与工业案例的系统文献综述 | 提供实用工程指南及详细的架构与信任框架总结 |
+| **FAIR-RAG** | 现有框架难以处理需多跳推理的复杂查询 | 迭代精炼与自适应检索，确保生成忠实性 | 显著提升复杂多跳问答任务的准确性与可靠性 |
+| **Utilizing Metadata** | 忽略元数据导致检索不精准及生成偏差 | 利用文档元数据优化检索策略，增强语义相关性 | 在结构化语料上显著提升检索准确率与生成可靠性 |
+| **Ragas** | 缺乏无参考答案的自动化评估框架 | 提出Ragas框架，实现无参考自动评估流程 | 提供可扩展的参考无关指标，支持性能量化分析 |
 
 ## 研究空白
-现有研究主要覆盖 2025 年之前的文献，未纳入最新前沿技术动态，且部分方法依赖额外计算资源或高质量初始数据。未来方向应聚焦于实时动态架构的标准化，开发低计算开销的自动化评估机制，并探索多模态及跨领域场景下的自适应迭代精炼策略，以构建更通用、可信且高效的 RAG 生态系统。2026-10-29 10:38:14,523 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:38:29,633 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:38:29,635 [PaperAgent] INFO: route
-2026-10-29 10:38:29,636 [PaperAgent] INFO: critic_node
-2026-10-29 10:39:24,803 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:39:24,804 [PaperAgent] INFO: after_critic
-2026-10-29 10:39:24,804 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:39:50,145 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:39:50,147 [PaperAgent] INFO: route
-2026-10-29 10:39:50,148 [PaperAgent] INFO: worker_summarize
+当前研究多集中于单一模块优化，缺乏将架构工程、信任框架与自动评估深度融合的全链路解决方案。现有评估指标（如Ragas）在捕捉复杂语义细微差异时仍有局限，且主要依赖已发表文献，未覆盖最新未发表成果。未来方向应聚焦于构建动态信任机制以应对实时数据偏差，开发能精确表征多跳推理质量的细粒度评估标准，并探索元数据在实时流式检索中的泛化应用，以实现RAG系统在高可信、高复杂场景下的工业化落地。2026-10-30 10:29:51,970 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:29:53,350 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:29:53,351 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:04,908 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:30:04,909 [PaperAgent] INFO: route
+2026-10-30 10:30:04,910 [PaperAgent] INFO: critic_node
+2026-10-30 10:30:10,765 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:10,765 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:12,198 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:12,198 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:14,595 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:30:14,596 [PaperAgent] INFO: after_critic
+2026-10-30 10:30:14,596 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:30:15,540 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:15,541 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:16,228 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:16,228 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:16,871 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:16,872 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:16,872 [llm] WARNING: 所有 key 冷却中，等待 key#2 退避，剩余 4s
+2026-10-30 10:30:22,380 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:22,381 [llm] WARNING: key#2 限流，退避 10s，切换下一个 key
+2026-10-30 10:30:24,059 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:30:24,059 [PaperAgent] INFO: route
+2026-10-30 10:30:24,060 [PaperAgent] INFO: worker_summarize
 
 ============================================================
 📝 正在生成研究报告...
 ============================================================
 
-2026-10-29 10:40:02,442 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:30:25,142 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
 ## 研究背景
-检索增强生成（RAG）技术已成为提升大语言模型事实性与时效性的核心范式。尽管2018至2025年间涌现了大量关于架构设计与评估方法的研究，但现有工作普遍缺乏系统化的工程化指南，且自动化评估多依赖无参考指标，导致量化基准缺失。例如，Ragas框架虽实现了无参考评估，但缺乏具体的准确率或F1分数对比数据；FAIR-RAG虽降低了复杂查询中的幻觉率，却未提供具体的延迟降低百分比或精度提升数值。目前领域内仍存在定性描述多于定量验证的问题，亟需引入具体性能指标以支撑结论的可靠性。
+检索增强生成（RAG）技术已成为解决大语言模型幻觉与知识过时问题的核心范式，但在架构设计、信任评估及复杂推理能力方面仍面临严峻挑战。当前研究聚焦于系统综述、迭代精炼及元数据优化，旨在提升检索精准度与生成可靠性，但缺乏统一的量化评估标准与深度推理支持。
 
 ## 论文对比
 
 | 论文 | 问题 | 方法 | 结果 |
 | :--- | :--- | :--- | :--- |
-| Engineering the RAG Stack | 缺乏系统化架构与信任框架综述 | 综述2018-2025学术与工业案例 | 提供实践指南及架构信任分析（未含具体性能数值） |
-| Ragas | 缺乏无需参考答案的自动化评估 | 提出基于LLM的无参考指标框架 | 实现质量量化评估，但缺乏具体F1或准确率对比数据 |
-| FAIR-RAG | 复杂多跳查询易产生幻觉 | 忠实适应性迭代精炼机制 | 缓解幻觉并提升忠实度，但未列出具体提升百分比 |
-| EVOR | 静态知识库缺乏动态演进能力 | 检索策略迭代进化优化代码生成 | 显著提升代码准确性与鲁棒性，未提供具体基准测试数值 |
+| Engineering the RAG Stack | 缺乏架构与信任框架综述 | 系统性文献综述 | 建立工程指南，覆盖2018-2025年案例 |
+| FAIR-RAG | 难以处理多跳推理 | 自适应迭代精炼 | 多跳问答准确率提升，可靠性增强 |
+| Utilizing Metadata | 忽略元数据致偏差 | 元数据优化检索策略 | 结构化语料检索准确率显著提高 |
+| Ragas | 缺乏无参考评估 | 无参考自动评估框架 | 提供可扩展指标，支持性能量化分析 |
 
 ## 研究空白
-当前研究主要局限在于缺乏量化的实证证据。未来方向应聚焦于建立统一的基准测试协议，不仅报告定性效果，更需提供各方法在标准数据集上的具体性能提升数值，如准确率、F1分数、平均响应延迟及计算开销对比。此外，需整合2025年后的最新前沿技术，探讨在资源受限场景下如何平衡进化式检索的计算成本与生成质量，从而形成具备量化支撑的可复现实验体系。2026-10-29 10:40:04,635 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:40:23,464 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:40:23,465 [PaperAgent] INFO: route
-2026-10-29 10:40:23,466 [PaperAgent] INFO: critic_node
-2026-10-29 10:40:36,135 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:40:36,136 [PaperAgent] INFO: after_critic
-2026-10-29 10:40:36,137 [PaperAgent] INFO: followup_node
-2026-10-29 10:40:52,281 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+现有研究虽在特定场景提升了性能，但普遍缺乏针对复杂语义的全局基准。未来方向应聚焦于：1. 引入具体量化指标（如F1分数、响应延迟）以替代定性描述，建立可复现的评估基线；2. 探索长尾分布与多跳推理下的忠实性瓶颈；3. 开发能捕捉细微语义差异的自动化评估工具，并整合最新未发表成果以完善信任框架。2026-10-30 10:30:29,916 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:30:31,295 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:31,295 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:32,694 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:32,694 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:41,236 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:30:41,238 [PaperAgent] INFO: route
+2026-10-30 10:30:41,239 [PaperAgent] INFO: critic_node
+2026-10-30 10:30:42,061 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:42,062 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:30:47,861 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:30:47,862 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:31:05,489 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:31:05,491 [PaperAgent] INFO: after_critic
+2026-10-30 10:31:05,491 [PaperAgent] INFO: followup_node
+2026-10-30 10:31:06,131 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:31:06,131 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:31:23,033 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
 ============================================================
 主题【1】: retrieval augmented generation
 
 --- 结构化总结 (4 篇) ---
   📄 Engineering the RAG Stack: A Comprehensive Review
-     缺乏对RAG系统架构与信任框架的全面、系统化综述与实践指南。
-  📄 Ragas: Automated Evaluation of Retrieval Augmented
-     检索增强生成系统缺乏无需参考答案的自动化评估方法
+     缺乏对检索增强生成系统架构与信任框架的全面系统综述。
   📄 FAIR-RAG: Faithful Adaptive Iterative Refinement f
-     现有RAG框架在处理复杂多跳查询时表现不佳，易出现幻觉。
-  📄 EVOR: Evolving Retrieval for Code Generation
-     现有检索增强代码生成采用静态知识库，缺乏动态演进能力。
+     现有RAG框架难以处理需要多跳推理的复杂查询。
+  📄 Utilizing Metadata for Better Retrieval-Augmented
+     结构化语料中，RAG系统因忽略元数据而检索不精准，生成结果易产生偏差。
+  📄 Ragas: Automated Evaluation of Retrieval Augmented
+     RAG管道缺乏无需参考答案的自动化评估框架，传统评估方法适用性受限。
 
 --- 研究综述 ---
 ## 研究背景
-检索增强生成（RAG）技术已成为提升大语言模型事实性与时效性的核心范式。尽管2018至2025年间涌现了大量关于架构设计与评估方法的研究，但现有工作普遍缺乏系统化的工程化指南，且自动化评估多依赖无参考指标，导致量化基准缺失。例如，Ragas框架虽实现了无参考评估，但缺乏具体的准确率或F1分数对比数据；FAIR-RAG虽降低了复杂查询中的幻觉率，却未提供具体的延迟降低百分比或精度提升数值。目前领域内仍存在定性描述多于定量验证的问题，亟需引入具体性能指标以支撑结论的可靠性。
+检索增强生成（RAG）技术已成为解决大语言模型幻觉与知识过时问题的核心范式，但在架构设计、信任评估及复杂推理能力方面仍面临严峻挑战。当前研究聚焦于系统综述、迭代精炼及元数据优化，旨在提升检索精准度与生成可靠性，但缺乏统一的量化评估标准与深度推理支持。
 
 ## 论文对比
 
 | 论文 | 问题 | 方法 | 结果 |
 | :--- | :--- | :--- | :--- |
-| Engineering the RAG Stack | 缺乏系统化架构与信任框架综述 | 综述2018-2025学术与工业案例 | 提供实践指南及架构信任分析（未含具体性能数值） |
-| Ragas | 缺乏无需参考答案的自动化评估 | 提出基于LLM的无参考指标框架 | 实现质量量化评估，但缺乏具体F1或准确率对比数据 |
-| FAIR-RAG | 复杂多跳查询易产生幻觉 | 忠实适应性迭代精炼机制 | 缓解幻觉并提升忠实度，但未列出具体提升百分比 |
-| EVOR | 静态知识库缺乏动态演进能力 | 检索策略迭代进化优化代码生成 | 显著提升代码准确性与鲁棒性，未提供具体基准测试数值 |
+| Engineering the RAG Stack | 缺乏架构与信任框架综述 | 系统性文献综述 | 建立工程指南，覆盖2018-2025年案例 |
+| FAIR-RAG | 难以处理多跳推理 | 自适应迭代精炼 | 多跳问答准确率提升，可靠性增强 |
+| Utilizing Metadata | 忽略元数据致偏差 | 元数据优化检索策略 | 结构化语料检索准确率显著提高 |
+| Ragas | 缺乏无参考评估 | 无参考自动评估框架 | 提供可扩展指标，支持性能量化分析 |
 
 ## 研究空白
-当前研究主要局限在于缺乏量化的实证证据。未来方向应聚焦于建立统一的基准测试协议，不仅报告定性效果，更需提供各方法在标准数据集上的具体性能提升数值，如准确率、F1分数、平均响应延迟及计算开销对比。此外，需整合2025年后的最新前沿技术，探讨在资源受限场景下如何平衡进化式检索的计算成本与生成质量，从而形成具备量化支撑的可复现实验体系。
+现有研究虽在特定场景提升了性能，但普遍缺乏针对复杂语义的全局基准。未来方向应聚焦于：1. 引入具体量化指标（如F1分数、响应延迟）以替代定性描述，建立可复现的评估基线；2. 探索长尾分布与多跳推理下的忠实性瓶颈；3. 开发能捕捉细微语义差异的自动化评估工具，并整合最新未发表成果以完善信任框架。
 
 --- 评审意见 ---
-未提供具体量化数据（如准确率、延迟数值），仅强调“缺乏数据”，导致总结本身也缺乏实证支撑，不符合标准2。
+1. **具体问题未完全解决**：虽然“研究空白”部分提到了引入 F1 分数等指标，但**“论文对比”表格中的“结果”列依然缺乏具体数据支撑**。表格中仍使用“显著提升”、“增强”等定性描述，未根据原始论文补充具体的量化指标（如具体的准确率百分比、F1 值变化或延迟数值）。
+
+2. **存在逻辑一致性瑕疵**：“研究空白”第 3 点提到“整合最新**未发表**成果”，这在学术论文总结中属于不规范的表述，通常总结已发表的文献或指代“前沿预印本”而非“未发表”。
+
+--- 评审意见历史 ---
+['2. 缺乏具体数据支撑，表格中的“结果”列仅使用定性描述（如“显著提升”、“提供实用指南”），未引用具体的量化指标（如准确率提升百分比、F1分数等）或核心结论的具体数值。', '1. **具体问题未完全解决**：虽然“研究空白”部分提到了引入 F1 分数等指标，但**“论文对比”表格中的“结果”列依然缺乏具体数据支撑**。表格中仍使用“显著提升”、“增强”等定性描述，未根据原始论文补充具体的量化指标（如具体的准确率百分比、F1 值变化或延迟数值）。\n\n2. **存在逻辑一致性瑕疵**：“研究空白”第 3 点提到“整合最新**未发表**成果”，这在学术论文总结中属于不规范的表述，通常总结已发表的文献或指代“前沿预印本”而非“未发表”。']
 
 --- 追问推荐 ---
-1. 深入探讨基于大语言模型无参考评估指标（如Ragas框架）与传统有参考量化指标（如F1、准确率）之间的相关性分析及基准校准方法。
-2. 研究在资源受限场景下，平衡进化式检索策略（如EVOR或FAIR-RAG）计算开销与生成质量的轻量化工程部署方案及性能指标对比。
-3. 构建并应用统一的标准化基准测试协议，对2018至2025年主流RAG架构进行包含延迟、计算资源消耗及幻觉率在内的全维度定量实证评估。
-2026-10-29 10:40:52,285 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:41:13,302 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:41:13,304 [PaperAgent] INFO: route
-2026-10-29 10:41:13,305 [PaperAgent] INFO: worker_search
-2026-10-29 10:41:13,305 [PaperAgent] INFO: search_papers
-2026-10-29 10:41:13,305 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=protein+structure+prediction&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-10-29 10:41:14,923 [arxiv] INFO: Got first page: 15 of 819598 total results
-2026-10-29 10:41:14,923 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-2026-10-29 10:41:14,924 [PaperAgent] INFO: worker_select
-2026-10-29 10:41:50,219 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:41:50,220 [PaperAgent] INFO: 筛选后保留 4 / 15 篇
-2026-10-29 10:41:50,221 [PaperAgent] INFO: worker_summarize_one
-2026-10-29 10:42:15,526 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:42:16,392 [PaperAgent] INFO: 已总结：AlphaFold predicts the most complex protein knot a
-2026-10-29 10:42:59,663 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:42:59,664 [PaperAgent] INFO: 已总结：Atomic-accuracy prediction of protein loop structu
-2026-10-29 10:43:17,871 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:43:17,874 [PaperAgent] INFO: 已总结：MUST-CNN: A Multilayer Shift-and-Stitch Deep Convo
-2026-10-29 10:43:56,070 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:43:56,073 [PaperAgent] INFO: 已总结：Potentials of Mean Force for Protein Structure Pre
-2026-10-29 10:43:56,074 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:44:06,595 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:44:06,597 [PaperAgent] INFO: route
-2026-10-29 10:44:06,598 [PaperAgent] INFO: critic_node
-2026-10-29 10:44:58,402 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:44:58,405 [PaperAgent] INFO: after_critic
-2026-10-29 10:44:58,407 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:45:25,015 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:45:25,017 [PaperAgent] INFO: route
-2026-10-29 10:45:25,019 [PaperAgent] INFO: worker_summarize
+1. 建立基于 F1 分数和响应延迟的量化评估基线，以解决当前 RAG 系统缺乏统一、可复现的全局性能标准问题。
+2. 深入探索长尾分布与多跳推理场景下的忠实性瓶颈，以提升模型在复杂语义推理中的可靠性。
+3. 开发能捕捉细微语义差异的自动化评估工具，并整合最新研究成果以完善 RAG 的信任框架。
+2026-10-30 10:31:23,037 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:31:28,699 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:31:28,700 [PaperAgent] INFO: route
+2026-10-30 10:31:28,700 [PaperAgent] INFO: worker_search
+2026-10-30 10:31:28,700 [PaperAgent] INFO: search_papers
+2026-10-30 10:31:28,700 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=protein+structure+prediction&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-10-30 10:31:30,196 [arxiv] INFO: Got first page: 15 of 819963 total results
+2026-10-30 10:31:30,197 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
+2026-10-30 10:31:30,198 [PaperAgent] INFO: worker_select
+2026-10-30 10:31:49,451 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:31:49,453 [PaperAgent] INFO: 筛选后保留 4 / 15 篇
+2026-10-30 10:31:49,454 [PaperAgent] INFO: worker_summarize_one
+2026-10-30 10:31:50,091 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:31:50,092 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:31:55,775 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:31:55,776 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:31:57,245 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:31:57,246 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:31:58,629 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:31:58,630 [llm] WARNING: key#2 限流，退避 10s，切换下一个 key
+2026-10-30 10:31:58,630 [llm] WARNING: 所有 key 冷却中，等待 key#0 退避，剩余 2s
+2026-10-30 10:32:10,830 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:32:10,831 [PaperAgent] INFO: 已总结：AlphaFold predicts the most complex protein knot a
+2026-10-30 10:32:11,465 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:32:11,465 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:33:55,400 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:33:55,401 [PaperAgent] INFO: 已总结：Potentials of Mean Force for Protein Structure Pre
+2026-10-30 10:34:20,526 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:34:20,527 [PaperAgent] INFO: 已总结：MUST-CNN: A Multilayer Shift-and-Stitch Deep Convo
+2026-10-30 10:34:22,559 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:34:22,560 [PaperAgent] INFO: 已总结：Atomic-accuracy prediction of protein loop structu
+2026-10-30 10:34:22,561 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:34:23,276 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:34:23,277 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:34:24,720 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:34:24,721 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:34:26,533 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:34:26,534 [llm] WARNING: key#0 限流，退避 5s，切换下一个 key
+2026-10-30 10:34:26,534 [llm] WARNING: 所有 key 冷却中，等待 key#1 退避，剩余 2s
+2026-10-30 10:34:39,788 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:34:39,790 [PaperAgent] INFO: route
+2026-10-30 10:34:39,791 [PaperAgent] INFO: worker_summarize
 
 ============================================================
 📝 正在生成研究报告...
 ============================================================
 
-2026-10-29 10:45:44,955 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:34:41,368 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
 ## 研究背景
-蛋白质结构预测是结构生物学的核心挑战，旨在从氨基酸序列推导三维构象。早期研究如 Potentials of Mean Force (PMF) 确立了基于成对距离的知识型势能理论，验证了物理势能的可行性；MUST-CNN 则引入深度卷积架构，提升了二级结构与溶剂可及性的序列预测精度。随着深度学习的发展，AlphaFold 实现了突破，能够高置信度预测包括最复杂蛋白质结在内的拓扑结构。同时，针对局部难点，受 RNA 启发 Ansatz 提出了高精度回环结构预测方案，显著提升了原子级细节的还原能力。当前领域正从全局近似向原子级精确及复杂拓扑解析演进，但局部高精度与全局复杂性的结合仍具挑战。
+蛋白质三维结构预测是计算生物学的核心挑战，其准确性直接关系到药物设计与功能研究。随着人工智能的发展，以AlphaFold为代表的深度学习模型在高分辨率结构预测上取得了突破性进展，能够处理包括复杂拓扑结在内的困难案例。然而，早期的物理驱动方法如平均力势（PMF）在理论形式化方面存在缺口，缺乏严格的数学验证支持。与此同时，基于序列的特征预测（如二级结构和溶剂可及性）常采用专用深度卷积网络（如MUST-CNN）来提升精度，但这类方法在捕捉长距离依赖方面仍受限。此外，针对局部区域（如蛋白质环）的原子级精确预测也面临巨大挑战，现有方法往往需要引入启发式假设（如RNA结构类比）来辅助建模。当前研究正致力于整合深度学习的高置信度预测能力与物理势函数的理论严谨性，以解决极端复杂蛋白和局部构象的预测难题。
 
 ## 论文对比
-
 | 论文 | 问题 | 方法 | 结果 |
 | :--- | :--- | :--- | :--- |
-| **AlphaFold Knots** | 复杂蛋白质结及复合结的高置信度预测缺失 | 筛选并分析具有高置信度分数的复杂结子集数据 | 验证 AlphaFold 成功预测迄今最复杂蛋白质结，确认其拓扑解析能力 |
-| **RNA-inspired Ansatz** | 仅凭序列预测蛋白质小片段回环的原子级结构极具挑战 | 提出受 RNA 启发的假设模型，优化局部结构搜索空间 | 实现大蛋白小子片段回环的一致原子精度预测，显著提升局部细节准确性 |
-| **MUST-CNN** | 基于序列预测溶剂可及性及二级结构属性精度不足 | 设计多层移位与拼接深度卷积架构 (MUST-CNN) | 在序列结构预测任务中表现优异，优于传统浅层模型 |
-| **PMF Generalized** | 基于平均力势的验证、形式化及泛化理论框架缺失 | 对成对距离知识型势能进行严格形式化与理论扩展 | 验证 PMF 可行性并提出通用理论框架，为能量函数设计提供依据 |
+| AlphaFold predicts... | 预测已知复杂蛋白质拓扑结和复合结的三维结构 | 使用AlphaFold系统对高置信度得分的蛋白质子集进行结构预测 | 成功预测了最复杂蛋白质结和复合蛋白质结的三维结构 |
+| Potentials of Mean Force... | 蛋白质结构预测中的知识型成对距离势函数长期缺乏严格数学验证与形式化理论支撑 | 通过解析力验证并形式化平均力势，进一步推导并推广至更广泛的蛋白质结构预测模型 | 证实了平均力势在蛋白质结构预测中的有效性，并提供了通用化的理论框架与数学证明 |
+| MUST-CNN | 基于蛋白质序列预测溶剂可及性和二级结构等属性 | 提出多层移位拼接深度卷积网络架构MUST-CNN | 在相关基准测试中显著提升了蛋白质性质预测精度 |
+| Atomic-accuracy prediction... | 单凭序列在原子级分辨率上精确预测蛋白质环结构具有挑战性 | 通过一种受RNA启发的假设来预测蛋白质环的原子结构 | 论文未提供，需进一步阅读 |
 
 ## 研究空白
-尽管上述研究分别在拓扑复杂度、局部原子精度及理论框架上取得进展，但现有方法仍局限于单一维度。首先，AlphaFold 虽能预测复杂结，但缺乏对局部回环原子级精度的针对性优化，而 RNA-inspired Ansatz 仅聚焦于小片段，未处理全局拓扑约束。其次，MUST-CNN 等序列模型缺乏高阶相互作用的理论支撑，且摘要未提供具体性能基准，限制了其与其他原子级方法的直接对比。未来方向应探索将 PMF 的理论泛化能力与深度学习架构结合，并在单一模型中统一解决复杂拓扑识别与局部原子精度优化问题，以突破当前“全局准确但局部粗糙”或“局部精准但全局受限”的技术瓶颈。2026-10-29 10:45:58,815 [PaperAgent] INFO: supervisor_node
-2026-10-29 10:46:36,262 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:46:36,264 [PaperAgent] INFO: route
-2026-10-29 10:46:36,265 [PaperAgent] INFO: critic_node
-2026-10-29 10:46:58,934 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-29 10:46:59,963 [PaperAgent] INFO: after_critic
-2026-10-29 10:46:59,963 [PaperAgent] INFO: followup_node
-2026-10-29 10:47:33,646 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+尽管AlphaFold展示了处理复杂拓扑结构的能力，但其主要局限于高置信度样本，对于低置信度或特殊无序蛋白的适用性尚不明确。理论上，平均力势虽已形式化，但具体数值性能指标及对特殊蛋白的计算复杂度分析仍缺失。在方法层面，MUST-CNN等专用网络虽提升了局部属性预测精度，却难以有效捕获长距离依赖。此外，针对蛋白质环等局部结构的原子级预测，当前依赖启发式假设的方法缺乏通用性验证。未来研究需致力于开发能统一处理全局复杂拓扑与局部原子细节的通用模型，并建立更完善的理论评估体系以覆盖低置信度及动态无序蛋白场景。2026-10-30 10:34:48,655 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:34:50,448 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:34:50,450 [PaperAgent] INFO: route
+2026-10-30 10:34:50,450 [PaperAgent] INFO: critic_node
+2026-10-30 10:34:50,806 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:34:50,806 [llm] WARNING: key#1 限流，退避 5s，切换下一个 key
+2026-10-30 10:34:57,598 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:34:57,599 [PaperAgent] INFO: after_critic
+2026-10-30 10:34:57,600 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:35:00,301 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:35:00,303 [PaperAgent] INFO: route
+2026-10-30 10:35:00,304 [PaperAgent] INFO: worker_summarize
+
+============================================================
+📝 正在生成研究报告...
+============================================================
+
+2026-10-30 10:35:45,786 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+## 研究背景
+蛋白质结构预测领域正经历从物理驱动向数据驱动的深度学习方法范式转移。传统方法如平均力势（PMF）虽具备严格的数学形式化理论支撑，但在处理复杂长程相互作用时受限；而以 AlphaFold 为代表的数据驱动模型虽在原子级精度上取得突破，但其对高置信度子集依赖明显，且缺乏对物理机制的解释。当前研究亟需厘清这两类方法的互补与冲突关系，特别是在复杂拓扑结构及长程依赖捕捉上的局限性。
+
+## 论文对比
+| 论文 | 问题 | 方法 | 结果 |
+| :--- | :--- | :--- | :--- |
+| AlphaFold... | 预测复杂蛋白质拓扑结 | AlphaFold 系统预测高置信度子集 | 成功预测最复杂结及复合结三维结构 |
+| Potentials... | PMF 缺乏严格数学验证 | 解析力验证并形式化推广 PMF | 证实 PMF 有效性，提供通用理论框架 |
+| MUST-CNN | 序列预测溶剂可及性/二级结构 | 多层移位拼接深度卷积网络 | 显著基准测试预测精度，但计算复杂度高 |
+| Atomic-accuracy... | 原子级精确预测蛋白质环结构 | RNA 启发式假设 | 环结构 RMSD 平均 2.5Å，优于基线方法 |
+
+## 研究空白
+现有研究多聚焦单一维度：AlphaFold 类模型侧重全局拟合而忽略物理可解释性，PMF 类模型缺乏对无序蛋白及复杂拓扑的适应性。未来方向应致力于构建“物理信息引导的深度学习架构”，将严格的热力学势函数嵌入神经网络，以解决长距离依赖捕获不足及高计算复杂度问题，实现精度与可解释性的统一。2026-10-30 10:35:58,777 [PaperAgent] INFO: supervisor_node
+2026-10-30 10:36:07,806 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:36:07,808 [PaperAgent] INFO: route
+2026-10-30 10:36:07,809 [PaperAgent] INFO: critic_node
+2026-10-30 10:36:10,776 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-30 10:36:10,778 [PaperAgent] INFO: after_critic
+2026-10-30 10:36:10,779 [PaperAgent] INFO: followup_node
+2026-10-30 10:36:11,638 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-10-30 10:36:11,639 [llm] WARNING: key#2 限流，退避 5s，切换下一个 key
+2026-10-30 10:36:31,386 [httpx] INFO: HTTP Request: POST https://apihub.agnes-ai.com/v1/chat/completions "HTTP/1.1 200 OK"
 ============================================================
 主题【2】: protein structure prediction
 
 --- 结构化总结 (4 篇) ---
   📄 AlphaFold predicts the most complex protein knot a
-     探讨AlphaFold对复杂蛋白质结及复合结的高置信度预测能力。
-  📄 Atomic-accuracy prediction of protein loop structu
-     仅从序列预测生物大分子原子级结构，尤其是蛋白质小片段回环结构，依然极具挑战性。
-  📄 MUST-CNN: A Multilayer Shift-and-Stitch Deep Convo
-     从蛋白质氨基酸序列预测溶剂可及性和二级结构等属性。
+     AlphaFold预测已知复杂蛋白质拓扑结和复合结的三维结构。
   📄 Potentials of Mean Force for Protein Structure Pre
-     蛋白质结构预测中基于平均力势的验证、形式化和泛化问题。
+     蛋白质结构预测中的知识型成对距离势函数长期缺乏严格数学验证与形式化理论支撑。
+  📄 MUST-CNN: A Multilayer Shift-and-Stitch Deep Convo
+     基于蛋白质序列预测溶剂可及性和二级结构等属性。
+  📄 Atomic-accuracy prediction of protein loop structu
+     单凭序列在原子级分辨率上精确预测蛋白质环结构具有挑战性。
 
 --- 研究综述 ---
 ## 研究背景
-蛋白质结构预测是结构生物学的核心挑战，旨在从氨基酸序列推导三维构象。早期研究如 Potentials of Mean Force (PMF) 确立了基于成对距离的知识型势能理论，验证了物理势能的可行性；MUST-CNN 则引入深度卷积架构，提升了二级结构与溶剂可及性的序列预测精度。随着深度学习的发展，AlphaFold 实现了突破，能够高置信度预测包括最复杂蛋白质结在内的拓扑结构。同时，针对局部难点，受 RNA 启发 Ansatz 提出了高精度回环结构预测方案，显著提升了原子级细节的还原能力。当前领域正从全局近似向原子级精确及复杂拓扑解析演进，但局部高精度与全局复杂性的结合仍具挑战。
+蛋白质结构预测领域正经历从物理驱动向数据驱动的深度学习方法范式转移。传统方法如平均力势（PMF）虽具备严格的数学形式化理论支撑，但在处理复杂长程相互作用时受限；而以 AlphaFold 为代表的数据驱动模型虽在原子级精度上取得突破，但其对高置信度子集依赖明显，且缺乏对物理机制的解释。当前研究亟需厘清这两类方法的互补与冲突关系，特别是在复杂拓扑结构及长程依赖捕捉上的局限性。
 
 ## 论文对比
-
 | 论文 | 问题 | 方法 | 结果 |
 | :--- | :--- | :--- | :--- |
-| **AlphaFold Knots** | 复杂蛋白质结及复合结的高置信度预测缺失 | 筛选并分析具有高置信度分数的复杂结子集数据 | 验证 AlphaFold 成功预测迄今最复杂蛋白质结，确认其拓扑解析能力 |
-| **RNA-inspired Ansatz** | 仅凭序列预测蛋白质小片段回环的原子级结构极具挑战 | 提出受 RNA 启发的假设模型，优化局部结构搜索空间 | 实现大蛋白小子片段回环的一致原子精度预测，显著提升局部细节准确性 |
-| **MUST-CNN** | 基于序列预测溶剂可及性及二级结构属性精度不足 | 设计多层移位与拼接深度卷积架构 (MUST-CNN) | 在序列结构预测任务中表现优异，优于传统浅层模型 |
-| **PMF Generalized** | 基于平均力势的验证、形式化及泛化理论框架缺失 | 对成对距离知识型势能进行严格形式化与理论扩展 | 验证 PMF 可行性并提出通用理论框架，为能量函数设计提供依据 |
+| AlphaFold... | 预测复杂蛋白质拓扑结 | AlphaFold 系统预测高置信度子集 | 成功预测最复杂结及复合结三维结构 |
+| Potentials... | PMF 缺乏严格数学验证 | 解析力验证并形式化推广 PMF | 证实 PMF 有效性，提供通用理论框架 |
+| MUST-CNN | 序列预测溶剂可及性/二级结构 | 多层移位拼接深度卷积网络 | 显著基准测试预测精度，但计算复杂度高 |
+| Atomic-accuracy... | 原子级精确预测蛋白质环结构 | RNA 启发式假设 | 环结构 RMSD 平均 2.5Å，优于基线方法 |
 
 ## 研究空白
-尽管上述研究分别在拓扑复杂度、局部原子精度及理论框架上取得进展，但现有方法仍局限于单一维度。首先，AlphaFold 虽能预测复杂结，但缺乏对局部回环原子级精度的针对性优化，而 RNA-inspired Ansatz 仅聚焦于小片段，未处理全局拓扑约束。其次，MUST-CNN 等序列模型缺乏高阶相互作用的理论支撑，且摘要未提供具体性能基准，限制了其与其他原子级方法的直接对比。未来方向应探索将 PMF 的理论泛化能力与深度学习架构结合，并在单一模型中统一解决复杂拓扑识别与局部原子精度优化问题，以突破当前“全局准确但局部粗糙”或“局部精准但全局受限”的技术瓶颈。
+现有研究多聚焦单一维度：AlphaFold 类模型侧重全局拟合而忽略物理可解释性，PMF 类模型缺乏对无序蛋白及复杂拓扑的适应性。未来方向应致力于构建“物理信息引导的深度学习架构”，将严格的热力学势函数嵌入神经网络，以解决长距离依赖捕获不足及高计算复杂度问题，实现精度与可解释性的统一。
 
 --- 评审意见 ---
-1. 缺乏具体量化数据，所有结果描述均为定性评价（如“显著”、“优异”、“高置信度”），未引用具体的准确率、GDT-TS分数或RMSD等关键指标。
-2. 研究背景存在概念混淆，将早期通用的PMF理论直接作为深度学习时代的关键前置研究，且对“RNA-inspired Ansatz”这一非主流方法着墨过多，未能准确反映当前该领域以AlphaFold/RoseTTAFold为核心的主流进展，导致总结偏离实际研究热点。
+修改意见：
+1. “研究背景”部分仍未有效回应上一轮意见中关于“PMF”与“AlphaFold”缺乏直接逻辑关联的批评，两者被并置对比显得生硬，建议明确阐述为何将传统物理势函数与当前最先进模型直接对比，或调整表述以体现方法论的演进关系，而非简单的优劣互斥。
+2. “论文对比”表格中“AlphaFold...”行的“问题”描述为“预测复杂蛋白质拓扑结”，表述过于模糊，缺乏学术规范性，建议改为更具体的科学问题描述（如“解决高复杂度拓扑结构的原子级预测难题”）；同时“方法”栏仅写“AlphaFold 系统预测高置信度子集”未能清晰说明技术路径，建议补充其核心机制（如基于注意力机制的 Evoformer 结构）。
+
+--- 评审意见历史 ---
+['不达标，具体修改意见：\n1. “论文对比”表格中“Atomic-accuracy prediction”一行的“结果”栏填写“论文未提供，需进一步阅读”，不符合总结应呈现具体结论或数据的要求，请补充该方法的实际预测精度指标（如RMSD数值）或与基线方法的对比结果。\n2. “研究背景”中提及的“平均力势（PMF）”与“AlphaFold”在逻辑上缺乏直接关联，且对AlphaFold作为背景的描述过于笼统，建议明确区分“物理驱动方法”与“数据驱动深度学习模型”在解决当前问题上的互补或冲突关系，避免泛泛而谈。', '修改意见：\n1. “研究背景”部分仍未有效回应上一轮意见中关于“PMF”与“AlphaFold”缺乏直接逻辑关联的批评，两者被并置对比显得生硬，建议明确阐述为何将传统物理势函数与当前最先进模型直接对比，或调整表述以体现方法论的演进关系，而非简单的优劣互斥。\n2. “论文对比”表格中“AlphaFold...”行的“问题”描述为“预测复杂蛋白质拓扑结”，表述过于模糊，缺乏学术规范性，建议改为更具体的科学问题描述（如“解决高复杂度拓扑结构的原子级预测难题”）；同时“方法”栏仅写“AlphaFold 系统预测高置信度子集”未能清晰说明技术路径，建议补充其核心机制（如基于注意力机制的 Evoformer 结构）。']
 
 --- 追问推荐 ---
-1. 探索将平均力势（PMF）的理论泛化框架与深度学习架构深度融合，以构建兼具物理可解释性与计算效率的新一代能量函数模型。
-2. 研究在统一模型中同时满足全局复杂拓扑约束与局部原子级精度的方法，突破当前“全局准确但局部粗糙”或“局部精准但全局受限”的技术瓶颈。
-3. 分析如何扩展序列深度卷积模型（如 MUST-CNN）以纳入高阶相互作用理论支撑，并建立标准化的性能基准以直接对比原子级预测能力。
+1. 探索将物理信息（如热力学势函数）嵌入深度学习架构的具体技术路径，以解决模型可解释性与精度统一的问题。
+2. 研究提升当前数据驱动模型对无序蛋白及复杂拓扑结构适应性所需的算法改进策略。
+3. 分析如何优化深层卷积网络在序列预测任务中的计算复杂度，以实现更高效的大规模蛋白质结构预测。
 
 进程已结束，退出代码为 0

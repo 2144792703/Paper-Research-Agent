@@ -72,6 +72,7 @@ def supervisor_node(state: SupervisorState):
 3. 论文数为 0 → 输出 search。
 4. 综述未生成 + 有论文 → 输出 summarize。
 5. 初始状态（none）→ 输出 search。
+6. 综述为空时，绝对禁止输出 critic。必须先 summarize。
 
 硬约束：
 - 上一步是 summarize 时，绝对禁止再次输出 summarize（防死循环）。
@@ -235,19 +236,45 @@ def worker_summarize(state: SupervisorState):
 def critic_node(state: SupervisorState):
     logger.info("critic_node")
     """评审 summary 质量，决定通过还是打回重做"""
-    prompt = f"""请评审以下论文总结的质量：
-    主题：{state['topic']}
-    总结：{state['summary']}
 
-    评审标准：
-    1. 是否覆盖了论文的核心发现？
-    2. 是否有具体数据/结论？
-    3. 是否只是泛泛而谈？
+    history = state.get("critique_history") or []
+    if history:
+        prompt = f"""请评审修订后的论文总结：
+主题：{state["topic"]}
+当前版本：{state['summary']}
 
-    如果质量达标，只回复：通过。
-    如果不达标，回复具体修改意见（1-2条）。"""
+上一轮评审意见：{history[-1]}
+
+请判断：
+1. 上一次提出的问题解决了吗？
+2. 还有新问题吗？
+
+如果全部达标，只回复：通过。
+如果还有问题，回复具体修改意见（1-3 条）。
+"""
+    else:
+        # 第一次审评
+        prompt = f"""请评审以下论文总结的质量：
+主题：{state['topic']}
+总结：{state['summary']}
+
+评审标准：
+1. 是否覆盖了论文的核心发现？
+2. 是否有具体数据/结论？
+3. 是否只是泛泛而谈？
+
+如果质量达标，只回复：通过。
+如果不达标，回复具体修改意见（1-2条）。"""
+
     result = invoke_llm(prompt)
-    return {"critique": result.strip(), "revision_count": state["revision_count"]+1}
+
+    new_history = history + [result.strip()]
+
+    return {
+        "critique": result.strip(),
+        "revision_count": state["revision_count"]+1,
+        "critique_history": new_history
+    }
 
 def followup_node(state: SupervisorState):
     logger.info("followup_node")
