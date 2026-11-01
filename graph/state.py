@@ -12,6 +12,8 @@ class SupervisorState(TypedDict):
     paper_summaries 对每篇论文做结构化总结
     critique_times 最大重试次数，防止程序陷入无限死循环
     revision_count 当前已重试次数，每次完成评审后加 1
+    search_max_results 单次搜索拉取的论文数量（用户可配置，默认 15）
+    keep_papers 最终保留的论文数量（用户可配置，默认 5）
     """
     topic: str
     papers: list[dict]
@@ -23,3 +25,5 @@ class SupervisorState(TypedDict):
     paper_summaries: list[dict]
     critique_times: int
     revision_count: int
+    search_max_results: int
+    keep_papers: int

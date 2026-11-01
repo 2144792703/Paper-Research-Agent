@@ -37,6 +37,7 @@ graph.add_conditional_edges(
         "search": "search",
         "summarize": "summarize",
         "critic": "critic",
+        "end": END,
     }
 )
 graph.add_conditional_edges(
