@@ -50,5 +50,3 @@ async def global_error_handler(request: Request, exc: Exception):
         status_code=500,
         content={"detail": "internal error", "error": str(exc)[:200]}
     )
-
-
