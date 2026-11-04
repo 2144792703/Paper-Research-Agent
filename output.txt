@@ -1,915 +1,118 @@
-D:\Anaconda3\envs\mybase\python.exe E:\testcode\day29\paper-research-agent\eval.py
-2026-11-03 19:04:38,604 [models] INFO: [models] 模型提供方已切换为: local
-[1/20] 测试: RAG retrieval
-2026-11-03 19:04:38,617 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:04:48,311 [PaperAgent] INFO: route
+(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --topic "How to keep what the model makes up out of the agent" --papers 4 --max-retries 2                                                                                    
+2026-11-04 10:39:44,663 [models] INFO: [models] 模型提供方已切换为: local
+2026-11-04 10:39:44,670 [models] INFO: [main] 模型提供方=local, 实现包=models.local
+🚀 开始研究：How to keep what the model makes up out of the agent
+   搜索论文数：15，保留论文数：4，评审轮数：2
+   模型提供方：local
+2026-11-04 10:39:44,675 [PaperAgent] INFO: supervisor_node
+2026-11-04 10:39:49,651 [PaperAgent] INFO: route
 
-🔍 正在搜索论文：RAG retrieval...
-2026-11-03 19:04:48,312 [PaperAgent] INFO: worker_search
-2026-11-03 19:04:48,312 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:04:48,312 [PaperAgent] INFO: search_papers
-2026-11-03 19:04:48,312 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=RAG+retrieval&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:04:53,747 [arxiv] INFO: Got first page: 15 of 67646 total results
-2026-11-03 19:04:53,749 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
+🔍 正在搜索论文：How to keep what the model makes up out of the agent...
+2026-11-04 10:39:49,652 [PaperAgent] INFO: worker_search
+2026-11-04 10:39:49,652 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-04 10:39:49,652 [PaperAgent] INFO: search_papers
+2026-11-04 10:39:49,652 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=How+to+keep+what+the+model+makes+up+out+of+the+agent&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-04 10:39:53,209 [arxiv] INFO: Got first page: 15 of 1811856 total results
+2026-11-04 10:39:53,210 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
 📊 正在筛选最相关论文...
-2026-11-03 19:04:53,750 [PaperAgent] INFO: worker_select
-2026-11-03 19:04:57,095 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:04:57,096 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:04:58,871 [PaperAgent] INFO: 已总结：Engineering the RAG Stack: A Comprehensive Review
-2026-11-03 19:05:00,210 [PaperAgent] INFO: 已总结：RAG over Tables: Hierarchical Memory Index, Multi-
-2026-11-03 19:05:01,783 [PaperAgent] INFO: 已总结：Q-RAG: Long Context Multi-step Retrieval via Value
-2026-11-03 19:05:01,783 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:05:02,188 [PaperAgent] INFO: route
+2026-11-04 10:39:53,212 [PaperAgent] INFO: worker_select
+2026-11-04 10:39:54,581 [PaperAgent] INFO: 筛选后保留 1 / 15 篇
+📝 正在逐篇总结 1 篇论文...
+2026-11-04 10:39:54,581 [PaperAgent] INFO: worker_summarize_one
+2026-11-04 10:39:56,286 [PaperAgent] INFO: 已总结：Learning From Failure: Integrating Negative Exampl
+2026-11-04 10:39:56,287 [PaperAgent] INFO: supervisor_node
+2026-11-04 10:39:56,680 [PaperAgent] INFO: route
 📝 正在进行总的汇总论文...
-2026-11-03 19:05:02,189 [PaperAgent] INFO: worker_summarize
+2026-11-04 10:39:56,680 [PaperAgent] INFO: worker_summarize
 
 ============================================================
 📝 正在生成研究报告...
 ============================================================
 
 ## 研究背景
-近年来，基于检索增强生成（RAG）系统的研究日益增多，旨在通过结合外部知识来提升语言模型生成答案的相关性和准确性。RAG系统通过检索外部数据源并结合生成模型，为用户提供更加准确和丰富的回答。随着技术的发展，RAG系统在多个应用场景中展现出巨大潜力，特别是在需要大量专业知识和复杂推理的领域。
-
-## 论文对比
-| 论文标题 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| Engineering the RAG Stack: A Comprehensive Review of the Architecture and Trust Frameworks for Retrieval-Augmented Generation Systems | 提供实际指导和详细的RAG系统架构及信任框架 | 进行了一篇全面的系统文献综述 | 提供了实际指导和详细的RAG系统架构及信任框架 |
-| RAG over Tables: Hierarchical Memory Index, Multi-Stage Retrieval, and Benchmarking | 提升LLMs通过结合外部知识库来提高答案的相关性和准确性 | 提出层次记忆索引和多阶段检索 | 增强RAG在表格数据上的表现 |
-| Q-RAG: Long Context Multi-step Retrieval via Value-based Embedder Training | 现有RAG方法在处理长上下文多步检索时存在局限性 | Q-RAG通过值基嵌入器训练提高LLM性能 | 有效过滤相关背景，减少幻觉和推理成本 |
-
-## 研究空白
-尽管上述研究在提升RAG系统性能方面取得了一定的进展，但仍然存在一些研究空白。例如，关于RAG系统架构和信任框架的全面文献综述虽然为研究者提供了宝贵的指导，但未详细说明其局限性。此外，虽然RAG在表格数据上的表现得到了提升，但对于非结构化数据的处理能力仍需进一步研究。最后，Q-RAG通过值基嵌入器训练提高了性能，但如何在保持性能的同时进一步优化训练方法仍是一个值得探索的方向。未来的研究应致力于解决这些挑战，进一步推动RAG系统的进步。2026-11-03 19:05:12,498 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:05:12,901 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:05:12,901 [PaperAgent] INFO: critic_node
-2026-11-03 19:05:14,857 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:05:14,858 [PaperAgent] INFO: followup_node
-  -> ✅通过 (38.0s, 951字)
-[2/20] 测试: transformer attention mechanism
-2026-11-03 19:05:16,644 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:05:17,044 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：transformer attention mechanism...
-2026-11-03 19:05:17,044 [PaperAgent] INFO: worker_search
-2026-11-03 19:05:17,044 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:05:17,044 [PaperAgent] INFO: search_papers
-2026-11-03 19:05:17,045 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=transformer+attention+mechanism&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:05:18,422 [arxiv] INFO: Got first page: 15 of 501955 total results
-2026-11-03 19:05:18,423 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:05:18,424 [PaperAgent] INFO: worker_select
-2026-11-03 19:05:20,865 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:05:20,865 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:05:22,547 [PaperAgent] INFO: 已总结：Transformer-based Personalized Attention Mechanism
-2026-11-03 19:05:23,871 [PaperAgent] INFO: 已总结：Energy-Gated Attention and Wavelet Positional Enco
-2026-11-03 19:05:25,135 [PaperAgent] INFO: 已总结：Benign Overfitting in Token Selection of Attention
-2026-11-03 19:05:25,136 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:05:25,534 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:05:25,534 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-在医学图像分析领域，准确识别图像中的关键区域对于诊断至关重要。尽管现有的深度学习方法已经取得了显著进展，但它们在处理医学图像时仍然存在一些局限性，尤其是在利用图像与临床记录的结合来提升诊断准确性方面需要进一步改进。此外，标准的Transformer注意力机制在处理不同输入的信息结构时存在不足，这限制了其在医学图像分析中的应用潜力。
+当前，大规模语言模型（LLMs）在生成高质量文本方面取得了显著进展，特别是在作为代理时，它们能够完成复杂任务和提供专业建议。然而，现有的优化方法主要关注于提升语言生成的质量和流畅性，较少涉及从失败中学习的能力，这限制了LLMs在实际应用中的灵活性和鲁棒性。因此，探索一种能够使LLMs在与用户互动中从错误中学习的方法，显得尤为重要。
 
 ## 论文对比
 | 论文 | 问题 | 方法 | 结果 |
 | --- | --- | --- | --- |
-| Transformer-based Personalized Attention Mechanism for Medical Images with Clinical Records | 标准方法在处理医学图像和临床记录时的准确性有待提高 | 采用基于Transformer的个性化注意力机制 | 有助于提高医学图像诊断的准确性 |
-| Energy-Gated Attention and Wavelet Positional Encoding: Complementary Inductive Biases for Transformer Attention | 标准Transformer注意力机制忽视了输入的信息结构差异 | 引入能量门控注意力和小波位置编码 | 提升了对不同位置和重要性的处理能力 |
-| Benign Overfitting in Token Selection of Attention Mechanism | 对注意力机制如何学习选择令牌的理论基础理解不足 | 未在摘要中提及 | 未在摘要中提及 |
+| Learning From Failure: Integrating Negative Examples when Fine-tuning Large Language Models as Agents | LLMs在作为代理时，优化主要集中在语言生成而非从失败中学习。 | 整合负面实例以改进fine-tuning过程。 | 提高代理性能，使其能更好地从失败中 学习。 |
 
 ## 研究空白
-尽管上述研究提出了多种改进现有Transformer注意力机制的方法，但这些方法在实际应用中的效果仍需进一步验证。未来的研究可以进一步探讨如何结合医学图像和临床记录以提高诊断准确性，以及如何更好地理解注意力机制在选择令牌过程中的工作原理。此外，针对不同应用场景的具体优化策略也是值得探索的方向。2026-11-03 19:05:33,742 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:05:34,134 [PaperAgent] INFO: route
+尽管该研究提出了一种有效的策略来增强LLMs的鲁棒性和学习能力，但在具体实施过程中，负面实例的整合方法及效果的具体细节尚未明确。未来的研究可以进一步探索以下方面：
+1. **负面实例的筛选和生成**：如何更有效地收集和生成负面实例，以确保它们能够准确反映潜在的错误和陷阱。
+2. **优化算法和策略**：开发更为高效和自动化的算法，以整合负面实例，同时减少对计算资源的需求。
+3. **评估与验证**：设计更全面的评估指标和方法，以验证整合负面实例后的LLMs在实际应用中的性能提升和学习能力增强情况。2026-11-04 10:40:04,925 [PaperAgent] INFO: supervisor_node
+2026-11-04 10:40:05,318 [PaperAgent] INFO: route
 📝 正在判断总汇总论文的质量...
-2026-11-03 19:05:34,134 [PaperAgent] INFO: critic_node
-2026-11-03 19:05:34,407 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:05:34,407 [PaperAgent] INFO: followup_node
-  -> ✅通过 (19.1s, 857字)
-[3/20] 测试: protein structure prediction
-2026-11-03 19:05:35,702 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:05:36,096 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：protein structure prediction...
-2026-11-03 19:05:36,096 [PaperAgent] INFO: worker_search
-2026-11-03 19:05:36,096 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:05:36,096 [PaperAgent] INFO: search_papers
-2026-11-03 19:05:36,096 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=protein+structure+prediction&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:05:57,614 [arxiv] INFO: Got first page: 15 of 822246 total results
-2026-11-03 19:05:57,615 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:05:57,616 [PaperAgent] INFO: worker_select
-2026-11-03 19:06:00,661 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:06:00,662 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:06:01,806 [PaperAgent] INFO: 已总结：A Novel Approach for Protein Structure Prediction
-2026-11-03 19:06:02,913 [PaperAgent] INFO: 已总结：AlphaFold predicts the most complex protein knot a
-2026-11-03 19:06:04,726 [PaperAgent] INFO: 已总结：Atomic-accuracy prediction of protein loop structu
-2026-11-03 19:06:04,726 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:05,138 [PaperAgent] INFO: route
+2026-11-04 10:40:05,319 [PaperAgent] INFO: critic_node
+2026-11-04 10:40:07,984 [PaperAgent] INFO: after_critic
+2026-11-04 10:40:07,984 [PaperAgent] INFO: supervisor_node
+2026-11-04 10:40:08,471 [PaperAgent] INFO: route
 📝 正在进行总的汇总论文...
-2026-11-03 19:06:05,139 [PaperAgent] INFO: worker_summarize
+2026-11-04 10:40:08,472 [PaperAgent] INFO: worker_summarize
 
 ============================================================
 📝 正在生成研究报告...
 ============================================================
 
 ## 研究背景
-蛋白质结构预测是生物信息学和结构生物学中的核心问题之一，对于理解蛋白质的生物学功能至关重要。随着计算方法的发展，越来越多的研究致力于通过序列信息准确预测蛋白质的三维结构。然而，从序列预测原子分辨率的蛋白质结构仍然面临诸多挑战，特别是在环状结构的预测上。
+近年来，大语言模型（LLMs）在各种自然语言处理任务中取得了显著的进展。然而，在将其作为代理进行应用时，优化工作主要集中在语言生成能力的提升上，而忽视了从失败中学习的能力。这种局限性使得代理在处理复杂任务时，难以有效避免错误和提高决策准确性。
 
 ## 论文对比
-| 论文名称 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| A Novel Approach for Protein Structure Prediction | 研究蛋白质结构与序列关系 | 使用隐藏马尔可夫模型和人工神经网络 | 未提及具体结果 |
-| AlphaFold predicts the most complex protein knot and composite protein knots | 预测蛋白质的三维结构 | 使用AlphaFold系统 | 预测出复杂蛋白质结和复合蛋白质结 |
-| Atomic-accuracy prediction of protein loop structures through an RNA-inspired ansatz | 从序列预测生物大分子结构原子分辨率仍然具有挑战性，尤其是环状结构 | 提出一种受RNA启发的方法来预测蛋白质环状结构 | 具体结果未在摘要中提及 |
+| 论文名称               | 问题                                                                 | 方法                                                        | 结果                                                                 |
+|------------------------|----------------------------------------------------------------------|-------------------------------------------------------------|----------------------------------------------------------------------|
+| Learning From Failure: Integrating Negative Examples when Fine-tuning Large Language Models as Agents | LLMs在作为代理时，优化主要集中在语言生成而非从失败中学习。         | 整合负面实例以改进fine-tuning过程。                           |  提高代理性能，使其能更好地从失败中学习。                             |
 
 ## 研究空白
-尽管上述研究在蛋白质结构预测方面取得了显著进展，但仍存在一些研究空白。首先是对于复杂蛋白质结构（如环状结构）的预测，虽然AlphaFold能够预测出复杂的蛋白质结和复合蛋白质结，但具体的技术细节和准确率并未在摘要中提及。其次，对于环状结构的预测仍然存在挑战，尽管提出了一种RNA启发的方法，但其在实际应用中的效果还需要进一步验证。未来的研究可以进一步优化现有的预测方法，提高预测的准确性和效率，并探索新的方法来解决原子分辨率下复杂蛋白质结构预测的难题。2026-11-03 19:06:13,751 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:14,134 [PaperAgent] INFO: route
+尽管该研究提出了通过整合负面实例来提高代理性能的方法，并取得了一定的成果，但仍有以下几个方面值得进一步探索：
+1. **具体的负面实例整合方法**：需要具体说明如何定义和选择负面实例，以及如何将其融入fine-tuning过程中。
+2. **效果评估**：需要进一步评估这种整合方法对代理性能的具体影响，例如通过具体的性能指标（如准确率、召回率等）进行衡量。
+3. **应用场景拓展**：需要探索这种方法在不同应用场景中的适用性和效果，包括但不限于推荐系统、智能客服等领域。
+4. **长期学习机制**：进一步研究如何建立一个长期有效的学习机制，使得代理能够在不断变化的环境中持续学习和改进。
+
+通过深入研究这些空白点，可以进一步提升大语言模型在代理任务中的整体性能和适应性。2026-11-04 10:40:17,199 [PaperAgent] INFO: supervisor_node
+2026-11-04 10:40:17,636 [PaperAgent] INFO: route
 📝 正在判断总汇总论文的质量...
-2026-11-03 19:06:14,135 [PaperAgent] INFO: critic_node
-2026-11-03 19:06:16,435 [PaperAgent] INFO: after_critic
+2026-11-04 10:40:17,637 [PaperAgent] INFO: critic_node
+2026-11-04 10:40:21,521 [PaperAgent] INFO: after_critic
 📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:06:16,435 [PaperAgent] INFO: followup_node
-  -> ✅通过 (42.0s, 821字)
-[4/20] 测试: object detection YOLO
-2026-11-03 19:06:17,676 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:18,069 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：object detection YOLO...
-2026-11-03 19:06:18,070 [PaperAgent] INFO: worker_search
-2026-11-03 19:06:18,070 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:06:18,070 [PaperAgent] INFO: search_papers
-2026-11-03 19:06:18,070 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=object+detection+YOLO&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:06:19,859 [arxiv] INFO: Got first page: 15 of 461216 total results
-2026-11-03 19:06:19,859 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:06:19,860 [PaperAgent] INFO: worker_select
-2026-11-03 19:06:22,380 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:06:22,381 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:06:23,641 [PaperAgent] INFO: 已总结：DAMO-YOLO : A Report on Real-Time Object Detection
-2026-11-03 19:06:25,389 [PaperAgent] INFO: 已总结：YOLO-World: Real-Time Open-Vocabulary Object Detec
-2026-11-03 19:06:26,571 [PaperAgent] INFO: 已总结：Poly-YOLO: higher speed, more precise detection an
-2026-11-03 19:06:26,572 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:26,984 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:06:26,985 [PaperAgent] INFO: worker_summarize
+2026-11-04 10:40:21,522 [PaperAgent] INFO: followup_node
 
 ============================================================
-📝 正在生成研究报告...
+📄 最终报告
 ============================================================
-
 ## 研究背景
-当前，实时目标检测技术在计算机视觉领域中得到了广泛应用，包括自动驾驶、安全监控、智能医疗等多个领域。然而，现有的一些目标检测方法如YOLO系列，在处理实时性和准确性方面存在一定的局限性。同时，现有的YOLO检测器依赖预定义的对象类别，限制了其应用范围。因此，提升实时目标检测的准确性和速度是亟待解决的问题。
+近年来，大语言模型（LLMs）在各种自然语言处理任务中取得了显著的进展。然而，在将其作为代理进行应用时，优化工作主要集中在语言生成能力的提升上，而忽视了从失败中学习的能力。这种局限性使得代理在处理复杂任务时，难以有效避免错误和提高决策准确性。
 
 ## 论文对比
-| 论文           | 问题                                                                                               | 方法                                                                                   | 结果                                           |
-|----------------|----------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|------------------------------------------------|
-| DAMO-YOLO      | 提升实时目标检测的准确性和速度                                                                     | 基于YOLO扩展的DAMO-YOLO方法                                                           | 性能超过YOLO系列，但未详细说明局限性           |
-| YOLO-World     | 现有的YOLO检测器依赖预定义的对象类别，限制了其应用范围。                                             | 提出一种实现实时开放词汇对象检测的方法                                               | 具体效果未在摘要中提及。局限在于依赖预定义类别 |
-| Poly-YOLO      | YOLOv3的两个弱点                                                                                   | 改进YOLOv3并加入实例分割                                                               | 提高检测速度和精度，未详细说明局限性           |
+| 论文名称               | 问题                                                                 | 方法                                                        | 结果                                                                 |
+|------------------------|----------------------------------------------------------------------|-------------------------------------------------------------|----------------------------------------------------------------------|
+| Learning From Failure: Integrating Negative Examples when Fine-tuning Large Language Models as Agents | LLMs在作为代理时，优化主要集中在语言生成而非从失败中学习。         | 整合负面实例以改进fine-tuning过程。                           |  提高代理性能，使其能更好地从失败中学习。                             |
 
 ## 研究空白
-尽管DAMO-YOLO、YOLO-World和Poly-YOLO分别针对YOLO系列的局限性提出了改进方法，但在具体细节和局限性方面仍然存在不足。未来的研究可以进一步探讨如何在保持实时性的同时提高检测的准确性和鲁棒性，特别是在处理复杂场景和小目标检测方面。此外，对于YOLO-World，未来的研究还可以探索如何减少对预定义类别依赖，实现更加开放和灵活的检测框架。2026-11-03 19:06:36,224 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:36,606 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:06:36,606 [PaperAgent] INFO: critic_node
-2026-11-03 19:06:36,913 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:06:36,913 [PaperAgent] INFO: followup_node
-  -> ✅通过 (21.0s, 1505字)
-[5/20] 测试: graph neural networks
-2026-11-03 19:06:38,637 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:39,037 [PaperAgent] INFO: route
+尽管该研究提出了通过整合负面实例来提高代理性能的方法，并取得了一定的成果，但仍有以下几个方面值得进一步探索：
+1. **具体的负面实例整合方法**：需要具体说明如何定义和选择负面实例，以及如何将其融入fine-tuning过程中。
+2. **效果评估**：需要进一步评估这种整合方法对代理性能的具体影响，例如通过具体的性能指标（如准确率、召回率等）进行衡量。
+3. **应用场景拓展**：需要探索这种方法在不同应用场景中的适用性和效果，包括但不限于推荐系统、智能客服等领域。
+4. **长期学习机制**：进一步研究如何建立一个长期有效的学习机制，使得代理能够在不断变化的环境中持续学习和改进。
 
-🔍 正在搜索论文：graph neural networks...
-2026-11-03 19:06:39,038 [PaperAgent] INFO: worker_search
-2026-11-03 19:06:39,038 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:06:39,038 [PaperAgent] INFO: search_papers
-2026-11-03 19:06:39,038 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+networks&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:06:41,197 [arxiv] INFO: Got first page: 15 of 512117 total results
-2026-11-03 19:06:41,197 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:06:41,198 [PaperAgent] INFO: worker_select
-2026-11-03 19:06:42,392 [PaperAgent] INFO: 筛选后保留 1 / 15 篇
-📝 正在逐篇总结 1 篇论文...
-2026-11-03 19:06:42,392 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:06:44,023 [PaperAgent] INFO: 已总结：MECCH: Metapath Context Convolution-based Heteroge
-2026-11-03 19:06:44,024 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:44,442 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:06:44,442 [PaperAgent] INFO: worker_summarize
+通过深入研究这些空白点，可以进一步提升大语言模型在代理任务中的整体性能和适应性。
 
-============================================================
-📝 正在生成研究报告...
-============================================================
+--- 评审意见 ---
+通过。
 
-## 研究背景
-在当前的复杂网络分析中，异构图神经网络（Heterogeneous Graph Neural Networks, HGNNs）因其能够处理多类型节点和边的结构数据而被广泛应用于推荐系统、社交网络分析等领域。然而，当面对大规模且复杂的异构图数据时，传统的HGNNs在性能上往往出现下降，这主要是因为它们难以有效地捕捉和利用多类型的节点和边之间的复杂依赖关系。
+总结总体上已经涵盖了论文的核心发现，并且提供了具体的数据/结论和研究空白。以下是根据你的要求进行的评估：
 
-## 论文对比
-| 论文名称 | 问题                     | 方法                                | 结果                     |
-|----------|--------------------------|-------------------------------------|--------------------------|
-| MECCH    | HGNNs在处理多类型节点和边时性能下降 | 提出了基于元路径上下文卷积的异构图神经网络MECCH | 具体结果未在摘要中提及 |
+1. **增加具体数据/结论**：当前总结中已经提供了一些具体的数据和结论，如提到“提高代理性能，使其能更好地从失败中学习”。可以进一步增加具体的性能提升百分比或对比实验的数据，以增强说服力。
 
-## 研究空白
-尽管MECCH提出了基于元路径上下文卷积的新方法来解决HGNNs在处理多类型节点和边时的性能下降问题，但具体实验结果和性能提升幅度并未在摘要中提及。未来的研究可以进一步探讨MECCH在实际应用场景中的表现，包括但不限于评估其在不同数据集上的准确性、效率以及与现有方法的对比分析。此外，还可以研究如何进一步优化MECCH的网络结构和参数设置，以更好地适应各种复杂的异构图数据。2026-11-03 19:06:51,360 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:51,759 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:06:51,760 [PaperAgent] INFO: critic_node
-2026-11-03 19:06:54,882 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:06:54,882 [PaperAgent] INFO: followup_node
-  -> ✅通过 (17.6s, 671字)
-[6/20] 测试: quantum error correction
-2026-11-03 19:06:56,197 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:06:56,584 [PaperAgent] INFO: route
+2. **增强细节描述**：对于研究空白部分的具体细节，确实可以进一步细化描述。例如，具体说明如何定义和选择负面实例的方法，以 及如何将其融入fine-tuning过程中的步骤。同时，可以提供一些预期结果的描述，以帮助读者更好地理解研究方向。
 
-🔍 正在搜索论文：quantum error correction...
-2026-11-03 19:06:56,584 [PaperAgent] INFO: worker_search
-2026-11-03 19:06:56,584 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:06:56,585 [PaperAgent] INFO: search_papers
-2026-11-03 19:06:56,585 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=quantum+error+correction&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:06:58,619 [arxiv] INFO: Got first page: 15 of 752434 total results
-2026-11-03 19:06:58,620 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:06:58,621 [PaperAgent] INFO: worker_select
-2026-11-03 19:07:00,672 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:07:00,673 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:07:02,894 [PaperAgent] INFO: 已总结：An Introduction to Error-Correcting Codes: From Cl
-2026-11-03 19:07:03,921 [PaperAgent] INFO: 已总结：Quantum Error Correction
-2026-11-03 19:07:05,422 [PaperAgent] INFO: 已总结：Stabilizer Formalism for Operator Algebra Quantum
-2026-11-03 19:07:05,423 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:05,842 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:07:05,842 [PaperAgent] INFO: worker_summarize
+根据这些建议，可以进一步完善总结，但当前版本已经基本达标。
 
-============================================================
-📝 正在生成研究报告...
-============================================================
+--- 评审意见历史 ---
+['通过。\n\n总结总体上涵盖了论文的核心发现，并且提供了具体的数据/结论和研究空白。以下是一些建议，可以进一步提升总结的质 量：\n\n1. **增加具体数据/结论**：可以进一步增加一些具体数据或实验结果来支持结论，比如具体的性能提升百分比或者对比实验的数据。\n2. **增强细节描述**：对于研究空白部分的具体细节，可以进一步细化描述，提供更加具体的实施步骤或预期结果，使读者更 容易理解并进行进一步的研究。', '通过。\n\n总结总体上已经涵盖了论文的核心发现，并且提供了具体的数据/结论和研究空白。以下 是根据你的要求进行的评估：\n\n1. **增加具体数据/结论**：当前总结中已经提供了一些具体的数据和结论，如提到“提高代理性能， 使其能更好地从失败中学习”。可以进一步增加具体的性能提升百分比或对比实验的数据，以增强说服力。\n\n2. **增强细节描述**：对于研究空白部分的具体细节，确实可以进一步细化描述。例如，具体说明如何定义和选择负面实例的方法，以及如何将其融入fine-tuning过程中的步骤。同时，可以提供一些预期结果的描述，以帮助读者更好地理解研究方向。\n\n根据这些建议，可以进一步完善总结，但 当前版本已经基本达标。']
 
-## 研究背景
-量子信息处理技术的快速发展为解决经典计算难题开辟了新途径，但同时也带来了量子信息易受环境干扰和噪声影响的挑战。量子纠错技术成为了确保量子信息准确传输和处理的关键。目前，量子纠错技术的研究已成为量子计算领域的重要课题。
-
-## 论文对比
-| 论文/问题/方法/结果 | An Introduction to Error-Correcting Codes: From Classical to Quantum | Quantum Error Correction | Stabilizer Formalism for Operator Algebra Quantum Error Correction |
-|---------------------|--------------------------------------------------------------------|-------------------------|-------------------------------------------------------------------|
-| 问题                | 量子信道与经典信道行为不同，需要有效的错误纠正代码解决量子信息传输中的错误问题。 | 保护量子信息免受环境干扰和噪音。                     | 引入适用于操作代数量子错误纠正(OAQEC)框架的稳态形式主义。 |
-| 方法                | 本文综述了量子纠错码的方法，强调了21世纪将是量子纠错的黄金时代。 | 量子纠错技术。                                        | 扩展Gottesman的形式主义。                                   |
-| 结果                | 介绍了从经典到量子的纠错技术，为进一步的量子计算研究提供了理论基础。 | 提高量子计算可靠性。                                 | 为OAQEC提供了一种稳态表述方法。                             |
-| 局限                | 未具体讨论纠错码的实际实现和潜在技术挑战。                         | 实现复杂且受物理限制。                               | 未详细讨论限制条件。                                       |
-
-## 研究空白
-尽管上述论文对量子纠错技术的发展做出了重要贡献，但当前仍存在一些研究空白。首先，需要更深入地探讨量子纠错码在实际物理系统中的实现方法及潜在技术挑战，如硬件限制和量子门操作误差。其次，如何在复杂量子系统中高效地执行量子纠错操作也是一个亟待解决的问题。最后，针对操作代数量子错误纠正(OAQEC)框架的稳态表述方法的具体应用和优化还需进一步研究。2026-11-03 19:07:15,834 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:16,235 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:07:16,236 [PaperAgent] INFO: critic_node
-2026-11-03 19:07:17,971 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:07:17,972 [PaperAgent] INFO: followup_node
-  -> ✅通过 (23.4s, 1294字)
-[7/20] 测试: CRISPR gene editing delivery
-2026-11-03 19:07:19,639 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:20,015 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：CRISPR gene editing delivery...
-2026-11-03 19:07:20,015 [PaperAgent] INFO: worker_search
-2026-11-03 19:07:20,015 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:07:20,015 [PaperAgent] INFO: search_papers
-2026-11-03 19:07:20,015 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=CRISPR+gene+editing+delivery&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:07:21,273 [arxiv] INFO: Got first page: 15 of 34472 total results
-2026-11-03 19:07:21,273 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:07:21,275 [PaperAgent] INFO: worker_select
-2026-11-03 19:07:24,701 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:07:24,701 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:07:25,983 [PaperAgent] INFO: 已总结：CRISPR SWAPnDROP -- A multifunctional system for g
-2026-11-03 19:07:27,331 [PaperAgent] INFO: 已总结：DeepFM-Crispr: Prediction of CRISPR On-Target Effe
-2026-11-03 19:07:28,328 [PaperAgent] INFO: 已总结：Gene and RNA Editing: Methods, Enabling Technologi
-2026-11-03 19:07:28,329 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:28,721 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:07:28,721 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-当前，基因编辑技术为治疗遗传性疾病提供了新的可能，但其在靶向效应预测、基因和RNA编辑效率等方面存在挑战。为了克服这些限制，研究人员开发了多种方法和技术，包括CRISPR SWAPnDROP系统和DeepFM-Crispr等。
-
-## 论文对比
-| 论文名称 | 问题 | 方法 | 结果 |
-| :-- | :-- | :-- | :-- |
-| CRISPR SWAPnDROP -- A multifunctional system for genome editing and large-scale interspecies gene transfer | 需要多样化的染色体修改 | 开发CRISPR SWAPnDROP系统 | 实现基因编辑和大规模跨物种基因转移 |
-| DeepFM-Crispr: Prediction of CRISPR On-Target Effects via Deep Learning | 预测CRISPR基因编辑的靶向效应 | 使用深度学习方法DeepFM-Crispr | 提高CRISPR靶向效应预测准确性 |
-| Gene and RNA Editing: Methods, Enabling Technologies, Applications, and Future Directions | 传统药物疗法效率较低 | 基因和RNA编辑方法和技术 | 提供更高效的治疗方法 |
-
-## 研究空白
-尽管CRISPR SWAPnDROP系统和DeepFM-Crispr在基因编辑和靶向效应预测方面取得了显著进展，但这些技术仍存在局限性。未来研究可以进一步探讨这些系统的具体限制，例如CRISPR SWAPnDROP系统可能存在的脱靶效应和DeepFM-Crispr模型在不同数据集上的泛化能力。此外，还需深入研究基因和RNA编辑在不同类型疾病中的应用，以实现更广泛和高效的治疗效果。2026-11-03 19:07:37,079 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:37,477 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:07:37,477 [PaperAgent] INFO: critic_node
-2026-11-03 19:07:37,759 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:07:37,760 [PaperAgent] INFO: followup_node
-  -> ✅通过 (19.3s, 825字)
-[8/20] 测试: climate model downscaling
-2026-11-03 19:07:38,940 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:39,334 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：climate model downscaling...
-2026-11-03 19:07:39,335 [PaperAgent] INFO: worker_search
-2026-11-03 19:07:39,335 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:07:39,335 [PaperAgent] INFO: search_papers
-2026-11-03 19:07:39,335 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=climate+model+downscaling&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:07:41,241 [arxiv] INFO: Got first page: 15 of 1265870 total results
-2026-11-03 19:07:41,241 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:07:41,242 [PaperAgent] INFO: worker_select
-2026-11-03 19:07:44,098 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:07:44,098 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:07:45,309 [PaperAgent] INFO: 已总结：Fourier Neural Operators for Arbitrary Resolution
-2026-11-03 19:07:46,729 [PaperAgent] INFO: 已总结：Deep Ensembles to Improve Uncertainty Quantificati
-2026-11-03 19:07:48,028 [PaperAgent] INFO: 已总结：On the use of Deep Generative Models for Perfect P
-2026-11-03 19:07:48,028 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:48,438 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:07:48,439 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-当前，气候模拟在应对气候变化和理解全球气候变化方面发挥着重要作用。然而，高分辨率气候模拟的计算成本非常高，这限制了其广泛应用。同时，现有方法在不确定性量化方面存在不足，特别是在气候变化条件下，统计下规模计算模型的不确定性评估需要进一步改进。此外，从粗大气数据生成高分辨率气候场的效果也有限，这进一步限制了气候模拟的精确性。
-
-## 论文对比
-| 论文                                     | 问题                                      | 方法                                                                 | 结果                                                                                           |
-|----------------------------------------|------------------------------------------|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| Fourier Neural Operators for Arbitrary Resolution Climate Data Downscaling | 高分辨率气候模拟计算成本高                 | 使用Fourier Neural Operators处理任意分辨率气候数据                | 未提及具体结果                                                                                      |
-| Deep Ensembles to Improve Uncertainty Quantification of Statistical Downscaling Models under Climate Change Conditions | 现有方法在气候条件下统计下规模计算模型的不确定性量化不足 | 提出使用深度集成方法提高不确定性量化                              | 该方法有望改进统计下规模计算模型的不确定性量化                                                     |
-| On the use of Deep Generative Models for Perfect Prognosis Climate Downscaling | 现有技术在从粗大气数据生成高分辨率气候场方面效果有限 | 使用深度生成模型进行完美 prognosis 下规模计算                      | 显示出有希望的结果                                                                                      |
-
-## 研究空白
-未来的研究应关注以下几个方面：
-1. 对Fourier Neural Operators在实际气候模拟中的具体应用效果进行详细评估，包括在不同气候条件和数据分辨率下的表现。
-2. 深入探讨深度集成方法在不确定性量化中的具体改进和实现细节，以提供更准确的评估结果。
-3. 明确深度生成模型在生成高分辨率气候场过程中的主要限制和挑战，寻找改进方法以提高生成效果。
-4. 探索这些方法在实际应用中的可行性及性能，特别是在处理大规模气候数据时的效率和精度。2026-11-03 19:07:58,246 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:07:58,656 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:07:58,657 [PaperAgent] INFO: critic_node
-2026-11-03 19:08:02,809 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:08:02,809 [PaperAgent] INFO: followup_node
-  -> ✅通过 (25.6s, 1717字)
-[9/20] 测试: speech emotion recognition
-2026-11-03 19:08:04,495 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:04,886 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：speech emotion recognition...
-2026-11-03 19:08:04,887 [PaperAgent] INFO: worker_search
-2026-11-03 19:08:04,887 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:08:04,887 [PaperAgent] INFO: search_papers
-2026-11-03 19:08:04,887 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=speech+emotion+recognition&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:08:06,891 [arxiv] INFO: Got first page: 15 of 266263 total results
-2026-11-03 19:08:06,891 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:08:06,893 [PaperAgent] INFO: worker_select
-2026-11-03 19:08:09,476 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:08:09,477 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:08:10,469 [PaperAgent] INFO: 已总结：Emotional Voice Messages (EMOVOME) database: emoti
-2026-11-03 19:08:11,701 [PaperAgent] INFO: 已总结：Double Multi-Head Attention Multimodal System for
-2026-11-03 19:08:12,972 [PaperAgent] INFO: 已总结：Emotion Neural Transducer for Fine-Grained Speech
-2026-11-03 19:08:12,973 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:13,383 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:08:13,383 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-近年来，情感识别技术在日常生活中的应用越来越广泛，特别是在语音情感识别（Speech Emotion Recognition, SER）方面，随着智能助手、虚拟客服等应用场景的增加，提升情感识别的准确性和实时性成为了重要课题。然而，现有技术在识别细粒度情感和处理真实生活中的自发语音消息时仍面临挑战。
-
-## 论文对比
-| 论文标题 | 问题 | 方法 | 结果 | 局限性 |
-| :--- | :--- | :--- | :--- | :--- |
-| Emotional Voice Messages (EMOVOME) database: emotion recognition in spontaneous voice messages | 提升计算机在日常生活中应用中的情感识别能力 | 收集西班牙人自发语音消息 | 识别情绪成功 | 数据集中问题描述不足 |
-| Double Multi-Head Attention Multimodal System for Odyssey 2024 Speech Emotion Recognition Challenge | 提升计算机在日常生活中应用中的情感识别能力 | 提出Double Multi-Head Attention的多模态系统 | 未提及 | 未提及 |
-| Emotion Neural Transducer for Fine-Grained Speech Emotion Recognition | 现有SER方法忽视了细粒度情感动态 | 提出情感神经转换器处理细粒度语音情感识别 | 未提及 | 未提及 |
-
-## 研究空白
-尽管上述研究在情感识别领域取得了一定进展，但仍然存在几个需要进一步探索的方向：
-1. **细粒度情感识别**：现有研究在处理细粒度情感方面仍存在不足，未来研究可以进一步探索如何捕捉和识别更为细腻的情感变化。
-2. **真实生活场景数据集**：现有的数据集可能无法充分反映真实生活中的复杂情况，未来需要构建更多具有代表性的数据集，以提高模型在实际应用中的泛化能力。
-3. **多模态融合技术**：多模态融合在情感识别中展现出巨大潜力，但如何有效地融合多种模态信息仍是一个挑战，未来研究可进一步探索多模态系统的优化方法。
-4. **实时性与低功耗**：在实际应用中，实时性和低功耗是关键需求，未来研究需要在提升识别准确率的同时，优化算法以满足这些需求。2026-11-03 19:08:24,334 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:24,732 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:08:24,733 [PaperAgent] INFO: critic_node
-2026-11-03 19:08:28,372 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:08:28,372 [PaperAgent] INFO: followup_node
-  -> ✅通过 (26.1s, 1035字)
-[10/20] 测试: federated learning heterogeneity
-2026-11-03 19:08:30,547 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:30,952 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：federated learning heterogeneity...
-2026-11-03 19:08:30,952 [PaperAgent] INFO: worker_search
-2026-11-03 19:08:30,952 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:08:30,952 [PaperAgent] INFO: search_papers
-2026-11-03 19:08:30,952 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=federated+learning+heterogeneity&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:08:32,723 [arxiv] INFO: Got first page: 15 of 560085 total results
-2026-11-03 19:08:32,723 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:08:32,724 [PaperAgent] INFO: worker_select
-2026-11-03 19:08:35,110 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:08:35,110 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:08:36,428 [PaperAgent] INFO: 已总结：Heterogeneous Federated Learning
-2026-11-03 19:08:37,679 [PaperAgent] INFO: 已总结：Federated Learning with Superquantile Aggregation
-2026-11-03 19:08:39,114 [PaperAgent] INFO: 已总结：FedMD: Heterogenous Federated Learning via Model D
-2026-11-03 19:08:39,115 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:39,520 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:08:39,520 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-当前，联邦学习作为一种数据隐私保护的技术，允许分布式客户端进行模型训练而不共享原始数据，这在医疗、金融等领域得到了广泛应用。然而，在异质联邦学习中，不同的客户端拥有不同分布的数据，这给模型的融合带来了挑战，如模型结构对齐问题、处理参与者模型异构性问题等。
-
-## 论文对比
-| 论文名称 | 问题 | 方法 | 结果 | 局限 |
-| --- | --- | --- | --- | --- |
-| Heterogeneous Federated Learning | 分布不均的信息导致结构对齐问题 | 未在摘要中提及具体方法 | 未在摘要中提及 | 信息分布不均影响模型融合 |
-| Federated Learning with Superquantile Aggregation for Heterogeneous Data | 针对异质数据客户端，提供稳健的预测性能 | 提出基于超分位数聚合的联邦学习框架 | 未在摘要中提及 | 未在摘要中提及 |
-| FedMD: Heterogenous Federated Learning via Model Distillation | 现有联邦学习无法处理参与者模型异构性问题 | 提出FedMD，利用模型蒸馏方法解决异构问题 | 能够创建更强大的中央模型 | 未具体说明处理异构性的效果和限制 |
-
-## 研究空白
-尽管现有研究提出了多种方法来解决异质联邦学习中的问题，但关于如何更精确地处理不同客户端间分布不均的数据、如何更有效地利用模型蒸馏方法解决异构性问题，以及如何评估和优化联邦学习框架的性能等方面，仍需进一步研究。未来的研究可以探索更灵活的模型融合策略，以适应更加复杂和多样化的异质数据环境，同时提高联邦学习在实际应用中的鲁棒性和效率。2026-11-03 19:08:48,657 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:49,073 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:08:49,073 [PaperAgent] INFO: critic_node
-2026-11-03 19:08:52,016 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:08:52,017 [PaperAgent] INFO: followup_node
-  -> ✅通过 (23.7s, 761字)
-[11/20] 测试: trannsformer
-2026-11-03 19:08:54,248 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:54,626 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：trannsformer...
-2026-11-03 19:08:54,627 [PaperAgent] INFO: worker_search
-2026-11-03 19:08:54,627 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:08:54,627 [PaperAgent] INFO: search_papers
-2026-11-03 19:08:54,627 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=trannsformer&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:08:55,425 [arxiv] INFO: Got first page: 1 of 1 total results
-2026-11-03 19:08:55,425 [PaperAgent] INFO: ===search_papers，查到 1 条数据。并返回 1 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:08:55,427 [PaperAgent] INFO: worker_select
-2026-11-03 19:08:56,440 [PaperAgent] INFO: 筛选后保留 1 / 1 篇
-📝 正在逐篇总结 1 篇论文...
-2026-11-03 19:08:56,440 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:08:58,323 [PaperAgent] INFO: 已总结：TraNNsformer: Neural network transformation for me
-2026-11-03 19:08:58,323 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:08:58,741 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:08:58,742 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-在类神经系统实现中，基于CMOS后技术的memristive crossbar array成为了一种有前景的解决方案。然而，这一技术的实现面临诸多挑战，尤其是在低功耗设计方面，这限制了其在实际应用中的推广。研究者们一直在寻找新的方法来克服这些限制，以便能够更高效地设计基于memristive crossbar的类神经系统。
-
-## 论文对比
-| 论文 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| TraNNsformer | 使用CMOS后技术基于 memristive crossbar array 的类神经系统实现面临挑战 | 提出TraNNsformer，一种神经网络转换方法用于设计基于memristive crossbar的类神经系统 | 旨在实现低功耗类神经系统设计 |
-
-TraNNsformer 方法的主要目的是通过神经网络转换来设计基于memristive crossbar的类神经系统，从而解决低功耗设计的问题。这种方法能够更好地利用memristive crossbar array 的优势，提高系统的能效比。
-
-## 研究空白
-尽管TraNNsformer 提供了一种新的方法来设计基于memristive crossbar的类神经系统，但具体实现过程中可能存在的局限性仍然没有明确提及。未来研究可以进一步探讨具体的技术限制，例如 memristor 的非线性特性对系统性能的影响，以及如何优化神经网络转换过程以进一步提高能效。此外，还需要进行更多的实验来验证该方法在实际应用中的可行性和效果。2026-11-03 19:09:06,415 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:06,823 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:09:06,824 [PaperAgent] INFO: critic_node
-2026-11-03 19:09:08,246 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:09:08,246 [PaperAgent] INFO: followup_node
-  -> ✅通过 (15.3s, 691字)
-[12/20] 测试: deep learing RAG
-2026-11-03 19:09:09,581 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:09,962 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：deep learing RAG...
-2026-11-03 19:09:09,963 [PaperAgent] INFO: worker_search
-2026-11-03 19:09:09,963 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:09:09,963 [PaperAgent] INFO: search_papers
-2026-11-03 19:09:09,963 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=deep+learing+RAG&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:09:11,361 [arxiv] INFO: Got first page: 15 of 174104 total results
-2026-11-03 19:09:11,362 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:09:11,363 [PaperAgent] INFO: worker_select
-2026-11-03 19:09:12,807 [PaperAgent] INFO: 筛选后保留 1 / 15 篇
-📝 正在逐篇总结 1 篇论文...
-2026-11-03 19:09:12,807 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:09:14,122 [PaperAgent] INFO: 已总结：RAG System for Supporting Japanese Litigation Proc
-2026-11-03 19:09:14,122 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:14,536 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:09:14,536 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-
-近年来，随着自然语言处理技术的不断进步，研究者们开始探索如何将这些技术应用于法律领域，以提高司法工作的效率和质量。特别是在日本的医疗诉讼程序中，如何利用RAG（Retrieval-Augmented Generation）系统生成符合法律规范的响应，是一个亟待解决的问题。RAG系统结合了检索和生成两种方法，能够从大量的文档中检索出相关的信息，并基于这些信息生成准确的、合规的响应。然而，目前大多数研究集中在其他法律领域，尚未针对日本医疗诉讼程序和法律规范进行专门的研究。
-
-## 论文对比
-
-| 论文名称 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| RAG System for Supporting Japanese Litigation Procedures | 构建符合日本医疗诉讼程序和法律规范的RAG系统的关键组件 | 未具体描述方法 | 尚未明确结果 |
-| [其他研究论文1] | [问题1] | [方法1] | [结果1] |
-| [其他研究论文2] | [问题2] | [方法2] | [结果2] |
-
-## 研究空白
-
-当前，尽管已经有一些研究开始探索如何利用RAG系统支持法律领域的任务，但针对日本医疗诉讼程序和法律规范的专门研究仍然不足。具体来说，现有研究尚未详细讨论构建这样的RAG系统的具体组件，例如需要哪些法律文档作为训练数据，如何确保生成的响应符合日本特定的法律规范，以及如何在实际应用中评估系统的性能。未来的研究需要更加关注这些细节，以实现一个真正能够支持日本医疗诉讼程序的高效、合规的RAG系统。2026-11-03 19:09:22,908 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:23,286 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:09:23,286 [PaperAgent] INFO: critic_node
-2026-11-03 19:09:25,247 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:09:25,248 [PaperAgent] INFO: followup_node
-  -> ✅通过 (17.4s, 699字)
-[13/20] 测试: proten structure
-2026-11-03 19:09:26,997 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:27,403 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：proten structure...
-2026-11-03 19:09:27,403 [PaperAgent] INFO: worker_search
-2026-11-03 19:09:27,403 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:09:27,403 [PaperAgent] INFO: search_papers
-2026-11-03 19:09:27,403 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=proten+structure&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:09:29,643 [arxiv] INFO: Got first page: 15 of 529977 total results
-2026-11-03 19:09:29,643 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:09:29,644 [PaperAgent] INFO: worker_select
-2026-11-03 19:09:31,610 [PaperAgent] INFO: 筛选后保留 2 / 15 篇
-📝 正在逐篇总结 2 篇论文...
-2026-11-03 19:09:31,610 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:09:33,075 [PaperAgent] INFO: 已总结：Probing the electronic structure of $\mathrm{UTe}_
-2026-11-03 19:09:34,640 [PaperAgent] INFO: 已总结：Comprehensive structural classification of ligand
-2026-11-03 19:09:34,640 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:35,062 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:09:35,062 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-
-近年来，随着科学技术的发展，对复杂材料和蛋白质的研究逐渐深入。在材料科学领域，UTe2因其独特的物理性质而备受关注。UTe2具有非传统超导性，但其超导机制尚未完全阐明，这为深入研究该材料提供了广阔的空间。在蛋白质科学领域，蛋白质-配体相互作用是蛋白质功能和生物过程的关键。虽然已有研究对这些相互作用进行了初步探索，但缺乏全面的知识分类和系统性研究，这限制了其在功能注释、进化研究、酶活性工程和药物设计等方面的应用。
-
-## 论文对比
-
-| 论文标题 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| Probing the electronic structure of UTe2 with ARPES and high-energy spectroscopy | 研究UTe2的电子结构及其非传统超导性 | 使用ARPES和高能谱学 | 揭示了UTe2独特的电子结构特征 |
-| Comprehensive structural classification of ligand binding motifs in proteins | 缺乏全面的蛋白质-配体相互作用的知识 | 对蛋白质配体结合模式进行全面分类 | 为蛋白质功能注释、进化研究、酶活性工程和药物设计提供基础 |
-
-## 研究空白
-
-未来的研究需要进一步探索UTe2的超导机制，尤其是其非传统超导性的具体原因。同时，尽管蛋白质-配体结合模式分类为相关领域提供了基础，但未来的研究应更多关注具体结合机制的分子层面细节，以促进药物设计和功能注释的应用。2026-11-03 19:09:43,302 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:43,705 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:09:43,706 [PaperAgent] INFO: critic_node
-2026-11-03 19:09:46,146 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:09:46,146 [PaperAgent] INFO: followup_node
-  -> ✅通过 (20.5s, 687字)
-[14/20] 测试: graph neuaral network
-2026-11-03 19:09:47,471 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:47,864 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：graph neuaral network...
-2026-11-03 19:09:47,865 [PaperAgent] INFO: worker_search
-2026-11-03 19:09:47,865 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:09:47,865 [PaperAgent] INFO: search_papers
-2026-11-03 19:09:47,865 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neuaral+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:09:50,372 [arxiv] INFO: Got first page: 15 of 448938 total results
-2026-11-03 19:09:50,373 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:09:50,374 [PaperAgent] INFO: worker_select
-2026-11-03 19:09:53,104 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:09:53,104 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:09:55,111 [PaperAgent] INFO: 已总结：Learning Universal Graph Neural Network Embeddings
-2026-11-03 19:09:56,663 [PaperAgent] INFO: 已总结：Graph Learning Network: A Structure Learning Algor
-2026-11-03 19:09:58,565 [PaperAgent] INFO: 已总结：GraphFPN: Graph Feature Pyramid Network for Object
-2026-11-03 19:09:58,566 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:09:58,976 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:09:58,977 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-随着机器学习技术的不断发展，数据嵌入成为机器学习领域的核心问题之一，特别是在自然语言处理和计算机视觉领域。尽管已有许多方法来解决这一问题，但在处理无结构数据时，图神经网络（GNN）仍然面临结构学习不足的问题，以及在多尺度特征学习中的局限性。
-
-## 论文对比
-| 论文名称                           | 问题                                           | 方法                                                     | 结果/应用                                                                                      |
-|------------------------------------|------------------------------------------------|----------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| Learning Universal Graph Neural Network Embeddings With Aid Of Transfer Learning | 现有GNN在嵌入普遍性和有效性上存在不足            | 利用迁移学习辅助学习通用图神经网络嵌入                   | 提高嵌入的普遍性和有效性。但迁移学习可能面临领域适应性问题。                                      |
-| Graph Learning Network              | 现有GNN在处理无结构数据任务时存在结构学习不足的问题 | 提出Graph Learning Network以改进结构学习                   | 适用于社区检测、节点分类和链接预测等任务。具体限制未在摘要中提及。                                |
-| GraphFPN                           | 现有方法在多尺度特征学习中主要关注特征交互，缺乏有效的多尺度特征提取 | 提出GraphFPN，利用图结构学习多尺度特征                   | 在多尺度特征理解任务中表现出色，提升了检测性能。图结构的应用可能增加计算复杂度。                   |
-
-## 研究空白
-未来的研究可以更深入地探讨迁移学习在GNN嵌入中的应用，克服领域适应性问题，以进一步提高嵌入的普遍性和有效性。同时，针对Graph Learning Network的具体限制，可以进一步优化算法，提高其在特定任务中的性能。此外，GraphFPN的图结构可能增加了计算复杂度，未来的研究可以探索更高效的图结构学习方法，以优化计算效率和性能之间的平衡。2026-11-03 19:10:08,287 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:08,736 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:10:08,736 [PaperAgent] INFO: critic_node
-2026-11-03 19:10:12,319 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:10:12,319 [PaperAgent] INFO: followup_node
-  -> ✅通过 (27.2s, 1397字)
-[15/20] 测试: speech reccognition
-2026-11-03 19:10:14,628 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:15,036 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：speech reccognition...
-2026-11-03 19:10:15,037 [PaperAgent] INFO: worker_search
-2026-11-03 19:10:15,037 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:10:15,037 [PaperAgent] INFO: search_papers
-2026-11-03 19:10:15,037 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=speech+reccognition&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:10:16,385 [arxiv] INFO: Got first page: 15 of 36389 total results
-2026-11-03 19:10:16,385 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:10:16,386 [PaperAgent] INFO: worker_select
-2026-11-03 19:10:17,523 [PaperAgent] INFO: 筛选后保留 1 / 15 篇
-📝 正在逐篇总结 1 篇论文...
-2026-11-03 19:10:17,523 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:10:18,652 [PaperAgent] INFO: 已总结：Advancing automatic speech recognition using featu
-2026-11-03 19:10:18,652 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:19,080 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:10:19,080 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-自动语音识别（Automatic Speech Recognition, ASR）是近年来人工智能领域的重要研究方向之一。随着深度学习的发展，ASR 技术取得了显著进步，但依然面临诸多挑战，如噪声环境下的识别准确率、方言识别、背景音乐干扰等。传统的 ASR 方法主要依赖手工设计的特征提取，而近年来，结合深度学习自动特征提取与自监督学习的方法成为新的研究热点。本文将探讨如何通过自监督学习特征与特征融合来进一步提升 ASR 的性能。
-
-## 论文对比
-| 论文名称                              | 问题                                 | 方法                                               | 结果                                                                                   |
-| ------------------------------------- | ------------------------------------ | -------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Advancing automatic speech recognition using feature fusion with self-supervised learning features: A case study on Fearless Steps Apollo corpus | 提高自动语音识别性能                       | 结合自监督学习特征和特征融合                                                 | 显著提升下游语音任务性能                                                             |
-
-## 研究空白
-尽管本文通过自监督学习特征与特征融合显著提升了自动语音识别的性能，但具体在哪些方面存在限制，以及这些限制如何影响最终的识别效果仍未详细描述。未来的研究可以从以下几个方面进行深入探索：1) 详细分析自监督学习特征与传统特征在不同场景下的表现差异；2) 探索更多的特征融合策略，以进一步优化模型性能；3) 研究在噪声、混响等复杂环境下的鲁棒性增强方法；4) 考虑多模态信息的融合，提升模型的泛化能力。2026-11-03 19:10:26,944 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:27,347 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:10:27,347 [PaperAgent] INFO: critic_node
-2026-11-03 19:10:30,234 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:10:30,234 [PaperAgent] INFO: followup_node
-  -> ✅通过 (17.6s, 1201字)
-[16/20] 测试: AI
-2026-11-03 19:10:32,207 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:32,610 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：AI...
-2026-11-03 19:10:32,611 [PaperAgent] INFO: worker_search
-2026-11-03 19:10:32,611 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:10:32,611 [PaperAgent] INFO: search_papers
-2026-11-03 19:10:32,611 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=AI&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:10:33,478 [arxiv] INFO: Got first page: 15 of 69973 total results
-2026-11-03 19:10:33,479 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:10:33,480 [PaperAgent] INFO: worker_select
-2026-11-03 19:10:36,135 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:10:36,135 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:10:37,359 [PaperAgent] INFO: 已总结：Foundations of GenIR
-2026-11-03 19:10:38,631 [PaperAgent] INFO: 已总结：The New Shape of Search: How Conversational AI Rec
-2026-11-03 19:10:39,884 [PaperAgent] INFO: 已总结：Exploring utilization of generative AI for researc
-2026-11-03 19:10:39,885 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:40,297 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:10:40,297 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-当前，随着生成式AI（GenAI）技术的迅猛发展，信息访问系统面临着前所未有的挑战与机遇。传统的信息访问系统多依赖于基于检索的模式，但这种模式在处理复杂查询和大规模数据集时存在诸多局限性。而现代生成AI模型通过理解上下文和生成内容，正逐渐改变信息访问的方式，提高系统的互动性和效率。本文将探讨三篇相关论文，分别从信息访问系统基础、搜索模式和数据驱动材料科学应用三个方面，分析现代生成AI对传统信息访问系统的潜在影响。
-
-## 论文对比
-| 论文名称 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| Foundations of GenIR | 现代生成AI模型对信息访问系统基础影响 | 对比分析传统AI与生成AI | 提升大规模训练和数据建模 |
-| The New Shape of Search | 现有搜索模式从查询到文档缺乏互动性 | 利用对话AI重新构想信息检索过程 | 提高搜索的互动性和效率 |
-| Exploring utilization of generative AI for research and education in data-driven materials science | 探索生成式AI在数据驱动材料科学中的高效应用 | 组织相关研究 | 未提及 |
-
-## 研究空白
-尽管上述论文从不同角度探讨了生成式AI对信息访问系统的影响，但这些研究仍存在一些未解决的问题。首先，对于现代生成AI模型在信息访问系统中的具体实施方法，研究中并未给出详细的探讨。其次，虽然对话AI能够提升搜索的互动性和效率，但在对话理解的精确性方面仍存在挑战，影响用户体验。最后，对于生成式AI在数据驱动材料科学中的高效应用，还需进一步研究其具体应用场景和实施效果。未来的研究需在这些问题上取得突破，以推动信息访问系统向更加智能化和高效化方向发展。2026-11-03 19:10:49,932 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:50,335 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:10:50,336 [PaperAgent] INFO: critic_node
-2026-11-03 19:10:55,149 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:10:55,149 [PaperAgent] INFO: followup_node
-  -> ✅通过 (25.4s, 811字)
-[17/20] 测试: how to build everything
-2026-11-03 19:10:57,636 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:10:58,011 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：how to build everything...
-2026-11-03 19:10:58,012 [PaperAgent] INFO: worker_search
-2026-11-03 19:10:58,012 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:10:58,012 [PaperAgent] INFO: search_papers
-2026-11-03 19:10:58,012 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=how+to+build+everything&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:11:00,076 [arxiv] INFO: Got first page: 15 of 397668 total results
-2026-11-03 19:11:00,076 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:11:00,077 [PaperAgent] INFO: worker_select
-2026-11-03 19:11:03,028 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:11:03,029 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:11:04,313 [PaperAgent] INFO: 已总结：Building Rome from a Single Image
-2026-11-03 19:11:05,962 [PaperAgent] INFO: 已总结：BuildEvo: Designing Building Energy Consumption Fo
-2026-11-03 19:11:06,901 [PaperAgent] INFO: 已总结：Theory of Everything
-2026-11-03 19:11:06,901 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:11:07,357 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:11:07,357 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-当前，科学研究领域存在一些亟待解决的问题，如从单张图像重建完整的3D场景、建筑能耗预测的精确性及模型透明度、构建统一理论等。这些问题虽然在传统方法和现有模型中有所尝试，但普遍存在精度不足、透明度差、缺乏泛化能力等问题。因此，探索新的解决方案显得尤为重要。
-
-## 论文对比
-| 论文 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| Building Rome from a Single Image | 从单张图像生成完整的3D场景网格 | 利用预训练的3D物体生成器 | 生成未观察到的表面 |
-| BuildEvo: Designing Building Energy Consumption Forecasting Heuristics via LLM-driven Evolution | 传统启发式方法精度不足，先进模型透明度差且缺乏泛化能力 | 使用LLM驱动的进化方法设计建筑能耗预测启发式算法 | 未在摘要中提及具体结果 |
-| Theory of Everything | 构建统一理论 | 从相对论性量子引力理论出发 | 形成完整的理论体系 |
-
-## 研究空白
-尽管上述论文提出了一些创新的方法和理论，但它们仍然存在一些未解决的问题。对于“Building Rome from a Single Image”，虽然生成了未观察到的表面，但具体限制和挑战未被详细说明。对于“BuildEvo”，虽然使用了LLM驱动的进化方法，但具体结果和局限性并未在摘要中明确提及。至于“Theory of Everything”，虽然构建了理论体系，但文章数量有限。因此，未来的研究可以进一步探讨这些问题的具体细节和潜在局限性，以推动相关领域的进步。2026-11-03 19:11:15,844 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:11:16,250 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:11:16,250 [PaperAgent] INFO: critic_node
-2026-11-03 19:11:19,230 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:11:19,231 [PaperAgent] INFO: followup_node
-  -> ✅通过 (24.1s, 757字)
-[18/20] 测试: the future
-2026-11-03 19:11:21,763 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:11:22,142 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：the future...
-2026-11-03 19:11:22,142 [PaperAgent] INFO: worker_search
-2026-11-03 19:11:22,142 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:11:22,142 [PaperAgent] INFO: search_papers
-2026-11-03 19:11:22,142 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=the+future&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:11:23,747 [arxiv] INFO: Got first page: 15 of 162138 total results
-2026-11-03 19:11:23,748 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:11:23,748 [PaperAgent] INFO: worker_select
-2026-11-03 19:11:26,261 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:11:26,261 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:11:27,703 [PaperAgent] INFO: 已总结：Comparative evaluation of future collider options
-2026-11-03 19:11:29,279 [PaperAgent] INFO: 已总结：U.S. National Accelerator R\&D Program on Future C
-2026-11-03 19:11:30,546 [PaperAgent] INFO: 已总结：Future and Origin of our Universe: Modern View
-2026-11-03 19:11:30,546 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:11:30,955 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:11:30,956 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-随着高亮度大型强子对撞机（HL-LHC）项目于2041年结束，粒子物理学界正积极规划下一阶段的大型对撞机项目，以继续探索基本粒子和宇宙的奥秘。目前，美国正在积极研究多种未来对撞机选项，并探索宇宙未来发展的可能性。
-
-## 论文对比
-| 论文题目 | 问题 | 方法 | 结果 |
-| --- | --- | --- | --- |
-| Comparative evaluation of future collider options | 现有HL-LHC项目将于2041年结束，需规划新设施 | 未描述具体方法 | 计划在2040年代中期启动新的大型设施 |
-| U.S. National Accelerator R&D Program on Future Colliders | 研究未来的粒子对撞机是粒子物理学战略愿景的重要组成部分 | 正在进行多种未来对撞机选项的概念研究和技术开发 | 暂无具体成果描述 |
-| Future and Origin of our Universe: Modern View | 存在正的Lambda项可能变化，对未来宇宙有更多的可能性预测 | 未在摘要中提及具体方法 | 预测了宇宙未来更多可能性 |
-
-## 研究空白
-当前的研究在方法和具体成果方面尚存在不足。未来的研究方向应更加明确具体的方法和技术路径，以推动新一代对撞机项目的顺利进行。此外，对宇宙未来发展的预测需要进一步细化，以更好地理解宇宙的演变过程。2026-11-03 19:11:38,238 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:11:38,641 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:11:38,642 [PaperAgent] INFO: critic_node
-2026-11-03 19:11:40,960 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:11:40,960 [PaperAgent] INFO: followup_node
-  -> ✅通过 (20.1s, 636字)
-[19/20] 测试:
-2026-11-03 19:11:41,866 [PaperAgent] INFO: supervisor_node
-请输入研究主题：
-RAG
-2026-11-03 19:13:52,814 [PaperAgent] INFO: route
-
-🔍 正在搜索论文：RAG...
-2026-11-03 19:13:52,815 [PaperAgent] INFO: worker_search
-2026-11-03 19:13:52,815 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-03 19:13:52,815 [PaperAgent] INFO: search_papers
-2026-11-03 19:13:52,815 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=RAG&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-03 19:13:54,693 [arxiv] INFO: Got first page: 15 of 6333 total results
-2026-11-03 19:13:54,693 [PaperAgent] INFO: ===search_papers，查到 15 条数据。并返回 15 条数据。===
-📊 正在筛选最相关论文...
-2026-11-03 19:13:54,694 [PaperAgent] INFO: worker_select
-2026-11-03 19:13:58,043 [PaperAgent] INFO: 筛选后保留 3 / 15 篇
-📝 正在逐篇总结 3 篇论文...
-2026-11-03 19:13:58,043 [PaperAgent] INFO: worker_summarize_one
-2026-11-03 19:13:59,233 [PaperAgent] INFO: 已总结：RAG System for Supporting Japanese Litigation Proc
-2026-11-03 19:14:00,452 [PaperAgent] INFO: 已总结：DeFT-RAG: Decomposing Multi-Hop Questions into Sel
-2026-11-03 19:14:01,989 [PaperAgent] INFO: 已总结：From RAG to QA-RAG: Integrating Generative AI for
-2026-11-03 19:14:01,989 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:14:02,409 [PaperAgent] INFO: route
-📝 正在进行总的汇总论文...
-2026-11-03 19:14:02,409 [PaperAgent] INFO: worker_summarize
-
-============================================================
-📝 正在生成研究报告...
-============================================================
-
-## 研究背景
-
-近年来，RAG（Retrieval-Augmented Generation）系统因其在法律、医疗和制药等领域中的广泛应用而受到广泛关注。这些系统通过结合检索和生成技术，能够有效处理复杂的查询，提高信息检索的准确性和生成文本的质量。特别是在日本的医疗诉讼程序和制药行业的监管合规过程中，RAG系统能够提供更加专业和规范的支持，但当前的RAG系统在回答多跳问题、适应复杂规范方面仍存在一定的挑战。
-
-## 论文对比
-
-| 论文名称 | 问题 | 方法 | 结果 |
-| :--- | :--- | :--- | :--- |
-| RAG System for Supporting Japanese Litigation Procedures: Faithful Response Generation Complying with Legal Norms | 开发符合日本医疗诉讼程序和法律规范的RAG系统 | 分析RAG系统所需的核心组件 | 无具体结果描述 |
-| DeFT-RAG: Decomposing Multi-Hop Questions into Self-Contained Sub-Questions with Reusable Answers | RAG在回答多跳问题时遇到困难 | 将多跳问题分解为自包含子问题；使用可复用答案增强生成 | 未详细说明 |
-| From RAG to QA-RAG: Integrating Generative AI for Pharmaceutical Regulatory Compliance Process | 制药行业的监管合规涉及复杂且大量的指南，需要大量的人力资源 | 研究将生成式AI集成到RAG中以解决这一问题 | 未在摘要中明确提及具体结果 |
-
-## 研究空白
-
-尽管上述论文提出了多种改进RAG系统的策略，但在实际应用中仍存在一些研究空白。例如，关于RAG系统在医疗诉讼中的应用，目前缺乏具体的实验结果来验证其效果；DeFT-RAG方法的具体实现细节和实验效果也未详细说明；而关于QA-RAG系统，其在制药行业监管合规过程中的具体应用案例和效果评估尚不明确。因此，未来的研究可以从以下几个方面入手：进一步优化RAG系统的检索和生成模块，提升其处理多跳问题的能力；深入研究生成式AI在RAG系统中的集成方法，特别是在复杂规范应用中的具体效果；通过实际应用案例验证RAG系统的有效性和可靠性，从而更好地推动其在不同领域的应用和发展。2026-11-03 19:14:13,816 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:14:14,223 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-03 19:14:14,223 [PaperAgent] INFO: critic_node
-2026-11-03 19:14:14,546 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-03 19:14:14,546 [PaperAgent] INFO: followup_node
-  -> ✅通过 (154.8s, 1064字)
-[20/20] 测试: 🤖🤖🤖
-2026-11-03 19:14:16,633 [PaperAgent] INFO: supervisor_node
-2026-11-03 19:14:17,038 [PaperAgent] WARNING: 主题无效（乱码/无实际语义），终止研究：'🤖🤖🤖'
-
-❌ 无法识别研究主题「🤖🤖🤖」，疑似乱码或无效输入。
-   建议改用具体研究方向，例如 'RAG retrieval'、'graph neural network'。
-2026-11-03 19:14:17,038 [PaperAgent] INFO: route
-  -> ❌失败 (0.4s, 0字)
-
-==================================================
-通过率: 19/20 = 95%
-平均耗时: 28.9s
-
-进程已结束，退出代码为 0
+--- 追问推荐 ---
+1. **具体的负面实例整合方法**：研究如何定义和选择负面实例，并将其有效融入fine-tuning过程中。
+2. **效果评估**：通过具体性能指标（如准确率、召回率等）评估负面实例整合方法对代理性能的影响。
+3. **应用场景拓展**：探索负面实例整合方法在不同应用场景（如推荐系统、智能客服等）中的适用性和效果。
