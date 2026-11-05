@@ -1,0 +1,12 @@
+.env
+__pycache__
+*.pyc
+*.pyo
+.git
+.venv
+.idea
+.vscode
+.pytest_cache
+output.txt
+eval_results.md
+*.egg-info

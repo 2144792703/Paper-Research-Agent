@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # 容器内不连宿主机 Ollama，统一走远程 OpenAI 兼容 API
+      - MODEL_PROVIDER=remote
