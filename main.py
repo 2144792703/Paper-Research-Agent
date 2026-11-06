@@ -2,7 +2,8 @@ import argparse
 
 from graph.graph_compile import graph
 from models import _resolve_provider
-from config import clamp_search_count, clamp_keep_papers, SEARCH_MIN, SEARCH_MAX, KEEP_MIN, KEEP_MAX
+from config import clamp_search_count, clamp_keep_papers, SEARCH_MIN, SEARCH_MAX, KEEP_MIN, KEEP_MAX, LANGFUSE_ENABLED
+from observability import trace_config, trace_id, flush
 
 def main():
     parser = argparse.ArgumentParser(description="论文研究报告 Agent")
@@ -33,13 +34,20 @@ def main():
     print(f"🚀 开始研究：{topic}")
     print(f"   搜索论文数：{search_count}，保留论文数：{keep_papers}，评审轮数：{args.max_retries}")
     print(f"   模型提供方：{provider}")
+    print(f"   Langfuse 观测：{'已启用' if LANGFUSE_ENABLED else '未配置（跳过上报）'}")
 
+    config = trace_config(topic)
     result = graph.invoke({
         "topic": topic,
         "critique_times": args.max_retries,
         "search_max_results": search_count,
         "keep_papers": keep_papers,
-    })
+    }, config=config)
+    flush()
+
+    trace = trace_id(config)
+    if trace:
+        print(f"\n🔗 Langfuse trace：{trace}")
 
     print("\n" + "=" * 60)
     print("📄 最终报告")

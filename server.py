@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 import asyncio
 
 from graph.graph_compile import graph
+from observability import trace_config, trace_id, flush
 from logger import logger
 
 app = FastAPI(title="论文研究报告 Agent")
@@ -20,10 +21,12 @@ async def research(req: ResearchRequest):
         yield f"event: progress\ndata: {{\"step\": \"start\", \"topic\": \"{req.topic}\"}}\n\n"
 
         try:
+            config = trace_config(req.topic)
             result = await asyncio.wait_for(
                 asyncio.to_thread(
                     graph.invoke,
-                    {"topic": req.topic, "critique_times": req.max_retries, "keep_papers": req.papers}
+                    {"topic": req.topic, "critique_times": req.max_retries, "keep_papers": req.papers},
+                    config,
                 ),
                 timeout=180.0
             )
@@ -34,7 +37,8 @@ async def research(req: ResearchRequest):
             yield f"event: partial\ndata: {{\"error\": \"{str(e)[:200]}\"}}\n\n"
             return
 
-        yield f"event: done\ndata: {{\"report\": \"{result.get('summary', '')[:2000]}\"}}\n\n"
+        flush()
+        yield f"event: done\ndata: {{\"report\": \"{result.get('summary', '')[:2000]}\", \"trace_id\": \"{trace_id(config) or ''}\"}}\n\n"
 
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

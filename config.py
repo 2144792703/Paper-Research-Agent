@@ -81,3 +81,18 @@ def clamp_search_count(value=None) -> int:
 def clamp_keep_papers(value=None) -> int:
     """校验最终保留论文数量，None 时取 .env 配置值"""
     return _clamp_int(value if value is not None else KEEP_PAPERS, KEEP_MIN, KEEP_MAX, KEEP_PAPERS)
+
+
+# ============================================================
+# 模块五：可观测性（Langfuse）
+# ============================================================
+# 两个 key 缺任一即视为未配置，观测能力降级为“不上报”，不影响主流程。
+LANGFUSE_PUBLIC_KEY = (os.getenv("LANGFUSE_PUBLIC_KEY") or "").strip()
+LANGFUSE_SECRET_KEY = (os.getenv("LANGFUSE_SECRET_KEY") or "").strip()
+# SDK v5 优先读 LANGFUSE_BASE_URL，这里兼容旧的 LANGFUSE_HOST 写法
+LANGFUSE_BASE_URL = (
+    os.getenv("LANGFUSE_BASE_URL")
+    or os.getenv("LANGFUSE_HOST")
+    or "https://cloud.langfuse.com"
+).strip()
+LANGFUSE_ENABLED = bool(LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY)
