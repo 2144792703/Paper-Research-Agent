@@ -14,7 +14,7 @@ LangGraph 会把 callbacks 与 metadata 向下传递给每个节点和每次 Cha
 import logging
 from typing import Any
 
-from config import LANGFUSE_ENABLED, LANGFUSE_PUBLIC_KEY
+from config import LANGFUSE_ENABLED
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +62,3 @@ def flush() -> None:
         get_client().flush()
     except Exception as e:
         logger.debug(f"[observability] Langfuse flush 忽略异常：{e}")
-
-
-def public_key_hint() -> str:
-    """日志里只暴露 public key 前缀，永不打印 secret key"""
-    return f"{LANGFUSE_PUBLIC_KEY[:8]}..." if LANGFUSE_PUBLIC_KEY else ""

@@ -23,7 +23,7 @@ class SupervisorState(TypedDict):
     next: str
     critique: str
     followup: str
-    critique_history: list[dict]
+    critique_history: list[str]
     paper_summaries: list[dict]
     critique_times: int
     revision_count: int

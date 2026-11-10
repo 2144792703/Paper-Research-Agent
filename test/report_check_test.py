@@ -58,3 +58,35 @@ def test_fabricated_percentage_flagged():
 
 def test_empty_report_passes():
     assert check_report("", "任意语料") == []
+
+
+def test_ms_unit_flagged():
+    corpus = build_corpus({"papers": [_paper_obj()]})  # 语料只有 12ms
+    assert check_report("延迟降低到 200ms", corpus) == ["200ms"]
+    assert check_report("延迟 12ms", corpus) == []
+
+
+def test_times_chinese_unit_flagged():
+    corpus = build_corpus({"papers": [_paper_obj()]})
+    assert check_report("耗时 3 秒", corpus) == ["3秒"]
+
+
+def test_multiple_times_flagged():
+    corpus = build_corpus({"papers": [_paper_obj()]})
+    assert check_report("速度提升 3 倍", corpus) == ["3倍"]
+
+
+def test_decimal_flagged_and_matched():
+    corpus = build_corpus({"papers": [_paper_dict()]})  # 语料含 F1 0.62
+    assert check_report("F1 达到 0.62", corpus) == []
+    assert check_report("F1 达到 0.85", corpus) == ["0.85"]
+
+
+def test_percentage_not_split_into_decimal():
+    # 1.5% 不应额外产出 "1.5" 造成重复告警
+    assert check_report("提升 1.5%", "语料无关") == ["1.5%"]
+
+
+def test_plain_integer_not_flagged():
+    # 年份、篇数等纯整数不检，避免误报
+    assert check_report("2020 年以来共 5 篇", "语料无关") == []

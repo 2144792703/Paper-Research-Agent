@@ -244,6 +244,7 @@ def stream_llm(prompt: str):
                 continue
             _mark_success(target)
             # 流式边收边发；结束后把完整文本落缓存，下次直接回放（不再请求 API）
+            # 注意：此处按“端点每个 chunk 返回增量 usage”累加；若换的端点改为返回累计值需重新对账
             total_in = total_out = 0
             parts: list[str] = []
             in_t, out_t = _usage_tokens(first)

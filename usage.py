@@ -128,14 +128,17 @@ def summary() -> dict:
 
     cost_usd = 0.0
     unpriced: list[str] = []
+    priced_models: list[str] = []
     for name, t in by_model.items():
         price = _price_per_token(name)
         if price is None:
             unpriced.append(name)
             continue
         cost_usd += t["input"] * price[0] + t["output"] * price[1]
+        priced_models.append(name)
 
-    priced = not unpriced
+    # 混合模型：只要有一个模型能计价就先算出可计部分，未计价模型单独列出（不再整体置 None）
+    has_cost = bool(priced_models)
     return {
         "input_tokens": input_total,
         "output_tokens": output_total,
@@ -143,8 +146,10 @@ def summary() -> dict:
         "calls": calls,
         "cached_calls": cached_calls,
         "models": by_model,
-        "cost_usd": round(cost_usd, 8) if priced else None,
-        "cost_cny": round(cost_usd * USD_TO_CNY, 6) if (priced and USD_TO_CNY) else None,
+        "cost_usd": round(cost_usd, 8) if has_cost else None,
+        "cost_cny": round(cost_usd * USD_TO_CNY, 6) if (has_cost and USD_TO_CNY) else None,
+        "cost_partial": bool(unpriced),
+        "priced_models": priced_models,
         "unpriced_models": unpriced,
         "price_table_date": _price_table_date(),
     }
@@ -163,6 +168,12 @@ def format_summary(data: dict | None = None) -> str:
     if d["cost_usd"] is None:
         models = "、".join(d["unpriced_models"]) or "未知模型"
         lines.append(f"  估算成本      = 单价未知（{models} 不在价格表），仅报 token")
+    elif d.get("cost_partial"):
+        cost = f" 估算成本(可计部分) = ${d['cost_usd']:.6f}"
+        if d["cost_cny"] is not None:
+            cost += f"（约 ¥{d['cost_cny']:.6f}，汇率 {USD_TO_CNY}）"
+        lines.append(cost)
+        lines.append(f"                    {'、'.join(d['unpriced_models'])} 无单价，其 token 未计入金额")
     else:
         cost = f" 估算成本      = ${d['cost_usd']:.6f}"
         if d["cost_cny"] is not None:
