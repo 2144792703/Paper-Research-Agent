@@ -12,6 +12,7 @@ from logger import logger
 class SelectedPaper(BaseModel):
     """选中的一篇论文"""
     index: int = Field(description="候选论文的序号，对应列表中的 [i]")
+    subfield: str = Field(default="", description="该论文所属的子领域/技术范式，一句话")
     reason: str = Field(description="为什么这篇与主题相关，一句话")
 
 class SelectionResult(BaseModel):
@@ -167,12 +168,16 @@ def worker_select(state: SupervisorState):
     prompt = f"""研究主题：{state['topic']}
 
 以下是搜索到的 {len(papers)} 篇论文，请选出与主题最相关的 {keep_count} 篇。
-用序号说明选择理由。
+
+筛选约束：
+1. 优先选择同子领域、同技术范式的论文，保持组合内聚。
+2. 若同子领域候选不足 {keep_count} 篇，允许跨领域补足，但对应 reason 必须以"跨领域补充："开头。
+3. 候选之间子领域差异明显时，在 reason 中明确说明组合的跨领域情况。
 
 {paper_list}
 
 请以 JSON 返回，格式为：
-{{"selected": [{{"index": 0, "reason": "这篇论文与主题的关系"}}]}}
+{{"selected": [{{"index": 0, "subfield": "所属子领域", "reason": "这篇论文与主题的关系"}}]}}
 
 index 必须是上面列表中的序号。只返回 JSON，不要代码块或额外说明。"""
 
@@ -197,6 +202,20 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
         if not selected_papers:
             logger.warning("筛选结果为空或序号无效，按搜索顺序保留前 N 篇")
             return {"papers": papers[:keep_count]}
+        # 方案6：同子领域不足 N 篇时允许跨领域补足，不硬性减产
+        if len(selected_papers) < keep_count:
+            before = len(selected_papers)
+            for p in papers:
+                if p.url not in seen:
+                    selected_papers.append(p)
+                    seen.add(p.url)
+                    if len(selected_papers) >= keep_count:
+                        break
+            logger.warning(f"筛选数量不足 {before}/{keep_count}，按搜索顺序补齐 {len(selected_papers) - before} 篇")
+        # 方案6：组合跨子领域时留下可检索的日志（验收可观测）
+        subfields = {i.subfield.strip() for i in parsed.selected if (i.subfield or "").strip()}
+        if len(subfields) > 1:
+            logger.warning(f"筛选组合跨子领域：{subfields}")
         logger.info(f"筛选后保留 {len(selected_papers)} / {len(papers)} 篇")
         return {'papers': selected_papers}
     except Exception as e:
@@ -219,7 +238,9 @@ def worker_summarize_one(state: SupervisorState):
 请以 JSON 返回：
 {{"problem": "...", "method": "...", "result": "...", "limitation": "..."}}
 
-每个字段一句话，不要超过50字。只返回 JSON。"""
+每个字段一句话，不要超过50字。
+铁律：所有字段只能基于上面摘要的内容；摘要未提供的量化指标（百分比/数值）一律不得编写，无数据时如实写"原文未提供"。
+只返回 JSON。"""
 
         result = invoke_llm(prompt)
         # 去 markdown 代码
@@ -277,6 +298,7 @@ def worker_summarize(state: SupervisorState):
 2. 中间用 ## 论文对比 放一个 Markdown 表格（列：论文/问题/方法/结果）
 3. 结尾用 ## 研究空白 指出未来方向
 4. 总字数 300-500 字
+5. 禁止编造论文信息中没有的量化指标；某篇论文无数据时写"原文未提供"，不要估算或补写数字
 """
 
     if state.get("critique"):
@@ -311,6 +333,8 @@ def critic_node(state: SupervisorState):
 1. 上一次提出的问题解决了吗？
 2. 还有新问题吗？
 
+评审铁律：你的评审意见不得要求提供论文摘要中不存在的数据。
+
 如果全部达标，只回复：通过。
 如果还有问题，回复具体修改意见（1-3 条）。
 """
@@ -322,8 +346,10 @@ def critic_node(state: SupervisorState):
 
 评审标准：
 1. 是否覆盖了论文的核心发现？
-2. 是否有具体数据/结论？
+2. 是否有具体数据/结论？（输入摘要未提供数据属正常情况，报告如实标注"原文未提供"即可达标，不得因此打回）
 3. 是否只是泛泛而谈？
+
+评审铁律：你的评审意见不得要求提供论文摘要中不存在的数据。
 
 如果质量达标，只回复：通过。
 如果不达标，回复具体修改意见（1-2条）。"""

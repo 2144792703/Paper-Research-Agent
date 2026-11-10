@@ -17,7 +17,12 @@ from openai import (
 # 可轮换的"临时故障"异常集合：固定短暂冷却 + 换下一个 key，不计入限流退避
 _NETWORK_RETRYABLE = (InternalServerError, APIConnectionError, APITimeoutError)
 
-from config import MODEL, API_KEYS, BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, KEY_COOLDOWN, RPM_LIMIT, RPM_WINDOW
+from config import (
+    MODEL, API_KEYS, BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, KEY_COOLDOWN, RPM_LIMIT, RPM_WINDOW,
+    LLM_TEMPERATURE, LLM_TOP_P,
+)
+from cache import cache_get, cache_key, cache_put
+from usage import record_usage
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +42,7 @@ _last_req_ts = 0.0                             # 上一次请求的发起时间�
 def _get_client(i: int) -> ChatOpenAI:
     """按 key 索引获取客户端（缓存复用）"""
     if i not in _clients:
-        _clients[i] = ChatOpenAI(
+        kwargs = dict(
             model=MODEL,
             api_key=API_KEYS[i],
             http_client=httpx.Client(trust_env=False, timeout=120.0) ,
@@ -45,7 +50,22 @@ def _get_client(i: int) -> ChatOpenAI:
             timeout=float(REQUEST_TIMEOUT),
             max_retries=int(MAX_RETRIES),
         )
+        # 采样参数只在 .env 显式配置时下发；同时也是缓存键的一部分
+        if LLM_TEMPERATURE is not None:
+            kwargs["temperature"] = LLM_TEMPERATURE
+        if LLM_TOP_P is not None:
+            kwargs["top_p"] = LLM_TOP_P
+        _clients[i] = ChatOpenAI(**kwargs)
     return _clients[i]
+
+
+def _usage_tokens(response) -> tuple[int, int]:
+    """从 LangChain 响应/流式 chunk 中取 (input_tokens, output_tokens)"""
+    md = getattr(response, "usage_metadata", None) or {}
+    if md:
+        return int(md.get("input_tokens") or 0), int(md.get("output_tokens") or 0)
+    tu = (getattr(response, "response_metadata", None) or {}).get("token_usage") or {}
+    return int(tu.get("prompt_tokens") or 0), int(tu.get("completion_tokens") or 0)
 
 
 def _mark_limited(i: int):
@@ -137,7 +157,16 @@ def _next_target(order: list[int], tried: set[int]):
 
 
 def invoke_llm(prompt: str) -> str:
-    """调用模型；429/5xx 按 key 池轮换 + 退避，401/403 永久禁用，4 轮耗尽抛异常"""
+    """调用模型；429/5xx 按 key 池轮换 + 退避，401/403 永久禁用，4 轮耗尽抛异常
+
+    先查磁盘缓存：命中直接返回，不发任何网络请求，也不产生 Langfuse Generation。
+    """
+    key = cache_key(prompt, provider="remote", model=MODEL)
+    cached = cache_get(key)
+    if cached is not None:
+        record_usage(model=MODEL, cached=True)
+        return cached
+
     last_err: Exception | None = None
     for _ in range(MAX_ROUNDS):
         order = _scan_order()
@@ -151,9 +180,12 @@ def invoke_llm(prompt: str) -> str:
             tried.add(target)
             _record_req()
             try:
-                content = _get_client(target).invoke(prompt).content
+                response = _get_client(target).invoke(prompt)
                 _mark_success(target)
-                return content
+                in_tokens, out_tokens = _usage_tokens(response)
+                record_usage(in_tokens, out_tokens, model=MODEL)
+                cache_put(key, response.content)
+                return response.content
             except (AuthenticationError, PermissionDeniedError) as e:
                 _disabled.add(target)
                 logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{e}")
@@ -169,7 +201,18 @@ def invoke_llm(prompt: str) -> str:
 
 
 def stream_llm(prompt: str):
-    """流式调用，yield 每个 chunk 文本；首 chunk 前限流/5xx 可换 key，中途限流标记冷却后直接抛出"""
+    """流式调用，yield 每个 chunk 文本；首 chunk 前限流/5xx 可换 key，中途限流标记冷却后直接抛出
+
+    命中磁盘缓存时按固定窗口回放完整文本，不发请求、不产生 Langfuse Generation。
+    """
+    key = cache_key(prompt, provider="remote", model=MODEL)
+    cached = cache_get(key)
+    if cached is not None:
+        record_usage(model=MODEL, cached=True)
+        for i in range(0, len(cached), 40):
+            yield cached[i:i + 40]
+        return
+
     last_err: Exception | None = None
     for _ in range(MAX_ROUNDS):
         order = _scan_order()
@@ -200,9 +243,20 @@ def stream_llm(prompt: str):
                 _mark_limited(target)
                 continue
             _mark_success(target)
+            # 流式边收边发；结束后把完整文本落缓存，下次直接回放（不再请求 API）
+            total_in = total_out = 0
+            parts: list[str] = []
+            in_t, out_t = _usage_tokens(first)
+            total_in += in_t
+            total_out += out_t
+            parts.append(first.content)
             yield first.content
             try:
                 for chunk in iterator:
+                    in_t, out_t = _usage_tokens(chunk)
+                    total_in += in_t
+                    total_out += out_t
+                    parts.append(chunk.content)
                     yield chunk.content
             except (RateLimitError, *_NETWORK_RETRYABLE) as e:
                 # 中途限流/网络/服务端故障：标记冷却，不重试（避免内容重复）
@@ -211,5 +265,7 @@ def stream_llm(prompt: str):
                 else:
                     _mark_server_err(target)
                 raise
+            record_usage(total_in, total_out, model=MODEL)
+            cache_put(key, "".join(parts))
             return
     raise last_err if last_err else RuntimeError("API 请求失败：重试轮次耗尽")

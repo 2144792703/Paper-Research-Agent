@@ -96,3 +96,43 @@ LANGFUSE_BASE_URL = (
     or "https://cloud.langfuse.com"
 ).strip()
 LANGFUSE_ENABLED = bool(LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY)
+
+
+# ============================================================
+# 模块六：LLM 磁盘缓存与成本统计
+# 社区网址：https://docs.litellm.com.cn/docs/proxy/model_cost_map
+# https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
+# ============================================================
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _optional_float(name: str):
+    """读取可选浮点配置，空值或非法值返回 None（表示“未设置”）"""
+    raw = (os.getenv(name) or "").strip()
+    if not raw:
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
+CACHE_ENABLED = (os.getenv("CACHE_ENABLED", "1") or "").strip().lower() not in ("0", "false", "no", "off")
+CACHE_DIR = os.getenv("CACHE_DIR") or os.path.join(_BASE_DIR, ".cache")
+# 方案8 规约：prompt 模板/缓存格式大改，或任何影响输出的代码逻辑变更时 +1，强制旧缓存全部失效
+# （缓存键只覆盖 prompt/模型/采样参数，覆盖不了代码行为变化与供应商侧模型更新）
+CACHE_VERSION = (os.getenv("CACHE_VERSION") or "1").strip()
+
+# 采样参数：参与缓存键；留空则不向 API 传参（使用服务端默认值）
+LLM_TEMPERATURE = _optional_float("LLM_TEMPERATURE")
+LLM_TOP_P = _optional_float("LLM_TOP_P")
+
+# 单价表（litellm 的 model_prices_and_context_window.json），单位：美元 / token
+MODEL_PRICES_PATH = os.getenv("MODEL_PRICES_PATH") or os.path.join(
+    _BASE_DIR, "prices", "model_prices_and_context_window.json"
+)
+# 表里查不到的模型可手动给单价（美元 / 百万 token），两者都填才生效
+MODEL_PRICE_INPUT_PER_1M = _optional_float("MODEL_PRICE_INPUT_PER_1M")
+MODEL_PRICE_OUTPUT_PER_1M = _optional_float("MODEL_PRICE_OUTPUT_PER_1M")
+# 可选：人民币展示汇率，不填则只显示美元
+USD_TO_CNY = _optional_float("USD_TO_CNY")

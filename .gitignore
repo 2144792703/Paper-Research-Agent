@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# LLM disk cache (Day45)
+.cache/
+
 # Virtual environments
 .venv/
 venv/

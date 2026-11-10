@@ -8,3 +8,7 @@ services:
     environment:
       # 容器内不连宿主机 Ollama，统一走远程 OpenAI 兼容 API
       - MODEL_PROVIDER=remote
+    volumes:
+      # 缓存落宿主机，容器删除后仍可复用（Day45 两次运行对照需要）
+      # <宿主机路径或卷名>:<容器内路径>[:权限]
+      - ./.cache:/app/.cache

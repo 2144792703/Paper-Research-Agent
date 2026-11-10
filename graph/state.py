@@ -1,5 +1,7 @@
 from typing import TypedDict
 
+from tools.arxiv_tool import PaperMeta
+
 class SupervisorState(TypedDict):
     """
     topic 研究主题或搜索关键词，用于指导论文搜索和总结
@@ -16,7 +18,7 @@ class SupervisorState(TypedDict):
     keep_papers 最终保留的论文数量（用户可配置，默认 5）
     """
     topic: str
-    papers: list[dict]
+    papers: list[PaperMeta]
     summary: str
     next: str
     critique: str
