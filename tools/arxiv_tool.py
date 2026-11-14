@@ -46,9 +46,9 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
                 )
             )
     except arxiv.HTTPError as e:
-        logger.info(f"arXiv API 请求失败: {e}")
+        logger.info(f"arXiv API 请求失败: {type(e).__name__}")
     except Exception as e:
-        logger.info(f"arXiv 搜索异常: {e}")
+        logger.info(f"arXiv 搜索异常: {type(e).__name__}")
     logger.info(f'===search_papers，查到 {len(papers)} 条数据。并返回 {len(papers)} 条数据。===')
     return papers
 

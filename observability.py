@@ -29,8 +29,8 @@ def trace_config(topic: str) -> dict[str, Any]:
 
         handler = CallbackHandler()
     except Exception as e:
-        # 观测失败不能影响主流程：只告警，返回空 config
-        logger.warning(f"[observability] Langfuse 初始化失败，本次跳过上报：{e}")
+        # 观测失败不能影响主流程：只告警，返回空 config；异常详情只记类型名
+        logger.warning(f"[observability] Langfuse 初始化失败，本次跳过上报：{type(e).__name__}")
         return {}
 
     return {
@@ -61,4 +61,4 @@ def flush() -> None:
 
         get_client().flush()
     except Exception as e:
-        logger.debug(f"[observability] Langfuse flush 忽略异常：{e}")
+        logger.debug(f"[observability] Langfuse flush 忽略异常：{type(e).__name__}")

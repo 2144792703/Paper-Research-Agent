@@ -114,6 +114,17 @@ def _record_req():
     _req_times.append(_last_req_ts)
 
 
+def _redact_headers(headers: dict) -> dict:
+    """响应头日志脱敏：Authorization / 各类 Key 只保留键名和值的前 6 位"""
+    out = {}
+    for k, v in (headers or {}).items():
+        lk = k.lower()
+        if any(s in lk for s in ("authorization", "api-key", "api_key", "token", "secret", "x-api")):
+            v = (str(v)[:6] + "...") if v else ""
+        out[k] = v
+    return out
+
+
 def _log_rate_limit(i: int, e: Exception):
     """打印 429 的响应头与 body，用于判断限流按账号/IP/RPM/TPM 哪个维度计算"""
     resp = getattr(e, "response", None)
@@ -121,10 +132,10 @@ def _log_rate_limit(i: int, e: Exception):
         logger.warning(f"key#{i} 429（无响应对象），无法读取限流头")
         return
     try:
-        headers = dict(resp.headers)
-        body = resp.text[:500]
+        headers = _redact_headers(dict(resp.headers))
+        body = (resp.text or "")[:200]  # 从 500 缩到 200，减少泄露面
     except Exception as read_err:
-        logger.warning(f"key#{i} 429，读取响应失败：{read_err}")
+        logger.warning(f"key#{i} 429，读取响应失败（{type(read_err).__name__}）")
         return
     logger.warning(f"key#{i} 429 headers={headers} body={body}")
 
@@ -188,7 +199,7 @@ def invoke_llm(prompt: str) -> str:
                 return response.content
             except (AuthenticationError, PermissionDeniedError) as e:
                 _disabled.add(target)
-                logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{e}")
+                logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{type(e).__name__}")
             except _NETWORK_RETRYABLE as e:
                 last_err = e
                 _mark_server_err(target)
@@ -230,7 +241,7 @@ def stream_llm(prompt: str):
                 first = next(iterator)  # 首 chunk 前抛错可安全换 key
             except (AuthenticationError, PermissionDeniedError) as e:
                 _disabled.add(target)
-                logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{e}")
+                logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{type(e).__name__}")
                 continue
             except _NETWORK_RETRYABLE as e:
                 last_err = e

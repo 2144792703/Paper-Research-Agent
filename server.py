@@ -7,6 +7,7 @@ import json
 
 from graph.graph_compile import graph
 from observability import trace_config, trace_id, flush
+from security import sanitize_topic, flag_injection, MAX_TOPIC_LEN
 from logger import logger
 import usage
 import cache
@@ -24,21 +25,33 @@ class ResearchRequest(BaseModel):
 
 @app.post("/research")
 async def research(req: ResearchRequest):
+    # 步骤3：控制字符清理 + 空值/长度校验（Pydantic 的 max_length 为第一道兜底，这里再显式校验）
+    from fastapi import HTTPException
+    topic_sanitized = sanitize_topic(req.topic)
+    if not topic_sanitized:
+        raise HTTPException(status_code=400, detail="topic 清理后为空")
+    if len(topic_sanitized) > MAX_TOPIC_LEN:
+        raise HTTPException(status_code=400, detail=f"topic 超长，上限 {MAX_TOPIC_LEN} 字符")
+
+    # 步骤3：危险标记（不硬拦截；命中仅打 warning 供人工复核）
+    for flag in flag_injection(topic_sanitized):
+        logger.warning(f"[sec] topic 含注入可疑短语 '{flag}'，正常处理但请人工核对后续报告")
+
     async def event_stream():
-        start_payload = {"step": "start", "topic": req.topic}
+        start_payload = {"step": "start", "topic": topic_sanitized}
         yield f"event: progress\ndata: {json.dumps(start_payload, ensure_ascii=False)}\n\n"
 
         # 方案1：复位/执行/汇总在同一临界区内，并发请求排队执行，
         # 避免互相清零统计（usage/cache 命中数只统计当次请求），也避免重复消耗 API 配额
         async with _run_lock:
             try:
-                config = trace_config(req.topic)
+                config = trace_config(topic_sanitized)
                 usage.reset()
                 cache.reset_stats()
                 result = await asyncio.wait_for(
                     asyncio.to_thread(
                         graph.invoke,
-                        {"topic": req.topic, "critique_times": req.max_retries, "keep_papers": req.papers},
+                        {"topic": topic_sanitized, "critique_times": req.max_retries, "keep_papers": req.papers},
                         config,
                     ),
                     timeout=360.0
@@ -49,7 +62,9 @@ async def research(req: ResearchRequest):
                 return
             except Exception as e:
                 flush()
-                err_payload = {"error": str(e)[:200]}
+                # 异常详情只进服务端日志（类型名），不回传前端，避免内部信息泄露
+                logger.error(f"研究流程异常：{type(e).__name__}")
+                err_payload = {"error": "研究过程中出现内部错误，详情见服务端日志"}
                 yield f"event: partial\ndata: {json.dumps(err_payload, ensure_ascii=False)}\n\n"
                 return
 
@@ -76,8 +91,9 @@ def health():
 
 @app.exception_handler(Exception)
 async def global_error_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled：{exc}")
+    # 日志只记异常类型名；响应体不携带任何异常详情/内部路径
+    logger.error(f"Unhandled：{type(exc).__name__}")
     return JSONResponse(
         status_code=500,
-        content={"detail": "internal error", "error": str(exc)[:200]}
+        content={"detail": "internal error"}
     )

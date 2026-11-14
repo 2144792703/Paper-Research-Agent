@@ -7,6 +7,8 @@ from graph.graph_compile import graph
 from models import _resolve_provider
 from config import clamp_search_count, clamp_keep_papers, SEARCH_MIN, SEARCH_MAX, KEEP_MIN, KEEP_MAX, LANGFUSE_ENABLED, CACHE_DIR
 from observability import trace_config, trace_id, flush
+from security import sanitize_topic, flag_injection, MAX_TOPIC_LEN
+from logger import logger
 import usage
 import report_check
 from cache import reset_stats as reset_cache_stats, stats as cache_stats
@@ -31,10 +33,20 @@ def main():
 
     topic = args.topic
     if not topic:
-        topic = input("请输入研究主题：\n").strip()
-        if not topic:
-            print("错误，主题不能为空")
-            return
+        topic = input("请输入研究主题：\n")
+
+    # 步骤3：入口校验 —— 控制字符清理 + 空值/长度校验（与 API 端策略一致：超长拒绝）
+    topic = sanitize_topic(topic)
+    if not topic:
+        print("错误，主题为空或清理后为空")
+        return
+    if len(topic) > MAX_TOPIC_LEN:
+        print(f"错误，主题过长（{len(topic)} 字符，上限 {MAX_TOPIC_LEN}），请精简后重试")
+        return
+
+    # 步骤3：危险标记（不硬拦截，避免误杀正常论文标题；命中仅打 warning 供人工复核）
+    for flag in flag_injection(topic):
+        logger.warning(f"[sec] topic 含注入可疑短语 '{flag}'，正常处理但请人工核对后续报告")
 
     search_count = clamp_search_count(args.search_count)
     keep_papers = clamp_keep_papers(args.papers)

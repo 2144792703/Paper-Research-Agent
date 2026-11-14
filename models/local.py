@@ -46,7 +46,7 @@ def _post(payload: dict):
             )
         raise RuntimeError(f"Ollama HTTP {e.code}：{body}")
     except urllib.error.URLError as e:
-        raise RuntimeError(f"Ollama 连接失败：{e}（地址 {OLLAMA_HOST}）")
+        raise RuntimeError(f"Ollama 连接失败：{type(e).__name__}（地址 {OLLAMA_HOST}）")
 
 
 def _generate(prompt: str, stream: bool):

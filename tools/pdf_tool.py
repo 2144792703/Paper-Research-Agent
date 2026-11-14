@@ -15,7 +15,7 @@ def extract_pdf_text(pdf_url: str, max_chars: int = 3000) -> str:
         resp = requests.get(pdf_url, timeout=30)
         resp.raise_for_status()
     except Exception as e:
-        logger.error(f"PDF 下载失败：{e}")
+        logger.error(f"PDF 下载失败：{type(e).__name__}")
         return ""
 
     text_parts = []
@@ -26,7 +26,7 @@ def extract_pdf_text(pdf_url: str, max_chars: int = 3000) -> str:
                 t = page.extract_text() or ""
                 text_parts.append(t)
     except Exception as e:
-        logger.error(f"PDF 解析失败：{e}")
+        logger.error(f"PDF 解析失败：{type(e).__name__}")
         return ""
 
     full_text = "\n".join(text_parts)
