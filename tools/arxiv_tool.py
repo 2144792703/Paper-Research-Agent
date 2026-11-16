@@ -1,9 +1,10 @@
 import arxiv
 
-from pydantic import BaseModel, Field
 from langchain_core.tools import tool
+from pydantic import BaseModel, Field
 
 from logger import logger
+
 
 class PaperMeta(BaseModel):
     title: str = Field(description="论文标题")
@@ -11,6 +12,7 @@ class PaperMeta(BaseModel):
     published: str = Field(description="发布日期 YYYY-MM-DD")
     summary: str = Field(description="摘要前200字")
     url: str = Field(description="PDF链接或abs链接")
+
 
 def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
     """
@@ -28,9 +30,9 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
         delay_seconds=5.0,
     )
     search = arxiv.Search(
-        query = query,
-        max_results = max_results,   # 返回的搜索数量
-        sort_by = arxiv.SortCriterion.Relevance,
+        query=query,
+        max_results=max_results,   # 返回的搜索数量
+        sort_by=arxiv.SortCriterion.Relevance,
     )
     papers: list[PaperMeta] = []
 
@@ -49,11 +51,12 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
         logger.info(f"arXiv API 请求失败: {type(e).__name__}")
     except Exception as e:
         logger.info(f"arXiv 搜索异常: {type(e).__name__}")
-    logger.info(f'===search_papers，查到 {len(papers)} 条数据。并返回 {len(papers)} 条数据。===')
+    logger.info(f"search_papers：返回 {len(papers)} 条")
     return papers
 
+
 @tool("search_papers")
-def search_papers_tool(query: str, field: str = 'all', max_results: int = 5) -> list[dict]:
+def search_papers_tool(query: str, field: str = "all", max_results: int = 5) -> list[dict]:
     """搜索 arXiv 论文
     Args:
         query: 搜索关键词
@@ -63,5 +66,5 @@ def search_papers_tool(query: str, field: str = 'all', max_results: int = 5) -> 
     if field != "all":
         query = f"{field}:{query}"
     papers = search_papers(query, max_results)
-    logger.info(f'===search_papers_tool，查到 {len(papers)} 条数据。并返回 {len(papers)} 条数据。===')
+    logger.info(f"search_papers_tool：返回 {len(papers)} 条")
     return [p.model_dump() for p in papers]

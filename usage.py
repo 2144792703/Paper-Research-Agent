@@ -165,6 +165,10 @@ def format_summary(data: dict | None = None) -> str:
         f"  total tokens  = {d['total_tokens']}",
         f"  LLM 调用次数  = {d['calls']}（缓存命中 {d['cached_calls']} 次，未发请求）",
     ]
+    if d["models"]:
+        lines.append("  分模型 token（仅统计真实请求）：")
+        for name, tokens in d["models"].items():
+            lines.append(f"    {name}: input {tokens['input']} / output {tokens['output']}")
     if d["cost_usd"] is None:
         models = "、".join(d["unpriced_models"]) or "未知模型"
         lines.append(f"  估算成本      = 单价未知（{models} 不在价格表），仅报 token")

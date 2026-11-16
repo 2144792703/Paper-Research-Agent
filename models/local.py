@@ -2,10 +2,10 @@
 本地 Ollama 模型实现。
 
 对外接口与 models.remote 完全一致：
-    invoke_llm(prompt: str) -> str
-    stream_llm(prompt: str) -> Iterator[str]
+    invoke_llm(prompt: str, model: str | None = None) -> str
+    stream_llm(prompt: str, model: str | None = None) -> Iterator[str]
 
-模型固定指向 Ollama 中的 qwen2.5:7b-instruct-q5_K_M（可通过 OLLAMA_MODEL 覆盖）。
+默认模型取 OLLAMA_MODEL（可被调用方传入的 model 覆盖）。
 仅使用标准库，不引入额外依赖。
 """
 
@@ -42,15 +42,16 @@ def _post(payload: dict):
         body = e.read().decode("utf-8", errors="replace")[:500]
         if e.code == 404:
             raise RuntimeError(
-                f"Ollama 接口 404：请确认 `ollama serve` 已运行且模型 {OLLAMA_MODEL!r} 已 pull。url={_api_url()} body={body}"
+                f"Ollama 接口 404：请确认 `ollama serve` 已运行且模型 {payload['model']!r} 已 pull。url={_api_url()} body={body}"
             )
         raise RuntimeError(f"Ollama HTTP {e.code}：{body}")
     except urllib.error.URLError as e:
         raise RuntimeError(f"Ollama 连接失败：{type(e).__name__}（地址 {OLLAMA_HOST}）")
 
 
-def _generate(prompt: str, stream: bool):
-    payload = {"model": OLLAMA_MODEL, "prompt": prompt, "stream": stream}
+def _generate(prompt: str, stream: bool, model: str | None = None):
+    active = model or OLLAMA_MODEL
+    payload = {"model": active, "prompt": prompt, "stream": stream}
     resp = _post(payload)
 
     if not stream:
@@ -80,37 +81,39 @@ def _generate(prompt: str, stream: bool):
                 yield piece
             if chunk.get("done"):
                 break
-        record_usage(in_tokens, out_tokens, model=OLLAMA_MODEL)
+        record_usage(in_tokens, out_tokens, model=active)
 
     return _iter()
 
 
-def invoke_llm(prompt: str) -> str:
+def invoke_llm(prompt: str, model: str | None = None) -> str:
     """与 llm.invoke_llm 同签名：输入 prompt，返回完整文本；命中磁盘缓存则不发请求"""
-    key = cache_key(prompt, provider="local", model=OLLAMA_MODEL)
+    active = model or OLLAMA_MODEL
+    key = cache_key(prompt, provider="local", model=active)
     cached = cache_get(key)
     if cached is not None:
-        record_usage(model=OLLAMA_MODEL, cached=True)
+        record_usage(model=active, cached=True)
         return cached
 
-    text, in_tokens, out_tokens = _generate(prompt, stream=False)
-    record_usage(in_tokens, out_tokens, model=OLLAMA_MODEL)
+    text, in_tokens, out_tokens = _generate(prompt, stream=False, model=active)
+    record_usage(in_tokens, out_tokens, model=active)
     cache_put(key, text)
     return text
 
 
-def stream_llm(prompt: str) -> Iterator[str]:
+def stream_llm(prompt: str, model: str | None = None) -> Iterator[str]:
     """与 llm.stream_llm 同签名：逐块 yield 文本；命中缓存时回放，不发请求"""
-    key = cache_key(prompt, provider="local", model=OLLAMA_MODEL)
+    active = model or OLLAMA_MODEL
+    key = cache_key(prompt, provider="local", model=active)
     cached = cache_get(key)
     if cached is not None:
-        record_usage(model=OLLAMA_MODEL, cached=True)
+        record_usage(model=active, cached=True)
         for i in range(0, len(cached), 40):
             yield cached[i:i + 40]
         return
 
     parts: list[str] = []
-    for piece in _generate(prompt, stream=True):
+    for piece in _generate(prompt, stream=True, model=active):
         parts.append(piece)
         yield piece
     cache_put(key, "".join(parts))

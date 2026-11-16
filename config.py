@@ -8,23 +8,28 @@ load_dotenv()
 # 模块一：模型路由
 # ============================================================
 # local  -> 本地 Ollama 服务
-# remote -> 远程 OpenAI 兼容 API
+# remote -> 远程 OpenAI 兼容 API（BASE_URL 可配）
 MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "remote").strip().lower()
+# 缓存键的 provider 段：不同提供方即使用同一模型名也不会互相命中
+PROVIDER_NAME = MODEL_PROVIDER
 
 
 # ============================================================
 # 模块二：远程模型（OpenAI 兼容接口）
 # ============================================================
-MODEL = os.getenv("MODEL")
-API_KEY = os.getenv("API_KEY")
-BASE_URL = os.getenv("BASE_URL")
-
 REQUEST_TIMEOUT = os.getenv('REQUEST_TIMEOUT', '600.0')
 MAX_RETRIES = os.getenv('MAX_RETRIES', '2')
 
+API_KEY = os.getenv("API_KEY")
+
 
 def _parse_key_pools() -> list[str]:
-    """解析 API_KEY_POOLS（逗号分隔），去重保序；为空时回退到单个 API_KEY"""
+    """解析 key 池：API_KEY_POOLS 逗号分隔去重保序；为空时回退到单个 API_KEY
+
+    两种用法：
+        池化：API_KEY_POOLS=key1,key2,key3 -> 轮换 + 单 key 冷却 + 全局 RPM 限流
+        单个：只填 API_KEY=key1            -> 池中仅 1 个 key，逻辑相同但不切换
+    """
     raw = os.getenv("API_KEY_POOLS", "")
     keys = [k.strip() for k in raw.split(",") if k.strip()]
     if not keys and API_KEY:
@@ -32,7 +37,10 @@ def _parse_key_pools() -> list[str]:
     return list(dict.fromkeys(keys))
 
 
+MODEL = os.getenv("MODEL")
+BASE_URL = os.getenv("BASE_URL")
 API_KEYS = _parse_key_pools()
+
 # 仅远程模式强制要求 API key；本地模式不依赖
 if MODEL_PROVIDER != "local" and not API_KEYS:
     raise RuntimeError("未配置任何 API key：请在 .env 中配置 API_KEY_POOLS 或 API_KEY")
@@ -71,6 +79,12 @@ def _clamp_int(value, low: int, high: int, default: int) -> int:
 
 SEARCH_MAX_RESULTS = _clamp_int(os.getenv("SEARCH_MAX_RESULTS", "15"), SEARCH_MIN, SEARCH_MAX, 15)
 KEEP_PAPERS = _clamp_int(os.getenv("KEEP_PAPERS", "5"), KEEP_MIN, KEEP_MAX, 5)
+
+OLLAMA_MODEL_CHEAP = (os.getenv("OLLAMA_MODEL_CHEAP") or "").strip() or OLLAMA_MODEL
+MODEL_CHEAP = (os.getenv("MODEL_CHEAP") or "").strip() or MODEL or ""
+SUMMARY_CONCURRENCY = _clamp_int(os.getenv("SUMMARY_CONCURRENCY", "3"), 1, 8, 3)
+STRONG_MODEL = OLLAMA_MODEL if MODEL_PROVIDER == "local" else MODEL
+CHEAP_MODEL = OLLAMA_MODEL_CHEAP if MODEL_PROVIDER == "local" else MODEL_CHEAP
 
 
 def clamp_search_count(value=None) -> int:

@@ -7,7 +7,7 @@ LLM 磁盘缓存（diskcache）。
       强制旧缓存失效（改 prompt 文字会自动换键，但代码逻辑变化不会）。
     - 换模型或改 temperature / top_p 都会改变键，互不命中。
 
-只缓存完整文本（非流式）；流式输出见 models.* 中的说明。
+一次性与流式调用的完整文本都会落缓存：流式在结束后写入，命中时按固定窗口回放。
 """
 
 from __future__ import annotations
@@ -71,6 +71,11 @@ def cache_get(key: str) -> str | None:
     """命中返回缓存文本，未命中返回 None；同时打印并累计 hit / miss"""
     store = _get_cache()
     value = store.get(key) if store is not None else None
+    if value is not None and not value.strip():
+        # 历史坏数据：空响应曾被写入缓存，直接回放会让上游拿到空文本（如空综述）而陷入循环
+        if store is not None:
+            store.delete(key)
+        value = None
     if value is None:
         with _lock:
             _stats["miss"] += 1
@@ -88,6 +93,9 @@ def cache_put(key: str, value: str) -> None:
     """写入缓存；失败只告警，不影响主流程"""
     store = _get_cache()
     if store is None:
+        return
+    if not value or not value.strip():
+        logger.warning("[cache] 模型返回空内容，跳过写入缓存")
         return
     try:
         store.set(key, value)

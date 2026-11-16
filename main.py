@@ -13,6 +13,7 @@ import usage
 import report_check
 from cache import reset_stats as reset_cache_stats, stats as cache_stats
 
+
 def main():
     parser = argparse.ArgumentParser(description="论文研究报告 Agent")
     parser.add_argument("--topic", type=str, help="研究主题，不填则交互输入")
@@ -84,12 +85,12 @@ def main():
     print("=" * 60)
     print(result.get("summary", "（无报告）"))
 
-    # 方案7：报告数字事后校验（百分比须来自喂给模型的原始摘要）
+    # 方案7：报告数字事后校验（量化数字须来自喂给模型的原始摘要）
     missing_nums = report_check.check_report(result.get("summary", ""), report_check.build_corpus(result))
     if missing_nums:
-        print(f"\n⚠️  数字校验：报告出现摘要语料中不存在的百分比 {missing_nums}，疑似编造，请人工核对")
+        print(f"\n⚠️  数字校验：报告出现摘要语料中不存在的量化数字 {missing_nums}，疑似编造，请人工核对")
     else:
-        print("\n✅ 数字校验：报告中百分比均来自摘要语料")
+        print("\n✅ 数字校验：报告中的量化数字均来自摘要语料")
 
     print(f"\n--- 评审意见 ---")
     print(result.get('critique', '无'))

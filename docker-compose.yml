@@ -6,8 +6,8 @@ services:
     env_file:
       - .env
     environment:
-      # 容器内不连宿主机 Ollama，统一走远程 OpenAI 兼容 API
-      - MODEL_PROVIDER=remote
+      # 容器内 127.0.0.1 指向容器自身；默认 remote，走本地需把 OLLAMA_HOST 指向可达地址
+      - MODEL_PROVIDER=${MODEL_PROVIDER:-remote}
     volumes:
       # 缓存落宿主机，容器删除后仍可复用（Day45 两次运行对照需要）
       # <宿主机路径或卷名>:<容器内路径>[:权限]

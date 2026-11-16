@@ -2,6 +2,7 @@ from typing import TypedDict
 
 from tools.arxiv_tool import PaperMeta
 
+
 class SupervisorState(TypedDict):
     """
     topic 研究主题或搜索关键词，用于指导论文搜索和总结

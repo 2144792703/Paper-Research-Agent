@@ -1,13 +1,15 @@
 import re
-
-from graph.state import SupervisorState
-from tools.arxiv_tool import search_papers
-from llm import invoke_llm, stream_llm
-from config import clamp_search_count, clamp_keep_papers
+from concurrent.futures import ThreadPoolExecutor
+from time import perf_counter
 
 from pydantic import BaseModel, Field
 
+from config import clamp_search_count, clamp_keep_papers, CHEAP_MODEL, STRONG_MODEL, SUMMARY_CONCURRENCY
+from graph.state import SupervisorState
+from llm import invoke_llm, stream_llm
 from logger import logger
+from tools.arxiv_tool import search_papers
+
 
 class SelectedPaper(BaseModel):
     """选中的一篇论文"""
@@ -15,9 +17,11 @@ class SelectedPaper(BaseModel):
     subfield: str = Field(default="", description="该论文所属的子领域/技术范式，一句话")
     reason: str = Field(description="为什么这篇与主题相关，一句话")
 
+
 class SelectionResult(BaseModel):
     """LLM 筛选结果"""
     selected: list[SelectedPaper] = Field(description="选中的论文，3-5篇")
+
 
 class PaperSummary(BaseModel):
     """单篇论文的结构化总结"""
@@ -25,6 +29,7 @@ class PaperSummary(BaseModel):
     method: str = Field(description="用一句话总结这篇论文用什么方法/模型")
     result: str = Field(description="用一句话总结这篇论文的实验结果或者主要发现")
     limitation: str = Field(description="用一句话总结该论文的局限性或者未来方向")
+
 
 def supervisor_node(state: SupervisorState):
     logger.info("supervisor_node")
@@ -42,6 +47,13 @@ def supervisor_node(state: SupervisorState):
     previous = (state.get("next") or "").strip() or "none"
     revision_count = state.get("revision_count", 0)
     critique_times = state.get("critique_times", 3)
+
+    # 确定性护栏：综述已生成或已有论文时不再交给 LLM 判定，
+    # 避免 LLM 缓存回放/输出抖动把 summarize ↔ supervisor 判成死循环
+    if summary:
+        return {"next": "summarize" if previous == "critic" else "critic"}
+    if papers:
+        return {"next": "summarize"}
 
     # 评审意见：只在上一步是 critic 时才是当前待处理的，否则标注过期截断
     critique_display = "无"
@@ -121,7 +133,7 @@ def supervisor_node(state: SupervisorState):
 
 {judge_hint}"""
 
-    responses = invoke_llm(message)
+    responses = invoke_llm(message, model=CHEAP_MODEL)
     next_step = responses.strip().lower().strip("。.!！\"'`")
     if next_step == "invalid":
         if papers:
@@ -138,6 +150,7 @@ def supervisor_node(state: SupervisorState):
         next_step = "search"
     return {'next': next_step}
 
+
 def worker_search(state: SupervisorState):
     print(f"\n🔍 正在搜索论文：{state['topic']}...")
     logger.info("worker_search")
@@ -149,9 +162,10 @@ def worker_search(state: SupervisorState):
     merged = existing + [p for p in new_papers if p.url not in seen]
     return {'papers': merged}
 
+
 def worker_select(state: SupervisorState):
     """从搜索结果中筛选最相关的论文"""
-    print(f"📊 正在筛选最相关论文...")
+    print("📊 正在筛选最相关论文...")
     logger.info("worker_select")
     papers = state.get("papers") or []
     if not papers:
@@ -181,7 +195,7 @@ def worker_select(state: SupervisorState):
 
 index 必须是上面列表中的序号。只返回 JSON，不要代码块或额外说明。"""
 
-    result = invoke_llm(prompt)
+    result = invoke_llm(prompt, model=CHEAP_MODEL)
     result = re.sub(r"^\s*```(?:json)?\s*", "", result)
     result = re.sub(r"\s*```\s*$", "", result)
 
@@ -219,17 +233,12 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
         logger.info(f"筛选后保留 {len(selected_papers)} / {len(papers)} 篇")
         return {'papers': selected_papers}
     except Exception as e:
-        logger.warning(f"筛选解析失败，按搜索顺序保留前 N 篇：{e}")
+        logger.warning(f"筛选解析失败，按搜索顺序保留前 N 篇：{type(e).__name__}")
+        logger.debug(f"筛选解析异常详情：{e}")
         return {"papers": papers[:keep_count]}
 
-def worker_summarize_one(state: SupervisorState):
-    """对每篇论文做结构化总结"""
-    print(f"📝 正在逐篇总结 {len(state.get('papers', []))} 篇论文...")
-    logger.info("worker_summarize_one")
-    paper = state.get("papers") or []
-    summaries = []
-
-    for p in paper:
+def _summarize_one(p) -> dict:
+    try:
         prompt = f"""请阅读以下论文信息，提取结构化总结。
 
 标题：{p.title}
@@ -242,31 +251,45 @@ def worker_summarize_one(state: SupervisorState):
 铁律：所有字段只能基于上面摘要的内容；摘要未提供的量化指标（百分比/数值）一律不得编写，无数据时如实写"原文未提供"。
 只返回 JSON。"""
 
-        result = invoke_llm(prompt)
+        result = invoke_llm(prompt, model=CHEAP_MODEL)
         # 去 markdown 代码
         result = re.sub(r"^\s*```(?:json)?\s*", "", result)
         result = re.sub(r"\s*```\s*$", "", result)
 
-        try:
-            parsed = PaperSummary.model_validate_json(result)
-            summaries.append({
-                "title": p.title,
-                "url": p.url,
-                "summary": parsed.model_dump(),
-            })
-            logger.info(f"已总结：{p.title[:50]}")
-        except Exception as e:
-            logger.warning(f"总结解析失败，跳过：{e}")
-            summaries.append({
-                "title": p.title,
-                "url": p.url,
-                "summary": {"problem": "", "method": "", "result": "", "limitation": ""}
-            })
-            
+        parsed = PaperSummary.model_validate_json(result)
+        logger.info(f"已总结：{p.title[:50]}")
+        return {"title": p.title, "url": p.url, "summary": parsed.model_dump()}
+    except Exception as e:
+        logger.warning(f"单篇总结失败，保留空结构：{type(e).__name__}")
+        return {
+            "title": p.title,
+            "url": p.url,
+            "summary": {"problem": "", "method": "", "result": "", "limitation": ""},
+        }
+
+
+def worker_summarize_one(state: SupervisorState):
+    """并发总结单篇论文，结果顺序与输入一致。"""
+    papers = state.get("papers") or []
+    print(f"📝 正在并发总结 {len(papers)} 篇论文（并发度 {SUMMARY_CONCURRENCY}）...")
+    if not papers:
+        return {"paper_summaries": []}
+    started = perf_counter()
+    with ThreadPoolExecutor(max_workers=SUMMARY_CONCURRENCY) as executor:
+        summaries = list(executor.map(_summarize_one, papers))
+    mismatched = [
+        f"idx={i} paper={p.url} summary={s.get('url')}"
+        for i, (p, s) in enumerate(zip(papers, summaries))
+        if p.url != s.get("url")
+    ]
+    if mismatched:
+        logger.error(f"总结结果与论文顺序不一致：{'; '.join(mismatched)}")
+    logger.info(f"总结阶段耗时 {perf_counter() - started:.2f}s，{len(papers)} 篇")
     return {"paper_summaries": summaries}
 
+
 def worker_summarize(state: SupervisorState):
-    print(f"📝 正在进行总的汇总论文...")
+    print("📝 正在进行总的汇总论文...")
     logger.info("worker_summarize")
 
     paper_summaries = state.get("paper_summaries") or []
@@ -275,12 +298,11 @@ def worker_summarize(state: SupervisorState):
     if paper_summaries:
         # 用结构化总结 拼 综述输出
         paper_texts = "\n".join([
-            f"- {s['title']}: "
-            f"- {s['url']}"
-            f"问题={s['summary'].get('problem','')}; "
-            f"方法={s['summary'].get('method','')}; "
-            f"结果={s['summary'].get('result','')}"
-            f"局限={s['summary'].get('limitation','')}"
+            f"- {s['title']}（{s['url']}）"
+            f"问题={s['summary'].get('problem', '')}；"
+            f"方法={s['summary'].get('method', '')}；"
+            f"结果={s['summary'].get('result', '')}；"
+            f"局限={s['summary'].get('limitation', '')}"
             for s in paper_summaries
         ])
     else:
@@ -310,16 +332,23 @@ def worker_summarize(state: SupervisorState):
 
     full_text = ""
 
-    for chunk in stream_llm(message):
+    for chunk in stream_llm(message, model=STRONG_MODEL):
         print(chunk, end="", flush=True)
         full_text += chunk
 
+    # 空响应不能当作“综述已生成”继续路由，否则 supervisor 会反复要求重写
+    if not full_text.strip():
+        raise RuntimeError(
+            "生成研究报告失败：模型返回空内容。请重试；若怀疑旧缓存，执行 python main.py --clear-cache"
+        )
+
     return {'summary': full_text.lstrip()}
 
+
 def critic_node(state: SupervisorState):
-    print(f"📝 正在判断总汇总论文的质量...")
-    logger.info("critic_node")
     """评审 summary 质量，决定通过还是打回重做"""
+    print("📝 正在判断总汇总论文的质量...")
+    logger.info("critic_node")
 
     history = state.get("critique_history") or []
     if history:
@@ -354,7 +383,7 @@ def critic_node(state: SupervisorState):
 如果质量达标，只回复：通过。
 如果不达标，回复具体修改意见（1-2条）。"""
 
-    result = invoke_llm(prompt)
+    result = invoke_llm(prompt, model=STRONG_MODEL)
 
     new_history = history + [result.strip()]
 
@@ -364,13 +393,14 @@ def critic_node(state: SupervisorState):
         "critique_history": new_history
     }
 
+
 def followup_node(state: SupervisorState):
-    print(f"📝 推荐出你所感兴趣的相关论文...")
+    print("📝 推荐出你所感兴趣的相关论文...")
     logger.info("followup_node")
     prompt = f"""基于以下研究主题和内容，推荐 2-3 个用户可能想进一步了解的方向：
 主题：{state["topic"]}
 总结：{state['summary']}
 
 每个方向一句话，用序号列出。"""
-    result = invoke_llm(prompt)
+    result = invoke_llm(prompt, model=CHEAP_MODEL)
     return {"followup": result.strip()}

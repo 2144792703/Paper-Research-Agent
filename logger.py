@@ -1,4 +1,6 @@
-import logging, sys
+import logging
+import sys
+
 
 def setup_logger():
     logging.basicConfig(
@@ -6,6 +8,7 @@ def setup_logger():
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
         stream=sys.stdout,
     )
+
 
 setup_logger()
 logger = logging.getLogger("PaperAgent")

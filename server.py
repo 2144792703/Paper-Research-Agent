@@ -1,16 +1,17 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 import asyncio
 import json
 
+from config import KEEP_MAX, KEEP_MIN, clamp_keep_papers
 from graph.graph_compile import graph
 from observability import trace_config, trace_id, flush
 from security import sanitize_topic, flag_injection, MAX_TOPIC_LEN
 from logger import logger
-import usage
 import cache
+import usage
 from report_check import check_report, build_corpus
 
 app = FastAPI(title="论文研究报告 Agent")
@@ -18,15 +19,16 @@ app = FastAPI(title="论文研究报告 Agent")
 # 研究 run 串行锁：同一时刻只允许一个研究执行（见 /research 事件流内的临界区）
 _run_lock = asyncio.Lock()
 
+
 class ResearchRequest(BaseModel):
     topic: str = Field(..., min_length=1, max_length=100)
-    papers: int = Field(5, ge=1, le=20)
+    papers: int = Field(5, ge=KEEP_MIN, le=KEEP_MAX)
     max_retries: int = 2
+
 
 @app.post("/research")
 async def research(req: ResearchRequest):
     # 步骤3：控制字符清理 + 空值/长度校验（Pydantic 的 max_length 为第一道兜底，这里再显式校验）
-    from fastapi import HTTPException
     topic_sanitized = sanitize_topic(req.topic)
     if not topic_sanitized:
         raise HTTPException(status_code=400, detail="topic 清理后为空")
@@ -51,7 +53,7 @@ async def research(req: ResearchRequest):
                 result = await asyncio.wait_for(
                     asyncio.to_thread(
                         graph.invoke,
-                        {"topic": topic_sanitized, "critique_times": req.max_retries, "keep_papers": req.papers},
+                        {"topic": topic_sanitized, "critique_times": req.max_retries, "keep_papers": clamp_keep_papers(req.papers)},
                         config,
                     ),
                     timeout=360.0
@@ -85,9 +87,11 @@ async def research(req: ResearchRequest):
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.exception_handler(Exception)
 async def global_error_handler(request: Request, exc: Exception):

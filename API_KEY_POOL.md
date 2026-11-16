@@ -35,10 +35,12 @@
 MODEL=your-model-name
 BASE_URL=https://your-api-host/v1
 
-# key 池：逗号分隔，顺序即优先级
+# 池化：逗号分隔，顺序即优先级
 API_KEY_POOLS=sk-aaa,sk-bbb,sk-ccc
+# 单个 key：API_KEY_POOLS 留空时回退到这一项
+# API_KEY=sk-aaa
 
-REQUEST_TIMEOUT=30.0
+REQUEST_TIMEOUT=180.0
 
 # 必须为 0：禁用 OpenAI SDK 内部重试，重试统一由池控制，
 # 否则 SDK 会在同一个 key 上原地重试，拖延换 key 速度
@@ -46,6 +48,9 @@ MAX_RETRIES=0
 
 # 单 key 限流退避基数（秒）
 KEY_COOLDOWN=5
+
+# 全局（跨 key）每分钟请求上限，默认 0 表示关闭节流；下例 10 仅演示开启节流
+RPM_LIMIT=10
 ```
 
 ### 3.2 `config.py`
@@ -72,11 +77,13 @@ KEY_COOLDOWN = float(os.getenv('KEY_COOLDOWN', '5'))
 
 | 变量 | 类型 | 含义 |
 |---|---|---|
-| `_clients` | `dict[int, ChatOpenAI]` | key 索引 → 客户端缓存（按 key 复用，不重复建连） |
+| `_clients` | `dict[tuple[int, str], ChatOpenAI]` | (key 索引, 模型名) → 客户端缓存（按 key + 模型复用） |
 | `_current` | `int` | 粘性指针：上次成功的 key 索引，初始 0 |
 | `_fail_count` | `list[int]` | 每个 key 的连续限流次数（决定退避档位） |
 | `_cooldown_until` | `list[float]` | 每个 key 的解封时间戳（monotonic） |
 | `_disabled` | `set[int]` | 401/403 永久禁用的 key（进程内） |
+| `_req_times` / `_last_req_ts` | `deque` / `float` | 全局 RPM 滑动窗口与最小请求间隔 |
+| `_pool_lock` | `threading.Lock` | 保护上述共享状态（服务端并发/多线程调用） |
 
 保护常量：`MAX_ROUNDS = 4`（遍历上限）、`MAX_COOLDOWN = 60.0`（单 key 冷却封顶）。
 
@@ -85,7 +92,9 @@ KEY_COOLDOWN = float(os.getenv('KEY_COOLDOWN', '5'))
 ## 5. 核心算法（伪代码）
 
 ```
-invoke_llm(prompt):
+invoke_llm(prompt, model):
+  key = cache_key(prompt, provider, model)
+  if 缓存命中: return cached                          # 不发请求、不计 token
   last_err = None
   for round in 0..MAX_ROUNDS-1:                      # 一轮 = 从 current 出发的一次完整环形扫描
       order = 从 current 起、排除 disabled 的环形 key 序列
@@ -94,13 +103,16 @@ invoke_llm(prompt):
       while len(tried) < len(order):
           target = order 中第一个 未 tried 且已解封 的 key
           if target 不存在:
-              target = 未 tried 中冷却最早到期的 key
-              sleep(cooldown[target] - now)            # 按需等待，仅此时发生
-          tried.add(target)
+              target = 未 tried 中最早可用的 key
+          wait = max(cooldown[target] - now, rate_wait())
+          if wait > 0: sleep(wait)                   # 冷却未解封，或全局 RPM 窗口已满
+          if rate_wait() > 0: continue               # 窗口仍满，下一轮再试
+          tried.add(target); record_req()
           try:
-              result = client(target).invoke(prompt)
+              result = client(target, model).invoke(prompt)
               current = target                          # 粘性指针
               清空所有 fail_count 与 cooldown            # 成功即重置
+              record_usage(...); cache_put(...)
               return result.content
           except 401/403:
               disabled.add(target)                      # 永久禁用，不占轮次
@@ -109,14 +121,18 @@ invoke_llm(prompt):
               fail_count[target] += 1
               cooldown[target] = now + min(KEY_COOLDOWN × 2^(n-1), 60s)
               # 立即试下一个，不等待
+          except 5xx / 网络 / 超时 as e:
+              last_err = e
+              cooldown[target] = now + KEY_COOLDOWN     # 固定短冷却，切下一个
   raise last_err
 ```
 
 要点：
 
-- **等待只发生在一种情况**：一圈扫描下来没有任何已解封的 key，此时 sleep 到最早解封者。前面 key 的请求耗时通常已覆盖冷却时间，实际 sleep 常为 0。
+- **等待只发生在两种情况**：一圈扫描下来没有任何已解封的 key，或全局 RPM 窗口已满；都是“必要等待”。
 - 429 后**立即**切下一个，不在原地等待。
-- 其他异常（网络、超时、500）**直接抛出**，不进池逻辑。
+- 5xx / 网络 / 超时也按“固定短冷却 + 换 key”处理；其余未知异常直接抛出。
+- 磁盘缓存命中时完全不进入池逻辑（不发请求、不产生 Langfuse Generation）。
 
 ### 流式接口 `stream_llm` 的区别
 
@@ -131,9 +147,10 @@ invoke_llm(prompt):
 |---|---|
 | `RateLimitError`（429） | 该 key 退避递增（5→10→20→40，封顶 60s），立即切下一个 |
 | `AuthenticationError` / `PermissionDeniedError`（401/403） | 永久禁用该 key，记错误日志，继续下一个，不占轮次 |
-| 其他异常（网络、超时、5xx） | 直接抛出 |
-| 流式首 chunk 前 429 | 标记冷却 + 换 key 重试 |
-| 流式中途 429 | 标记冷却，抛出（不重试） |
+| `InternalServerError` / 网络 / 超时（5xx 等） | 该 key 固定冷却 `KEY_COOLDOWN` 秒，切下一个 |
+| 其他异常 | 直接抛出 |
+| 流式首 chunk 前 429/5xx/401 | 标记冷却或禁用 + 换 key 重试 |
+| 流式中途 429/5xx | 标记冷却，抛出（不重试） |
 
 ---
 
@@ -151,11 +168,11 @@ invoke_llm(prompt):
 
 | 文件 | 内容 |
 |---|---|
-| `config.py` | `API_KEYS`（池解析）、`KEY_COOLDOWN`、空池报错 |
-| `llm.py` | 池状态 + `invoke_llm` / `stream_llm`；`_get_client`（按 key 缓存）、`_mark_limited`（退避）、`_mark_success`（重置）、`_scan_order`（环形序列）、`_next_target`（已解封优先 / 等最早解封） |
-| `.env` | `API_KEY_POOLS`、`KEY_COOLDOWN`、`MAX_RETRIES=0` |
+| `config.py` | `API_KEYS`（池解析，`API_KEY_POOLS` 优先、`API_KEY` 回退）、`KEY_COOLDOWN`、`RPM_LIMIT`、空池报错 |
+| `models/remote.py` | 池状态 + `invoke_llm` / `stream_llm`；`_get_client`（按 key + 模型缓存）、`_mark_limited`（退避）、`_mark_server_err`（5xx 冷却）、`_mark_success`（重置）、`_scan_order`（环形序列）、`_next_target`（已解封优先）、`_rate_wait`（全局 RPM） |
+| `.env` | `API_KEY_POOLS` / `API_KEY`、`KEY_COOLDOWN`、`RPM_LIMIT`、`MAX_RETRIES=0` |
 
-调用方（如 `graph/nodes.py`）**零改动**：只调用 `invoke_llm(prompt)` / `stream_llm(prompt)`，池化对上层透明。
+调用方（如 `graph/nodes.py`）**零改动**：只调用 `invoke_llm(prompt, model=...)` / `stream_llm(prompt, model=...)`，池化对上层透明。
 
 ---
 
@@ -168,7 +185,9 @@ invoke_llm(prompt):
 3. 退避递增：同一 key 连续限流，冷却按 5→10→20→40 增长（测试时把 `KEY_COOLDOWN` 改小加速）；
 4. 全部 429：4 轮共 n×4 次尝试后抛出 `RateLimitError`；
 5. 401 → 进入 `_disabled`，后续调用不再尝试该 key；
-6. 全部 401 → 抛出 `RuntimeError("池内无可用 key")`。
+6. 全部 401 → 抛出 `RuntimeError("池内无可用 key")`；
+7. 5xx / 网络错误 → 该 key 固定冷却后切下一个，不在原地重试；
+8. 单个 key（池长度为 1）→ 行为与池化一致，只是没有其他 key 可切。
 
 ---
 

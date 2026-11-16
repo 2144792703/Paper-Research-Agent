@@ -1,4 +1,5 @@
 import time
+import threading
 import logging
 import httpx
 
@@ -19,44 +20,49 @@ _NETWORK_RETRYABLE = (InternalServerError, APIConnectionError, APITimeoutError)
 
 from config import (
     MODEL, API_KEYS, BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, KEY_COOLDOWN, RPM_LIMIT, RPM_WINDOW,
-    LLM_TEMPERATURE, LLM_TOP_P,
+    LLM_TEMPERATURE, LLM_TOP_P, PROVIDER_NAME,
 )
 from cache import cache_get, cache_key, cache_put
 from usage import record_usage
 
 logger = logging.getLogger(__name__)
 
+# 缓存键的 provider 段：换提供方即换键，避免同模型名串缓存
+PROVIDER = PROVIDER_NAME
+
 MAX_ROUNDS = 4        # 完整遍历上限，耗尽后抛出最后一次限流异常
 MAX_COOLDOWN = 60.0   # 单 key 冷却封顶（秒）
 
 # ===== 池状态（模块级，跨调用持久）=====
-_clients: dict[int, ChatOpenAI] = {}          # key 索引 -> 客户端缓存
+_clients: dict[tuple[int, str], ChatOpenAI] = {}
+_pool_lock = threading.Lock()
 _current = 0                                   # 粘性指针：上次调用成功的 key 索引
 _fail_count = [0] * len(API_KEYS)              # 每个 key 的连续限流次数
 _cooldown_until = [0.0] * len(API_KEYS)        # 每个 key 的解封时间戳（monotonic）
 _disabled: set[int] = set()                    # 401/403 永久禁用的 key（进程内）
-_req_times: deque = deque()                    # 全局请求时间戳（三个 key 共享同一限流窗口）
+_req_times: deque = deque()                    # 全局请求时间戳（所有 key 共享同一限流窗口）
 _last_req_ts = 0.0                             # 上一次请求的发起时间（用于最小间隔）
 
 
-def _get_client(i: int) -> ChatOpenAI:
+def _get_client(i: int, model: str) -> ChatOpenAI:
     """按 key 索引获取客户端（缓存复用）"""
-    if i not in _clients:
-        kwargs = dict(
-            model=MODEL,
-            api_key=API_KEYS[i],
-            http_client=httpx.Client(trust_env=False, timeout=120.0) ,
-            base_url=BASE_URL,
-            timeout=float(REQUEST_TIMEOUT),
-            max_retries=int(MAX_RETRIES),
-        )
-        # 采样参数只在 .env 显式配置时下发；同时也是缓存键的一部分
-        if LLM_TEMPERATURE is not None:
-            kwargs["temperature"] = LLM_TEMPERATURE
-        if LLM_TOP_P is not None:
-            kwargs["top_p"] = LLM_TOP_P
-        _clients[i] = ChatOpenAI(**kwargs)
-    return _clients[i]
+    cache_key_ = (i, model)
+    with _pool_lock:
+        if cache_key_ not in _clients:
+            kwargs = dict(
+                model=model,
+                api_key=API_KEYS[i],
+                http_client=httpx.Client(trust_env=False, timeout=120.0),
+                base_url=BASE_URL,
+                timeout=float(REQUEST_TIMEOUT),
+                max_retries=int(MAX_RETRIES),
+            )
+            if LLM_TEMPERATURE is not None:
+                kwargs["temperature"] = LLM_TEMPERATURE
+            if LLM_TOP_P is not None:
+                kwargs["top_p"] = LLM_TOP_P
+            _clients[cache_key_] = ChatOpenAI(**kwargs)
+    return _clients[cache_key_]
 
 
 def _usage_tokens(response) -> tuple[int, int]:
@@ -141,13 +147,13 @@ def _log_rate_limit(i: int, e: Exception):
 
 
 def _scan_order() -> list[int]:
-    """从 current 起的环形顺序，排除已禁用 key；全禁用返回空列表"""
+    """从 current 起的环形顺序，排除已禁用 key；全禁用返回空列表。调用方需持有 _pool_lock"""
     n = len(API_KEYS)
-    return [( _current + s) % n for s in range(n) if (_current + s) % n not in _disabled]
+    return [(_current + s) % n for s in range(n) if (_current + s) % n not in _disabled]
 
 
 def _next_target(order: list[int], tried: set[int]):
-    """优先选冷却已解封且全局窗口有空位的 key；否则等待最早可用的那个"""
+    """优先选冷却已解封且全局窗口有空位的 key；否则选最早可用的 key（等待由调用方执行）"""
     now = time.monotonic()
     for i in order:
         if i not in tried and _cooldown_until[i] <= now and _rate_wait() <= 0:
@@ -163,97 +169,128 @@ def _next_target(order: list[int], tried: set[int]):
     wait = _delay(target)
     if wait > 0:
         logger.warning(f"key#{target} 需等待 {wait:.0f}s（限流冷却或全局 RPM 窗口已满），暂停后重试")
-        time.sleep(wait + 0.05)
     return target
 
 
-def invoke_llm(prompt: str) -> str:
+def invoke_llm(prompt: str, model: str | None = None) -> str:
     """调用模型；429/5xx 按 key 池轮换 + 退避，401/403 永久禁用，4 轮耗尽抛异常
 
     先查磁盘缓存：命中直接返回，不发任何网络请求，也不产生 Langfuse Generation。
     """
-    key = cache_key(prompt, provider="remote", model=MODEL)
+    active = model or MODEL
+    key = cache_key(prompt, provider=PROVIDER, model=active)
     cached = cache_get(key)
     if cached is not None:
-        record_usage(model=MODEL, cached=True)
+        record_usage(model=active, cached=True)
         return cached
 
     last_err: Exception | None = None
     for _ in range(MAX_ROUNDS):
-        order = _scan_order()
+        with _pool_lock:
+            order = _scan_order()
         if not order:
             raise RuntimeError("API key 池已无可用 key（全部鉴权失败被禁用）")
         tried: set[int] = set()
         while len(tried) < len(order):
-            target = _next_target(order, tried)
-            if target is None:
-                break
-            tried.add(target)
-            _record_req()
+            with _pool_lock:
+                target = _next_target(order, tried)
+                if target is None:
+                    break
+                wait = max(_cooldown_until[target] - time.monotonic(), _rate_wait())
+                if wait <= 0:
+                    # 选中 key、标记占用、记录请求同一临界区，避免并发下重复选中
+                    tried.add(target)
+                    _record_req()
+            if wait > 0:
+                time.sleep(wait + 0.05)
+                # 睡醒后名额仍可能被其他线程抢占：标记已尝试，避免同轮反复评估
+                with _pool_lock:
+                    tried.add(target)
+                continue
             try:
-                response = _get_client(target).invoke(prompt)
-                _mark_success(target)
+                response = _get_client(target, active).invoke(prompt)
+                with _pool_lock:
+                    _mark_success(target)
                 in_tokens, out_tokens = _usage_tokens(response)
-                record_usage(in_tokens, out_tokens, model=MODEL)
+                record_usage(in_tokens, out_tokens, model=active)
                 cache_put(key, response.content)
                 return response.content
             except (AuthenticationError, PermissionDeniedError) as e:
-                _disabled.add(target)
+                with _pool_lock:
+                    _disabled.add(target)
                 logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{type(e).__name__}")
             except _NETWORK_RETRYABLE as e:
                 last_err = e
-                _mark_server_err(target)
+                with _pool_lock:
+                    _mark_server_err(target)
                 logger.warning(f"key#{target} 临时网络/服务端错误（{type(e).__name__}），冷却后换下一个 key")
             except RateLimitError as e:
                 last_err = e
                 _log_rate_limit(target, e)
-                _mark_limited(target)
+                with _pool_lock:
+                    _mark_limited(target)
     raise last_err if last_err else RuntimeError("API 请求失败：重试轮次耗尽")
 
 
-def stream_llm(prompt: str):
+def stream_llm(prompt: str, model: str | None = None):
     """流式调用，yield 每个 chunk 文本；首 chunk 前限流/5xx 可换 key，中途限流标记冷却后直接抛出
 
     命中磁盘缓存时按固定窗口回放完整文本，不发请求、不产生 Langfuse Generation。
     """
-    key = cache_key(prompt, provider="remote", model=MODEL)
+    active = model or MODEL
+    key = cache_key(prompt, provider=PROVIDER, model=active)
     cached = cache_get(key)
     if cached is not None:
-        record_usage(model=MODEL, cached=True)
+        record_usage(model=active, cached=True)
         for i in range(0, len(cached), 40):
             yield cached[i:i + 40]
         return
 
     last_err: Exception | None = None
     for _ in range(MAX_ROUNDS):
-        order = _scan_order()
+        with _pool_lock:
+            order = _scan_order()
         if not order:
             raise RuntimeError("API key 池已无可用 key（全部鉴权失败被禁用）")
         tried: set[int] = set()
         while len(tried) < len(order):
-            target = _next_target(order, tried)
-            if target is None:
-                break
-            tried.add(target)
-            _record_req()
+            with _pool_lock:
+                target = _next_target(order, tried)
+                if target is None:
+                    break
+                wait = max(_cooldown_until[target] - time.monotonic(), _rate_wait())
+                if wait <= 0:
+                    # 选中 key、标记占用、记录请求同一临界区，避免并发下重复选中
+                    tried.add(target)
+                    _record_req()
+            if wait > 0:
+                time.sleep(wait + 0.05)
+                # 睡醒后名额仍可能被其他线程抢占：标记已尝试，避免同轮反复评估
+                with _pool_lock:
+                    tried.add(target)
+                continue
             try:
-                iterator = _get_client(target).stream(prompt)
+                iterator = _get_client(target, active).stream(prompt)
                 first = next(iterator)  # 首 chunk 前抛错可安全换 key
             except (AuthenticationError, PermissionDeniedError) as e:
-                _disabled.add(target)
+                with _pool_lock:
+                    _disabled.add(target)
                 logger.error(f"key#{target} 鉴权失败，已从池中永久禁用：{type(e).__name__}")
                 continue
             except _NETWORK_RETRYABLE as e:
                 last_err = e
-                _mark_server_err(target)
+                with _pool_lock:
+                    _mark_server_err(target)
                 logger.warning(f"key#{target} 临时网络/服务端错误（{type(e).__name__}），冷却后换下一个 key")
                 continue
             except RateLimitError as e:
                 last_err = e
                 _log_rate_limit(target, e)
-                _mark_limited(target)
+                with _pool_lock:
+                    _mark_limited(target)
                 continue
-            _mark_success(target)
+            with _pool_lock:
+                _mark_success(target)
             # 流式边收边发；结束后把完整文本落缓存，下次直接回放（不再请求 API）
             # 注意：此处按“端点每个 chunk 返回增量 usage”累加；若换的端点改为返回累计值需重新对账
             total_in = total_out = 0
@@ -273,11 +310,13 @@ def stream_llm(prompt: str):
             except (RateLimitError, *_NETWORK_RETRYABLE) as e:
                 # 中途限流/网络/服务端故障：标记冷却，不重试（避免内容重复）
                 if isinstance(e, RateLimitError):
-                    _mark_limited(target)
+                    with _pool_lock:
+                        _mark_limited(target)
                 else:
-                    _mark_server_err(target)
+                    with _pool_lock:
+                        _mark_server_err(target)
                 raise
-            record_usage(total_in, total_out, model=MODEL)
+            record_usage(total_in, total_out, model=active)
             cache_put(key, "".join(parts))
             return
     raise last_err if last_err else RuntimeError("API 请求失败：重试轮次耗尽")

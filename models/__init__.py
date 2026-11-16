@@ -34,19 +34,8 @@ logger.info(f"[models] 模型提供方已切换为: {MODEL_PROVIDER}")
 
 
 def _resolve_provider() -> str:
-    """条件导入本地/远程实现包，校验配置并打印切换状态日志"""
-    from config import MODEL_PROVIDER
-
-    if MODEL_PROVIDER == "local":
-        from models import local as backend
-    elif MODEL_PROVIDER == "remote":
-        from models import remote as backend
-    else:
-        raise RuntimeError(
-            f"不支持的 MODEL_PROVIDER={MODEL_PROVIDER!r}，仅支持 local/remote"
-        )
-
-    logger.info(f"[main] 模型提供方={MODEL_PROVIDER}, 实现包={backend.__name__}")
+    """返回当前提供方并打印实际使用的实现模块（模块导入时已完成路由）"""
+    logger.info(f"[main] 模型提供方={MODEL_PROVIDER}, 实现包=models.{MODEL_PROVIDER}")
     return MODEL_PROVIDER
 
 

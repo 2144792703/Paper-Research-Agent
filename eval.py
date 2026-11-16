@@ -31,7 +31,10 @@ TEST_TOPICS = [
 
 
 def run_one(topic: str) -> dict:
-    """跑一个主题，返回结果"""
+    """跑一个主题，返回结果；空主题在入口层就会被拒绝，不进入图"""
+    if not topic.strip():
+        return {"topic": topic, "passed": False, "elapsed": 0.0,
+                "summary_len": 0, "error": "空主题（入口校验拒绝，未调用图）"}
     t0 = time.time()
     try:
         result = graph.invoke({
