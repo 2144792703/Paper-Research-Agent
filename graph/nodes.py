@@ -31,6 +31,15 @@ class PaperSummary(BaseModel):
     limitation: str = Field(description="用一句话总结该论文的局限性或者未来方向")
 
 
+def _fallback_route(state: SupervisorState) -> str:
+    """模型不可用时的确定性路由，与 supervisor prompt 的状态判定表保持一致"""
+    if (state.get("summary") or "").strip():
+        return "summarize" if (state.get("next") or "").strip() == "critic" else "critic"
+    if state.get("papers"):
+        return "summarize"
+    return "search"
+
+
 def supervisor_node(state: SupervisorState):
     logger.info("supervisor_node")
     if not state.get("topic") or not state["topic"].strip():
@@ -133,8 +142,18 @@ def supervisor_node(state: SupervisorState):
 
 {judge_hint}"""
 
-    responses = invoke_llm(message, model=CHEAP_MODEL)
-    next_step = responses.strip().lower().strip("。.!！\"'`")
+    try:
+        responses = invoke_llm(message, model=CHEAP_MODEL)
+    except Exception as e:
+        logger.warning(f"路由判定失败，按确定性状态回退：{type(e).__name__}")
+        logger.debug(f"路由判定异常详情：{e}")
+        next_step = _fallback_route(state)
+        print(f"\n⚠️ 路由模型不可用，已按当前状态回退到 {next_step}。")
+    else:
+        next_step = responses.strip().lower().strip("。.!！\"'`")
+        if not next_step:
+            logger.warning("路由输出为空，按确定性状态回退")
+            next_step = _fallback_route(state)
     if next_step == "invalid":
         if papers:
             # 已有论文说明主题有效，视为模型误判，不影响正常流程
@@ -195,7 +214,13 @@ def worker_select(state: SupervisorState):
 
 index 必须是上面列表中的序号。只返回 JSON，不要代码块或额外说明。"""
 
-    result = invoke_llm(prompt, model=CHEAP_MODEL)
+    try:
+        result = invoke_llm(prompt, model=CHEAP_MODEL)
+    except Exception as e:
+        logger.warning(f"筛选模型不可用，按搜索顺序保留前 {keep_count} 篇：{type(e).__name__}")
+        logger.debug(f"筛选模型异常详情：{e}")
+        print(f"⚠️ 筛选失败，已按搜索顺序保留前 {keep_count} 篇。")
+        return {"papers": papers[:keep_count]}
     result = re.sub(r"^\s*```(?:json)?\s*", "", result)
     result = re.sub(r"\s*```\s*$", "", result)
 
@@ -288,6 +313,53 @@ def worker_summarize_one(state: SupervisorState):
     return {"paper_summaries": summaries}
 
 
+def _md_cell(value) -> str:
+    """转义 Markdown 表格单元，避免论文信息中的 | 或换行破坏表格"""
+    text = str(value or "").replace("|", "\\|").replace("\n", " ").strip()
+    return text or "原文未提供"
+
+
+def _paper_field(paper, name: str, default: str = "") -> str:
+    if isinstance(paper, dict):
+        return str(paper.get(name) or default)
+    return str(getattr(paper, name, default) or default)
+
+
+def _fallback_report(paper_summaries, papers) -> str:
+    """综述生成失败时的降级报告：用已落库的单篇结构化摘要拼简版综述"""
+    rows = []
+    if paper_summaries:
+        for s in paper_summaries:
+            summary = s.get("summary") or {}
+            rows.append(
+                f"| {_md_cell(s.get('title'))} | {_md_cell(summary.get('problem'))} | "
+                f"{_md_cell(summary.get('method'))} | {_md_cell(summary.get('result'))} |"
+            )
+    else:
+        for p in papers:
+            rows.append(
+                f"| {_md_cell(_paper_field(p, 'title'))} | 原文未提供 | 原文未提供 | "
+                f"{_md_cell(_paper_field(p, 'summary'))} |"
+            )
+
+    if not rows:
+        return (
+            "## 研究未能完成\n\n"
+            "模型连续失败，且当前没有可用的论文摘要，未能生成综述报告。请稍后重试。\n"
+        )
+
+    return (
+        "## 研究背景\n\n"
+        "综述生成阶段模型连续失败，以下为基于已完成单篇结构化摘要的降级汇总。\n\n"
+        "## 论文对比\n\n"
+        "| 论文 | 问题 | 方法 | 结果 |\n"
+        "| --- | --- | --- | --- |\n"
+        + "\n".join(rows)
+        + "\n\n## 研究空白\n\n"
+        "原文未提供（综述生成失败，仅汇总单篇结构化结果）。\n"
+    )
+
+
 def worker_summarize(state: SupervisorState):
     print("📝 正在进行总的汇总论文...")
     logger.info("worker_summarize")
@@ -331,16 +403,19 @@ def worker_summarize(state: SupervisorState):
     print("=" * 60 + "\n")
 
     full_text = ""
+    stream_failed = False
+    try:
+        for chunk in stream_llm(message, model=STRONG_MODEL):
+            print(chunk, end="", flush=True)
+            full_text += chunk
+    except Exception as e:
+        stream_failed = True
+        logger.warning(f"综述生成失败，降级为单篇摘要汇总：{type(e).__name__}")
+        print("\n⚠️ 综述生成失败，已用单篇结构化摘要生成简版报告。")
 
-    for chunk in stream_llm(message, model=STRONG_MODEL):
-        print(chunk, end="", flush=True)
-        full_text += chunk
-
-    # 空响应不能当作“综述已生成”继续路由，否则 supervisor 会反复要求重写
-    if not full_text.strip():
-        raise RuntimeError(
-            "生成研究报告失败：模型返回空内容。请重试；若怀疑旧缓存，执行 python main.py --clear-cache"
-        )
+    # 失败或空响应时不再冒泡，也不把空内容当作“综述已生成”，直接用单篇摘要兜底
+    if stream_failed or not full_text.strip():
+        full_text = _fallback_report(paper_summaries, papers)
 
     return {'summary': full_text.lstrip()}
 
@@ -383,7 +458,12 @@ def critic_node(state: SupervisorState):
 如果质量达标，只回复：通过。
 如果不达标，回复具体修改意见（1-2条）。"""
 
-    result = invoke_llm(prompt, model=STRONG_MODEL)
+    try:
+        result = invoke_llm(prompt, model=STRONG_MODEL)
+    except Exception as e:
+        # 报告已生成，评审是非关键路径：失败时降级为通过，避免整次 run 无谓中止
+        logger.warning(f"评审节点降级：{type(e).__name__}，本轮按通过处理")
+        result = "通过。评审服务暂不可用，已跳过本轮评审。"
 
     new_history = history + [result.strip()]
 
@@ -402,5 +482,11 @@ def followup_node(state: SupervisorState):
 总结：{state['summary']}
 
 每个方向一句话，用序号列出。"""
-    result = invoke_llm(prompt, model=CHEAP_MODEL)
-    return {"followup": result.strip()}
+    try:
+        result = invoke_llm(prompt, model=CHEAP_MODEL)
+        text = result.strip()
+    except Exception as e:
+        # 追问推荐是非关键路径：模型连续失败时给友好提示，不丢弃已生成的报告
+        logger.warning(f"追问推荐降级：{type(e).__name__}")
+        text = "（推荐生成暂不可用，请稍后重试。）"
+    return {"followup": text}

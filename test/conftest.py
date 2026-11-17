@@ -2,9 +2,9 @@
 
 import pytest
 
-from graph.graph_compile import graph
+from graph.graph_compile import graph as _graph
 
 
 @pytest.fixture(scope="session")
 def graph():
-    return graph
+    return _graph

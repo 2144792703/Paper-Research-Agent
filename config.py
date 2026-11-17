@@ -4,6 +4,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _clamp_float(value, low: float, high: float, default: float) -> float:
+    """把非法或越界的浮点参数收敛到 [low, high]，解析失败时退回 default"""
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return default
+    return max(low, min(value, high))
+
+
 # ============================================================
 # 模块一：模型路由
 # ============================================================
@@ -19,6 +28,8 @@ PROVIDER_NAME = MODEL_PROVIDER
 # ============================================================
 REQUEST_TIMEOUT = os.getenv('REQUEST_TIMEOUT', '600.0')
 MAX_RETRIES = os.getenv('MAX_RETRIES', '2')
+# 混沌测试：请求发出前按概率注入可重试异常（0 关闭；仅远程模式生效，调试时临时开启）
+CHAOS_FAILURE_RATE = _clamp_float(os.getenv('CHAOS_FAILURE_RATE', '0.0'), 0.0, 1.0, 0.0)
 
 API_KEY = os.getenv("API_KEY")
 
@@ -82,6 +93,10 @@ KEEP_PAPERS = _clamp_int(os.getenv("KEEP_PAPERS", "5"), KEEP_MIN, KEEP_MAX, 5)
 
 OLLAMA_MODEL_CHEAP = (os.getenv("OLLAMA_MODEL_CHEAP") or "").strip() or OLLAMA_MODEL
 MODEL_CHEAP = (os.getenv("MODEL_CHEAP") or "").strip() or MODEL or ""
+# 轻量模型是否关闭思考/推理：1=关闭（默认），0=保留；仅在远程且轻量模型与主模型不同时生效
+CHEAP_MODEL_DISABLE_THINKING = _clamp_int(
+    os.getenv("CHEAP_MODEL_DISABLE_THINKING", "1"), 0, 1, 1
+) == 1
 SUMMARY_CONCURRENCY = _clamp_int(os.getenv("SUMMARY_CONCURRENCY", "3"), 1, 8, 3)
 STRONG_MODEL = OLLAMA_MODEL if MODEL_PROVIDER == "local" else MODEL
 CHEAP_MODEL = OLLAMA_MODEL_CHEAP if MODEL_PROVIDER == "local" else MODEL_CHEAP

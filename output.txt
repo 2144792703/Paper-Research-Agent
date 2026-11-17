@@ -1,267 +1,798 @@
-(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --clear-cache
-2026-11-16 21:04:13,665 [models] INFO: [models] 模型提供方已切换为: remote
-🧹 已清空本地 LLM 缓存：E:\testcode\day29\paper-research-agent\.cache
-(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --topic "graph neural network" --papers 5
-2026-11-16 21:04:31,163 [models] INFO: [models] 模型提供方已切换为: remote
-2026-11-16 21:04:31,174 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
+================================================================================
+Day48 混沌测试 · 运行记录归档（2026-11-17，remote / Qwen 系列）
+================================================================================
+口径说明：
+- CHAOS_FAILURE_RATE：LLM 请求前按概率注入可重试故障（0=关闭，0.2=20%，1.0=100%）。
+- 「当前代码」记录：与本次提交的兜底 / 重试 / 统计代码一致，可作为验收证据。
+- 「历史旧版」记录：兜底代码补齐之前跑出的中止 trace，仅留档回溯，不代表当前实现；
+  对应节点在当前代码已由兜底分支 + 确定性单测覆盖（见 test/chaos_test.py）。
+- 「极端压测」记录：1.0 全失败，超出 20% 验收口径，用于观察持续失败时的中止路径。
+- 主题均为 graph neural network；参数 --papers 2 --max-retries 1。
+
+--------------------------------------------------------------------------------
+【当前代码 · 对照组 A】CHAOS=0.0，2026-11-17 15:33，完整出报告（83.16s）
+--------------------------------------------------------------------------------
+CHAOS_FAILURE_RATE=0.0
+
+(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --topic "graph neural network" --papers 2 --max-retries 1
+2026-11-17 15:33:36,954 [models] INFO: [models] 模型提供方已切换为: remote
+2026-11-17 15:33:36,963 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
 🚀 开始研究：graph neural network
-   搜索论文数：15，保留论文数：5，评审轮数：2
+   搜索论文数：15，保留论文数：2，评审轮数：1
    模型提供方：remote
-   Langfuse 观测：已启用
-2026-11-16 21:04:31,520 [PaperAgent] INFO: supervisor_node
+   Langfuse 观测：未配置（跳过上报）
+2026-11-17 15:33:36,966 [PaperAgent] INFO: supervisor_node
    🌐 cache miss（调用 API）
-2026-11-16 21:04:31,529 [cache] INFO: [cache] miss key=7775b36dee6d
-2026-11-16 21:04:34,108 [PaperAgent] INFO: route
+2026-11-17 15:33:36,973 [cache] INFO: [cache] miss key=19b11821c2eb
+2026-11-17 15:33:38,213 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:33:38,218 [PaperAgent] INFO: route
 
 🔍 正在搜索论文：graph neural network...
-2026-11-16 21:04:34,110 [PaperAgent] INFO: worker_search
-2026-11-16 21:04:34,110 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-16 21:04:34,110 [PaperAgent] INFO: search_papers
-2026-11-16 21:04:34,110 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-16 21:04:34,737 [arxiv] INFO: Got first page: 15 of 506493 total results
-2026-11-16 21:04:34,737 [PaperAgent] INFO: search_papers：返回 15 条
+2026-11-17 15:33:38,219 [PaperAgent] INFO: worker_search
+2026-11-17 15:33:38,219 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-17 15:33:38,219 [PaperAgent] INFO: search_papers
+2026-11-17 15:33:38,219 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 15:33:54,852 [arxiv] INFO: Got first page: 15 of 506899 total results
+2026-11-17 15:33:54,852 [PaperAgent] INFO: search_papers：返回 15 条
 📊 正在筛选最相关论文...
-2026-11-16 21:04:34,739 [PaperAgent] INFO: worker_select
+2026-11-17 15:33:54,853 [PaperAgent] INFO: worker_select
    🌐 cache miss（调用 API）
-2026-11-16 21:04:34,739 [cache] INFO: [cache] miss key=7a96bc64a9ba
-2026-11-16 21:05:35,791 [PaperAgent] WARNING: 筛选组合跨子领域：{'异质图神经网络', 'GNN表征学习与迁移', '高效深层GNN', 'GNN在组合优化中的能力评估', 'GNN训练系统与扩展性'}
-2026-11-16 21:05:35,791 [PaperAgent] INFO: 筛选后保留 5 / 15 篇
-📝 正在并发总结 5 篇论文（并发度 1）...
+2026-11-17 15:33:54,854 [cache] INFO: [cache] miss key=573cc66c62af
+2026-11-17 15:33:57,579 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:33:57,583 [PaperAgent] WARNING: 筛选组合跨子领域：{'深度图神经网络 效率与构建方法', '图神经网络训练系统与架构优化'}
+2026-11-17 15:33:57,583 [PaperAgent] INFO: 筛选后保留 2 / 15 篇
+📝 正在并发总结 2 篇论文（并发度 3）...
    🌐 cache miss（调用 API）
-2026-11-16 21:05:35,821 [cache] INFO: [cache] miss key=f4586907aa73
-2026-11-16 21:06:07,937 [PaperAgent] INFO: 已总结：Learning Universal Graph Neural Network Embeddings
+2026-11-17 15:33:57,606 [cache] INFO: [cache] miss key=fd89833c5e86
    🌐 cache miss（调用 API）
-2026-11-16 21:06:07,938 [cache] INFO: [cache] miss key=9ad61a3787ef
-2026-11-16 21:06:35,188 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
-   🌐 cache miss（调用 API）
-2026-11-16 21:06:35,188 [cache] INFO: [cache] miss key=39079cdf147c
-2026-11-16 21:06:39,571 [PaperAgent] INFO: 已总结：Fast and Deep Graph Neural Networks
-   🌐 cache miss（调用 API）
-2026-11-16 21:06:39,571 [cache] INFO: [cache] miss key=33e5a03b7f73
-2026-11-16 21:07:06,292 [PaperAgent] INFO: 已总结：MECCH: Metapath Context Convolution-based Heteroge
-   🌐 cache miss（调用 API）
-2026-11-16 21:07:06,293 [cache] INFO: [cache] miss key=a31bc88b33d1
-2026-11-16 21:07:17,977 [PaperAgent] INFO: 已总结：Modern graph neural networks do worse than classic
-2026-11-16 21:07:17,977 [PaperAgent] INFO: 总结阶段耗时 102.19s，5 篇
-2026-11-16 21:07:17,979 [PaperAgent] INFO: supervisor_node
-2026-11-16 21:07:17,979 [PaperAgent] INFO: route
+2026-11-17 15:33:57,608 [cache] INFO: [cache] miss key=0b50a30ebd54
+2026-11-17 15:33:58,688 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:33:58,690 [PaperAgent] INFO: 已总结：Fast and Deep Graph Neural Networks
+2026-11-17 15:33:59,133 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:33:59,135 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
+2026-11-17 15:33:59,136 [PaperAgent] INFO: 总结阶段耗时 1.55s，2 篇
+2026-11-17 15:33:59,137 [PaperAgent] INFO: supervisor_node
+2026-11-17 15:33:59,137 [PaperAgent] INFO: route
 📝 正在进行总的汇总论文...
-2026-11-16 21:07:17,980 [PaperAgent] INFO: worker_summarize
+2026-11-17 15:33:59,138 [PaperAgent] INFO: worker_summarize
 
 ============================================================
 📝 正在生成研究报告...
 ============================================================
 
    🌐 cache miss（调用 API）
-2026-11-16 21:07:17,981 [cache] INFO: [cache] miss key=523476eed975
+2026-11-17 15:33:59,138 [cache] INFO: [cache] miss key=8657dfbc0b36
+2026-11-17 15:34:00,181 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
 ## 研究背景
-图神经网络是图数据表示学习的重要工具，研究涉及通用嵌入、训练系统、深层网络效率、异构图建模与组合优化。已有工作利用迁移学习提升通用图嵌入，比较全图与 mini-batch 训练，并探索以动力系统不动点表示输入图；异构图多类型节点边导致的性能退化及最大独立集等组合优化中的 GNN 求解也受到关注。但多篇论文的结果或局限信息未提供。
+
+图神经网络的实际部署不仅取决于模型能力，也受训练系统和网络深度影响。现有信息涉及 两类方向：一是比较全图与迷你批次训练系统，二是提升深层图神经网络的构建效率。然而 ，两篇论文的摘要或给定信息均未提供充分的实验数据、量化结果和局限说明，因此研究现 状仍偏向问题提出和方法框架，难以判断性能优势与适用边界。
 
 ## 论文对比
+
 | 论文 | 问题 | 方法 | 结果 |
 |---|---|---|---|
-| Learning Universal GNN Embeddings With Aid Of Transfer Learning | 强大的数据嵌入学习是机器学习核心 | 借助迁移学习学习通用图神经网络嵌入 | 原文未提供 |
-| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 关注 GNN 及 mini-batch 等常见训练方法 | 原文未提供具体方法，仅提及 mini-batch 训练 | 原文未提供量化结果或性能差异 |
-| Fast and Deep Graph Neural Networks | 解决深度 GNN 构建效率问题 | 将每个输入图表示为动力系统的不动点 | 原文未提供 |
-| MECCH: Metapath Context Convolution-based Heterogeneous Graph Neural Networks | 异构图神经网络处理多类型节点边时性能退化 | 原文未提供 | 原文未提供 |
-| Modern graph neural networks do worse than classical greedy algorithms in solving combinatorial optimization problems like maximum independent set | 最大独立集等组合优化 中的 GNN 求解 | 物理启发无监督 GNN 被提出用于求解组合优化 | 现代 GNN 在此类问题上差于 经典贪心算法 |
+| Graph GNN Training Systems | 摘要未提供具体的训练系统性能对比问题描述。 | 原文 未提供具体方法细节，仅提及全图与迷你批次两种常见训练方法。 | 原文未提供 |
+| Fast and Deep GNNs | 构建深层图神经网络存在效率问题。 | 将输入图表示为动力系统 的不动点。 | 原文未提供 |
 
 ## 研究空白
-未来需补足结果与局限报告：评估通用图嵌入的迁移泛化；量化全图与 mini-batch 训练差异；验证深层 GNN 的效率与表达能力；明确异构图性能退化机制；在组合优化中系统比较 GNN 与经典贪心基线，并推进标准化评测与可解释性研究。2026-11-16 21:07:33,826 [PaperAgent] INFO: supervisor_node
-2026-11-16 21:07:33,827 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-16 21:07:33,828 [PaperAgent] INFO: critic_node
-   🌐 cache miss（调用 API）
-2026-11-16 21:07:33,828 [cache] INFO: [cache] miss key=b31201df595b
-2026-11-16 21:07:38,464 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-16 21:07:38,465 [PaperAgent] INFO: followup_node
-   🌐 cache miss（调用 API）
-2026-11-16 21:07:38,465 [cache] INFO: [cache] miss key=cf7ff8bd8d02
 
-🔗 Langfuse trace：15e5ad2d98d9679af6f60ba4d2393bbf
+当前最大空白是缺少可核验的量化比较。全图与迷你批次训练在训练时间、显存占用、吞吐 或收敛表现上的差异未提供，无法评价工程取舍；深层 GNN 的不动点表示也缺少结果、局限及大规模验证信息。未来应在统一数据集和硬件条件下报告性能指标，并分析方法对图规模 、网络深度和训练稳定性的影响边界。2026-11-17 15:34:42,764 [PaperAgent] INFO: supervisor_node
+2026-11-17 15:34:42,765 [PaperAgent] INFO: route
+📝 正在判断总汇总论文的质量...
+2026-11-17 15:34:42,765 [PaperAgent] INFO: critic_node
+   🌐 cache miss（调用 API）
+2026-11-17 15:34:42,765 [cache] INFO: [cache] miss key=5c7ede70c482
+2026-11-17 15:34:58,028 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:34:58,030 [PaperAgent] INFO: after_critic
+📝 推荐出你所感兴趣的相关论文...
+2026-11-17 15:34:58,031 [PaperAgent] INFO: followup_node
+   🌐 cache miss（调用 API）
+2026-11-17 15:34:58,032 [cache] INFO: [cache] miss key=09a23bf0de48
+2026-11-17 15:35:00,125 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
 
 ============================================================
 📄 最终报告
 ============================================================
 ## 研究背景
-图神经网络是图数据表示学习的重要工具，研究涉及通用嵌入、训练系统、深层网络效率、异构图建模与组合优化。已有工作利用迁移学习提升通用图嵌入，比较全图与 mini-batch 训练，并探索以动力系统不动点表示输入图；异构图多类型节点边导致的性能退化及最大独立集等组合优化中的 GNN 求解也受到关注。但多篇论文的结果或局限信息未提供。
+
+图神经网络的实际部署不仅取决于模型能力，也受训练系统和网络深度影响。现有信息涉及 两类方向：一是比较全图与迷你批次训练系统，二是提升深层图神经网络的构建效率。然而 ，两篇论文的摘要或给定信息均未提供充分的实验数据、量化结果和局限说明，因此研究现 状仍偏向问题提出和方法框架，难以判断性能优势与适用边界。
 
 ## 论文对比
+
 | 论文 | 问题 | 方法 | 结果 |
 |---|---|---|---|
-| Learning Universal GNN Embeddings With Aid Of Transfer Learning | 强大的数据嵌入学习是机器学习核心 | 借助迁移学习学习通用图神经网络嵌入 | 原文未提供 |
-| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 关注 GNN 及 mini-batch 等常见训练方法 | 原文未提供具体方法，仅提及 mini-batch 训练 | 原文未提供量化结果或性能差异 |
-| Fast and Deep Graph Neural Networks | 解决深度 GNN 构建效率问题 | 将每个输入图表示为动力系统的不动点 | 原文未提供 |
-| MECCH: Metapath Context Convolution-based Heterogeneous Graph Neural Networks | 异构图神经网络处理多类型节点边时性能退化 | 原文未提供 | 原文未提供 |
-| Modern graph neural networks do worse than classical greedy algorithms in solving combinatorial optimization problems like maximum independent set | 最大独立集等组合优化 中的 GNN 求解 | 物理启发无监督 GNN 被提出用于求解组合优化 | 现代 GNN 在此类问题上差于 经典贪心算法 |
+| Graph GNN Training Systems | 摘要未提供具体的训练系统性能对比问题描述。 | 原文 未提供具体方法细节，仅提及全图与迷你批次两种常见训练方法。 | 原文未提供 |
+| Fast and Deep GNNs | 构建深层图神经网络存在效率问题。 | 将输入图表示为动力系统 的不动点。 | 原文未提供 |
 
 ## 研究空白
-未来需补足结果与局限报告：评估通用图嵌入的迁移泛化；量化全图与 mini-batch 训练差异；验证深层 GNN 的效率与表达能力；明确异构图性能退化机制；在组合优化中系统比较 GNN 与经典贪心基线，并推进标准化评测与可解释性研究。
+
+当前最大空白是缺少可核验的量化比较。全图与迷你批次训练在训练时间、显存占用、吞吐 或收敛表现上的差异未提供，无法评价工程取舍；深层 GNN 的不动点表示也缺少结果、局限及大规模验证信息。未来应在统一数据集和硬件条件下报告性能指标，并分析方法对图规模 、网络深度和训练稳定性的影响边界。
 
 ✅ 数字校验：报告中的量化数字均来自摘要语料
 
 --- 评审意见 ---
-通过
+通过。
 
 --- 评审意见历史 ---
-['通过']
+['通过。']
 
 --- 追问推荐 ---
-1. 迁移学习在通用图嵌入中的作用：GNN 如何跨任务、跨数据集保持表达能力与泛化性能？
-
-2. 异构图中的多类型节点与边：MECCH 等方法如何缓解语义复杂化带来的性能退化？
-
-3. GNN 在组合优化中的真实能力：最大独立集等问题上，GNN 与经典贪心算法相比存在哪些局限 与改进空间？
+1. 探究全图训练与迷你批次训练在不同硬件配置下的显存占用、通信开销及收敛速度差异，以明确工程部署中的具体取舍边界。
+2. 验证基于动力系统不动点表示的深层 GNN 在大规模稀疏图上的数值稳定性、计算效率及 其相对于传统深度堆叠方法的性能增益。
+3. 构建统一的基准测试框架，量化分析图神经网络架构深度、节点规模与训练系统资源消耗之间的非线性制约关系。
 
 ============================================================
 💰 本次 run 统计
 ============================================================
-  总耗时        = 192.48s
-  缓存          = hit 0 次 / miss 10 次
+  总耗时        = 83.16s
+  缓存          = hit 0 次 / miss 7 次
 本次 run 用量：
-  input tokens  = 4067
-  output tokens = 11669
-  total tokens  = 15736
-  LLM 调用次数  = 10（缓存命中 0 次，未发请求）
-  估算成本      = 单价未知（Qwen/Qwen3.8-Flash-Next、deepseek-ai/DeepSeek-V4.1-Flash:DashScope 不在价格表），仅报 token
+  input tokens  = 2910
+  output tokens = 1133
+  total tokens  = 4043
+  LLM 调用次数  = 7（缓存命中 0 次，未发请求）
+  分模型 token（仅统计真实请求）：
+    Qwen/Qwen3.5-35B-A3B: input 2444 / output 381
+    Qwen/Qwen3.8-Flash-Next: input 466 / output 752
+  估算成本      = 单价未知（Qwen/Qwen3.5-35B-A3B、Qwen/Qwen3.8-Flash-Next 不在价 格表），仅报 token
   价格表快照     = 2026-11-09（litellm 静态快照，成本为估算值）
-(mybase) PS E:\testcode\day29\paper-research-agent>
 
 
 
+--------------------------------------------------------------------------------
+【历史旧版 · 留档】CHAOS=0.2，2026-11-17 15:36，综述节点重试耗尽中止（未出报告）
+  说明：本次提交之前的代码，综述失败尚无降级兜底；当前代码 worker_summarize
+  已接 _fallback_report 简版综述兜底，对应单测 test_summarize_falls_back。
+--------------------------------------------------------------------------------
+CHAOS_FAILURE_RATE=0.2
 
-
-(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --clear-cache
-2026-11-16 20:53:45,858 [models] INFO: [models] 模型提供方已切换为: remote
-🧹 已清空本地 LLM 缓存：E:\testcode\day29\paper-research-agent\.cache
-(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --topic "graph neural network" --papers 5
-2026-11-16 20:54:11,816 [models] INFO: [models] 模型提供方已切换为: remote
-2026-11-16 20:54:11,827 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
+(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --topic "graph neural network" --papers 2 --max-retries 1
+2026-11-17 15:36:56,767 [models] INFO: [models] 模型提供方已切换为: remote
+2026-11-17 15:36:56,777 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
 🚀 开始研究：graph neural network
-   搜索论文数：15，保留论文数：5，评审轮数：2
+   搜索论文数：15，保留论文数：2，评审轮数：1
    模型提供方：remote
-   Langfuse 观测：已启用
-2026-11-16 20:54:12,174 [PaperAgent] INFO: supervisor_node
+   Langfuse 观测：未配置（跳过上报）
+2026-11-17 15:36:56,780 [PaperAgent] INFO: supervisor_node
    🌐 cache miss（调用 API）
-2026-11-16 20:54:12,185 [cache] INFO: [cache] miss key=7775b36dee6d
-2026-11-16 20:54:15,224 [PaperAgent] INFO: route
+2026-11-17 15:36:56,787 [cache] INFO: [cache] miss key=19b11821c2eb
+2026-11-17 15:36:57,875 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:36:57,879 [PaperAgent] INFO: route
 
 🔍 正在搜索论文：graph neural network...
-2026-11-16 20:54:15,225 [PaperAgent] INFO: worker_search
-2026-11-16 20:54:15,225 [PaperAgent] INFO: 本次搜索论文数量：15
-2026-11-16 20:54:15,226 [PaperAgent] INFO: search_papers
-2026-11-16 20:54:15,226 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
-2026-11-16 20:54:16,092 [arxiv] INFO: Got first page: 15 of 506493 total results
-2026-11-16 20:54:16,093 [PaperAgent] INFO: search_papers：返回 15 条
+2026-11-17 15:36:57,880 [PaperAgent] INFO: worker_search
+2026-11-17 15:36:57,880 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-17 15:36:57,880 [PaperAgent] INFO: search_papers
+2026-11-17 15:36:57,881 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 15:36:59,216 [arxiv] INFO: Got first page: 15 of 506899 total results
+2026-11-17 15:36:59,216 [PaperAgent] INFO: search_papers：返回 15 条
 📊 正在筛选最相关论文...
-2026-11-16 20:54:16,095 [PaperAgent] INFO: worker_select
+2026-11-17 15:36:59,218 [PaperAgent] INFO: worker_select
    🌐 cache miss（调用 API）
-2026-11-16 20:54:16,095 [cache] INFO: [cache] miss key=7a96bc64a9ba
-2026-11-16 20:55:26,071 [PaperAgent] WARNING: 筛选组合跨子领域：{'图神经网络表示学习与迁移嵌入', '图神经网络训练系统与计算性能', '图神经网络组合优化算法评测', '异质图神经网络表示学习', '高效深度图神经网络架构'}
-2026-11-16 20:55:26,072 [PaperAgent] INFO: 筛选后保留 5 / 15 篇
-📝 正在并发总结 5 篇论文（并发度 3）...
+2026-11-17 15:36:59,218 [cache] INFO: [cache] miss key=573cc66c62af
+2026-11-17 15:37:01,662 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:37:01,664 [PaperAgent] WARNING: 筛选组合跨子领域：{'GNN 训练系统与 优化', 'GNN 理论架构与Transformer关联'}
+2026-11-17 15:37:01,664 [PaperAgent] INFO: 筛选后保留 2 / 15 篇
+📝 正在并发总结 2 篇论文（并发度 3）...
    🌐 cache miss（调用 API）
    🌐 cache miss（调用 API）
-2026-11-16 20:55:26,108 [cache] INFO: [cache] miss key=9ad61a3787ef
-   🌐 cache miss（调用 API）
-2026-11-16 20:55:26,108 [cache] INFO: [cache] miss key=f4586907aa73
-2026-11-16 20:55:26,109 [cache] INFO: [cache] miss key=39079cdf147c
-2026-11-16 20:55:34,174 [PaperAgent] INFO: 已总结：Fast and Deep Graph Neural Networks
-   🌐 cache miss（调用 API）
-2026-11-16 20:55:34,174 [cache] INFO: [cache] miss key=33e5a03b7f73
-2026-11-16 20:55:34,914 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
-   🌐 cache miss（调用 API）
-2026-11-16 20:55:34,914 [cache] INFO: [cache] miss key=a31bc88b33d1
-2026-11-16 20:55:42,762 [PaperAgent] INFO: 已总结：MECCH: Metapath Context Convolution-based Heteroge
-2026-11-16 20:55:43,189 [PaperAgent] INFO: 已总结：Learning Universal Graph Neural Network Embeddings
-2026-11-16 20:55:55,499 [PaperAgent] INFO: 已总结：Modern graph neural networks do worse than classic
-2026-11-16 20:55:55,499 [PaperAgent] INFO: 总结阶段耗时 29.43s，5 篇
-2026-11-16 20:55:55,500 [PaperAgent] INFO: supervisor_node
-2026-11-16 20:55:55,501 [PaperAgent] INFO: route
+2026-11-17 15:37:01,689 [cache] INFO: [cache] miss key=ab5fc4537d4d
+2026-11-17 15:37:01,689 [cache] INFO: [cache] miss key=fd89833c5e86
+2026-11-17 15:37:02,811 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:37:02,812 [PaperAgent] INFO: 已总结：Transformers are Graph Neural Networks
+2026-11-17 15:37:03,489 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 15:37:03,491 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
+2026-11-17 15:37:03,491 [PaperAgent] INFO: 总结阶段耗时 1.83s，2 篇
+2026-11-17 15:37:03,492 [PaperAgent] INFO: supervisor_node
+2026-11-17 15:37:03,493 [PaperAgent] INFO: route
 📝 正在进行总的汇总论文...
-2026-11-16 20:55:55,502 [PaperAgent] INFO: worker_summarize
+2026-11-17 15:37:03,493 [PaperAgent] INFO: worker_summarize
 
 ============================================================
 📝 正在生成研究报告...
 ============================================================
 
    🌐 cache miss（调用 API）
-2026-11-16 20:55:55,502 [cache] INFO: [cache] miss key=5e559c518672
-# 研究报告
+2026-11-17 15:37:03,494 [cache] INFO: [cache] miss key=9d460c7c4018
+2026-11-17 15:37:03,494 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 15:37:03,494 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s，切换下一个 key
+2026-11-17 15:37:03,494 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 15:37:03,494 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 15:37:08,544 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 15:37:08,545 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s，切换下一个 key
+2026-11-17 15:37:08,545 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 15:37:08,545 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 15:37:13,595 [PaperAgent] ERROR: 研究流程异常：ChaosInjectedError
 
-## 研究背景
-图神经网络已成为图数据表示学习的重要方向，相关研究覆盖通用嵌入、训练系统性能、深度网络效率、异 构图建模及组合优化应用。现有工作既有方法创新，也有系统性比较，但部分论文的结果与局限披露不足， 影响复现与综合判断。
+⚠️ 研究未能完成：模型连续失败或服务异常，已中止（未生成报告）。
+   建议稍后重试；混沌测试时可降低 CHAOS_FAILURE_RATE。
 
-## 论文对比
-| 论文 | 问题 | 方法 | 结果 |
-|---|---|---|---|
-| Learning Universal Graph Neural Network Embeddings With Aid Of Transfer Learning | 学习强大数据嵌入，尤其用于自然语言和计算机视觉 | 原文未提供 | 原文未提供 |
-| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 图神经网络训练系统性能比较 | 比较全图训练与小批量训练 | 原文未提供具体实验结果或量化指标 |
-| Fast and Deep Graph Neural Networks | 构建深度图神经网络的效率问题 | 将每个输入图表示为动力系统的不动点 | 原文未提供 |
-| MECCH: Metapath Context Convolution-based Heterogeneous Graph Neural Networks | 异构图神经网 络在特定情况下的性能退化 | 提出基于元路径上下文卷积的异构图神经网络（MECCH） | 原文未提供 |
-| Modern graph neural networks do worse than classical greedy algorithms in solving combinatorial optimization problems like maximum independent set | 求解最大独立集等组合优化问题 | 比较现代GNN与经典贪心算法 | 现代GNN表现差于经典贪心算法 |
-
-## 研究空白
-未来可围绕通用图嵌入与迁移学习、全图/小批量训练的可复现基准、深度GNN效率、异构图鲁棒性及GNN求解组合优化的边界展开；同时应补充量化结果、失败案例与局限性说明，避免仅凭单一指标判断方法优劣。2026-11-16 20:56:05,242 [PaperAgent] INFO: supervisor_node
-2026-11-16 20:56:05,243 [PaperAgent] INFO: route
-📝 正在判断总汇总论文的质量...
-2026-11-16 20:56:05,244 [PaperAgent] INFO: critic_node
-   🌐 cache miss（调用 API）
-2026-11-16 20:56:05,244 [cache] INFO: [cache] miss key=ae699a187990
-2026-11-16 20:56:10,811 [PaperAgent] INFO: after_critic
-📝 推荐出你所感兴趣的相关论文...
-2026-11-16 20:56:10,812 [PaperAgent] INFO: followup_node
-   🌐 cache miss（调用 API）
-2026-11-16 20:56:10,812 [cache] INFO: [cache] miss key=b9b879bd8da2
-
-🔗 Langfuse trace：e4ad2ffcb7c07f03a1682839c6a256cb
-
-============================================================
-📄 最终报告
-============================================================
-# 研究报告
-
-## 研究背景
-图神经网络已成为图数据表示学习的重要方向，相关研究覆盖通用嵌入、训练系统性能、深度网络效率、异 构图建模及组合优化应用。现有工作既有方法创新，也有系统性比较，但部分论文的结果与局限披露不足， 影响复现与综合判断。
-
-## 论文对比
-| 论文 | 问题 | 方法 | 结果 |
-|---|---|---|---|
-| Learning Universal Graph Neural Network Embeddings With Aid Of Transfer Learning | 学习强大数据嵌入，尤其用于自然语言和计算机视觉 | 原文未提供 | 原文未提供 |
-| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 图神经网络训练系统性能比较 | 比较全图训练与小批量训练 | 原文未提供具体实验结果或量化指标 |
-| Fast and Deep Graph Neural Networks | 构建深度图神经网络的效率问题 | 将每个输入图表示为动力系统的不动点 | 原文未提供 |
-| MECCH: Metapath Context Convolution-based Heterogeneous Graph Neural Networks | 异构图神经网 络在特定情况下的性能退化 | 提出基于元路径上下文卷积的异构图神经网络（MECCH） | 原文未提供 |
-| Modern graph neural networks do worse than classical greedy algorithms in solving combinatorial optimization problems like maximum independent set | 求解最大独立集等组合优化问题 | 比较现代GNN与经典贪心算法 | 现代GNN表现差于经典贪心算法 |
-
-## 研究空白
-未来可围绕通用图嵌入与迁移学习、全图/小批量训练的可复现基准、深度GNN效率、异构图鲁棒性及GNN求解组合优化的边界展开；同时应补充量化结果、失败案例与局限性说明，避免仅凭单一指标判断方法优劣。
-
-✅ 数字校验：报告中的量化数字均来自摘要语料
-
---- 评审意见 ---
-通过
-
---- 评审意见历史 ---
-['通过']
-
---- 追问推荐 ---
-1. 进一步了解基于迁移学习的通用图嵌入方法，关注其在自然语言、计算机视觉和图任务中的跨域适应能力。
-
-2. 进一步研究图神经网络训练系统的全图训练与小批量训练对比，建立更完整、可复现的性能基准。
-
-3. 进一步探讨深度 GNN、异构图建模以及组合优化应用中方法的局限性与适用边界，弥补现有研究中结果和失败案例披露不足的问题。
+🧪 混沌统计
+   注入失败   = 2 次
+   请求尝试   = 6 次
+   重试次数   = 1 次
+   最终出报告 = 否
 
 ============================================================
 💰 本次 run 统计
 ============================================================
-  总耗时        = 123.33s
-  缓存          = hit 0 次 / miss 10 次
+  总耗时        = 16.82s
 本次 run 用量：
-  input tokens  = 3956
-  output tokens = 10831
-  total tokens  = 14787
-  LLM 调用次数  = 10（缓存命中 0 次，未发请求）
-  估算成本      = 单价未知（Qwen/Qwen3.8-Flash-Next、deepseek-ai/DeepSeek-V4.1-Flash:DashScope 不在价格表），仅报 token
+  input tokens  = 2102
+  output tokens = 274
+  total tokens  = 2376
+  LLM 调用次数  = 4（缓存命中 0 次，未发请求）
+  分模型 token（仅统计真实请求）：
+    Qwen/Qwen3.5-35B-A3B: input 2102 / output 274
+  估算成本      = 单价未知（Qwen/Qwen3.5-35B-A3B 不在价格表），仅报 token
   价格表快照     = 2026-11-09（litellm 静态快照，成本为估算值）
-(mybase) PS E:\testcode\day29\paper-research-agent>
+
+
+--------------------------------------------------------------------------------
+【当前代码 · 混沌达标组 A】CHAOS=0.2，2026-11-17 17:33，注入 4 / 重试 3，最终出报告（243.76s）
+--------------------------------------------------------------------------------
+(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --topic "graph neural network" --papers 2 --max-retries 1
+2026-11-17 17:33:56,425 [models] INFO: [models] 模型提供方已切换为: remote
+2026-11-17 17:33:56,438 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
+🚀 开始研究：graph neural network
+   搜索论文数：15，保留论文数：2，评审轮数：1
+   模型提供方：remote
+   Langfuse 观测：未配置（跳过上报）
+2026-11-17 17:33:56,442 [PaperAgent] INFO: supervisor_node
+   ⚡ cache hit（复用本地结果，不发请求）
+2026-11-17 17:33:56,449 [cache] INFO: [cache] hit key=19b11821c2eb
+2026-11-17 17:33:56,449 [PaperAgent] INFO: route
+
+🔍 正在搜索论文：graph neural network...
+2026-11-17 17:33:56,450 [PaperAgent] INFO: worker_search
+2026-11-17 17:33:56,450 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-17 17:33:56,450 [PaperAgent] INFO: search_papers
+2026-11-17 17:33:56,450 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 17:34:13,809 [arxiv] INFO: Sleeping: 4.999949 seconds
+2026-11-17 17:34:18,811 [arxiv] INFO: Requesting page (first: True, try: 1): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 17:34:34,682 [arxiv] INFO: Sleeping: 4.999966 seconds
+2026-11-17 17:34:39,683 [arxiv] INFO: Requesting page (first: True, try: 2): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 17:34:40,100 [arxiv] INFO: Sleeping: 4.999974 seconds
+2026-11-17 17:34:45,100 [arxiv] INFO: Requesting page (first: True, try: 3): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 17:34:45,495 [PaperAgent] INFO: arXiv API 请求失败: HTTPError
+2026-11-17 17:34:45,496 [PaperAgent] INFO: search_papers：返回 0 条
+📊 正在筛选最相关论文...
+2026-11-17 17:34:45,498 [PaperAgent] INFO: worker_select
+📝 正在并发总结 0 篇论文（并发度 3）...
+2026-11-17 17:34:45,500 [PaperAgent] INFO: supervisor_node
+   ⚡ cache hit（复用本地结果，不发请求）
+2026-11-17 17:34:45,500 [cache] INFO: [cache] hit key=4326e52559d8
+2026-11-17 17:34:45,500 [PaperAgent] INFO: route
+
+🔍 正在搜索论文：graph neural network...
+2026-11-17 17:34:45,501 [PaperAgent] INFO: worker_search
+2026-11-17 17:34:45,501 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-17 17:34:45,501 [PaperAgent] INFO: search_papers
+2026-11-17 17:34:45,501 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 17:34:46,978 [arxiv] INFO: Sleeping: 4.999981 seconds
+2026-11-17 17:34:51,979 [arxiv] INFO: Requesting page (first: True, try: 1): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 17:35:08,072 [arxiv] INFO: Sleeping: 4.999969 seconds
+2026-11-17 17:35:13,072 [arxiv] INFO: Requesting page (first: True, try: 2): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 17:35:59,589 [arxiv] INFO: Got first page: 15 of 506899 total results
+2026-11-17 17:35:59,589 [PaperAgent] INFO: search_papers：返回 15 条
+📊 正在筛选最相关论文...
+2026-11-17 17:35:59,590 [PaperAgent] INFO: worker_select
+   🌐 cache miss（调用 API）
+2026-11-17 17:35:59,591 [cache] INFO: [cache] miss key=573cc66c62af
+2026-11-17 17:35:59,591 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 17:35:59,591 [models.remote] WARNING: key#0 服务端错误(5xx)，短 暂冷却 5s，切换下一个 key
+2026-11-17 17:35:59,591 [models.remote] WARNING: key#0 临时网络/服务端错误 （ChaosInjectedError），冷却后换下一个 key
+2026-11-17 17:35:59,591 [models.remote] WARNING: key#0 需等待 5s（限流冷却 或全局 RPM 窗口已满），暂停后重试
+2026-11-17 17:36:07,464 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 17:36:07,475 [PaperAgent] INFO: 筛选后保留 2 / 15 篇
+📝 正在并发总结 2 篇论文（并发度 3）...
+   🌐 cache miss（调用 API）
+2026-11-17 17:36:07,493 [cache] INFO: [cache] miss key=fd89833c5e86
+   🌐 cache miss（调用 API）
+2026-11-17 17:36:07,495 [cache] INFO: [cache] miss key=0b50a30ebd54
+2026-11-17 17:36:07,495 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 17:36:07,495 [models.remote] WARNING: key#0 服务端错误(5xx)，短 暂冷却 5s，切换下一个 key
+2026-11-17 17:36:07,495 [models.remote] WARNING: key#0 临时网络/服务端错误 （ChaosInjectedError），冷却后换下一个 key
+2026-11-17 17:36:07,495 [models.remote] WARNING: key#0 需等待 5s（限流冷却 或全局 RPM 窗口已满），暂停后重试
+2026-11-17 17:36:08,646 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 17:36:08,647 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
+2026-11-17 17:36:12,545 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 17:36:12,545 [models.remote] WARNING: key#0 服务端错误(5xx)，短 暂冷却 5s，切换下一个 key
+2026-11-17 17:36:12,546 [models.remote] WARNING: key#0 临时网络/服务端错误 （ChaosInjectedError），冷却后换下一个 key
+2026-11-17 17:36:12,546 [models.remote] WARNING: key#0 需等待 5s（限流冷却 或全局 RPM 窗口已满），暂停后重试
+2026-11-17 17:36:17,596 [PaperAgent] WARNING: 单篇总结失败，保留空结构：ChaosInjectedError
+2026-11-17 17:36:17,596 [PaperAgent] INFO: 总结阶段耗时 10.12s，2 篇
+2026-11-17 17:36:17,597 [PaperAgent] INFO: supervisor_node
+2026-11-17 17:36:17,597 [PaperAgent] INFO: route
+📝 正在进行总的汇总论文...
+2026-11-17 17:36:17,597 [PaperAgent] INFO: worker_summarize
+
+============================================================
+📝 正在生成研究报告...
+============================================================
+
+   🌐 cache miss（调用 API）
+2026-11-17 17:36:17,598 [cache] INFO: [cache] miss key=1678fc1e37ac
+2026-11-17 17:36:18,229 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+## 研究背景
+
+图神经网络广泛用于节点分类、推荐、分子建模等图数据任务。随着图规模扩大和模 型层次加深，训练系统不仅影响计算效率，还影响内存占用、采样策略与训练稳定性 。已有研究通常围绕“全图训练”和“小批量采样训练”展开比较，也关注如何构造更快 、更深且更稳定的图神经网络实现。不过，本次给定摘要信息不足，因此报告只能形 成结构化对比框架，不能总结具体性能结论。
+
+## 论文对比
+
+| 论文 | 问题 | 方法 | 结果 |
+|---|---|---|---|
+| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 原文未提供具体问题描述 | 原文未提供具体方法细节 | 原 文未提供具体实验结果 |
+| Fast and Deep Graph Neural Networks | 原文未提供具体问题描述 | 原文未提供具体方法细节 | 原文未提供具体实验结果 |
+
+## 研究空白
+
+各篇论文当前都缺少问题定义、方法细节、实验结果与局限性说明，因此无法判断全 图和小批量方案在不同图规模下的优劣，也无法评估快速深层图神经网络相比既有系 统的提升来源。后续应补充统一的基准数据集、训练配置、评测指标、吞吐或收敛曲 线，以及适用边界和失效条件，才能形成可复现的横向比较。2026-11-17 17:37:43,528 [PaperAgent] INFO: supervisor_node
+2026-11-17 17:37:43,528 [PaperAgent] INFO: route
+📝 正在判断总汇总论文的质量...
+2026-11-17 17:37:43,528 [PaperAgent] INFO: critic_node
+   🌐 cache miss（调用 API）
+2026-11-17 17:37:43,529 [cache] INFO: [cache] miss key=1a4d2c23ad96
+2026-11-17 17:37:53,157 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 17:37:53,159 [PaperAgent] INFO: after_critic
+📝 推荐出你所感兴趣的相关论文...
+2026-11-17 17:37:53,160 [PaperAgent] INFO: followup_node
+   🌐 cache miss（调用 API）
+2026-11-17 17:37:53,160 [cache] INFO: [cache] miss key=3ba482b41990
+2026-11-17 17:37:53,161 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 17:37:53,161 [models.remote] WARNING: key#0 服务端错误(5xx)，短 暂冷却 5s，切换下一个 key
+2026-11-17 17:37:53,161 [models.remote] WARNING: key#0 临时网络/服务端错误 （ChaosInjectedError），冷却后换下一个 key
+2026-11-17 17:37:53,161 [models.remote] WARNING: key#0 需等待 5s（限流冷却 或全局 RPM 窗口已满），暂停后重试
+2026-11-17 17:38:00,196 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+
+============================================================
+📄 最终报告
+============================================================
+## 研究背景
+
+图神经网络广泛用于节点分类、推荐、分子建模等图数据任务。随着图规模扩大和模 型层次加深，训练系统不仅影响计算效率，还影响内存占用、采样策略与训练稳定性 。已有研究通常围绕“全图训练”和“小批量采样训练”展开比较，也关注如何构造更快 、更深且更稳定的图神经网络实现。不过，本次给定摘要信息不足，因此报告只能形 成结构化对比框架，不能总结具体性能结论。
+
+## 论文对比
+
+| 论文 | 问题 | 方法 | 结果 |
+|---|---|---|---|
+| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 原文未提供具体问题描述 | 原文未提供具体方法细节 | 原 文未提供具体实验结果 |
+| Fast and Deep Graph Neural Networks | 原文未提供具体问题描述 | 原文未提供具体方法细节 | 原文未提供具体实验结果 |
+
+## 研究空白
+
+各篇论文当前都缺少问题定义、方法细节、实验结果与局限性说明，因此无法判断全 图和小批量方案在不同图规模下的优劣，也无法评估快速深层图神经网络相比既有系 统的提升来源。后续应补充统一的基准数据集、训练配置、评测指标、吞吐或收敛曲 线，以及适用边界和失效条件，才能形成可复现的横向比较。
+
+✅ 数字校验：报告中的量化数字均来自摘要语料
+
+--- 评审意见 ---
+通过。
+
+--- 评审意见历史 ---
+['通过。']
+
+--- 追问推荐 ---
+1. 深入探究全图训练与小批量采样在不同图规模及硬件配置下的显存占用与计算吞吐量的具体权衡边界。
+2. 解析深层图神经网络中导致训练不稳定的核心机制，并评估现有加速策略在提升模型深度时的实际收敛效果。
+3. 构建包含统一基准数据集、标准化评测指标及复现环境的横向对比框架，以量化不同系统架构的适用性与局限性。
+
+============================================================
+💰 本次 run 统计
+============================================================
+  总耗时        = 243.76s
+  缓存          = hit 2 次 / miss 6 次
+本次 run 用量：
+  input tokens  = 1977
+  output tokens = 768
+  total tokens  = 2745
+  LLM 调用次数  = 7（缓存命中 2 次，未发请求）
+  分模型 token（仅统计真实请求）：
+    Qwen/Qwen3.5-35B-A3B: input 1508 / output 302
+    Qwen/Qwen3.8-Flash-Next: input 469 / output 466
+  估算成本      = 单价未知（Qwen/Qwen3.5-35B-A3B、Qwen/Qwen3.8-Flash-Next  不在价格表），仅报 token
+  价格表快照     = 2026-11-09（litellm 静态快照，成本为估算值）
+
+🧪 混沌统计
+   注入失败   = 4 次
+   逻辑调用   = 6 次（其中重试 3 次）
+   请求尝试   = 9 次
+   重试次数   = 3 次（尝试 - 调用）
+   最终出报告 = 是
+
+
+
+
+--------------------------------------------------------------------------------
+【极端压测】CHAOS=1.0，2026-11-17 15:40，100% 注入，路由连续失败中止（10.11s）
+  说明：超出 20% 验收口径；用于观察全失败时的顶层中止路径（友好提示 + 统计，无 traceback 外泄）。
+--------------------------------------------------------------------------------
+CHAOS_FAILURE_RATE=1.0
+
+(mybase) PS E:\testcode\day29\paper-research-agent> python main.py --topic "graph neural network" --papers 2 --max-retries 1
+2026-11-17 15:40:37,026 [models] INFO: [models] 模型提供方已切换为: remote
+2026-11-17 15:40:37,037 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
+🚀 开始研究：graph neural network
+   搜索论文数：15，保留论文数：2，评审轮数：1
+   模型提供方：remote
+   Langfuse 观测：未配置（跳过上报）
+2026-11-17 15:40:37,040 [PaperAgent] INFO: supervisor_node
+   🌐 cache miss（调用 API）
+2026-11-17 15:40:37,049 [cache] INFO: [cache] miss key=19b11821c2eb
+2026-11-17 15:40:37,049 [models.remote] WARNING: [chaos] 注入可重试故障（rate=1.00）
+2026-11-17 15:40:37,049 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s ，切换下一个 key
+2026-11-17 15:40:37,049 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 15:40:37,049 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 15:40:42,099 [models.remote] WARNING: [chaos] 注入可重试故障（rate=1.00）
+2026-11-17 15:40:42,100 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s ，切换下一个 key
+2026-11-17 15:40:42,100 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 15:40:42,100 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 15:40:47,150 [PaperAgent] ERROR: 研究流程异常：ChaosInjectedError
+
+⚠️ 研究未能完成：模型连续失败或服务异常，已中止（未生成报告）。
+   建议稍后重试；混沌测试时可降低 CHAOS_FAILURE_RATE。
+
+🧪 混沌统计
+   注入失败   = 2 次
+   请求尝试   = 2 次
+   重试次数   = 1 次
+   最终出报告 = 否
+
+============================================================
+💰 本次 run 统计
+============================================================
+  总耗时        = 10.11s
+本次 run 用量：
+  input tokens  = 0
+  output tokens = 0
+  total tokens  = 0
+  LLM 调用次数  = 0（缓存命中 0 次，未发请求）
+  估算成本      = 单价未知（未知模型 不在价格表），仅报 token
+  价格表快照     = 2026-11-09（litellm 静态快照，成本为估算值）
+
+
+--------------------------------------------------------------------------------
+【当前代码 · 对照组 B】CHAOS=0.0，2026-11-17 18:17，完整出报告（94.97s）
+--------------------------------------------------------------------------------
+===== D48 复核复跑 CHAOS=0.0 2026-11-17 18:19:06 =====
+2026-11-17 18:17:30,794 [models] INFO: [models] 模型提供方已切换为: remote
+2026-11-17 18:17:30,812 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
+🚀 开始研究：graph neural network
+   搜索论文数：15，保留论文数：2，评审轮数：1
+   模型提供方：remote
+   Langfuse 观测：未配置（跳过上报）
+2026-11-17 18:17:30,820 [PaperAgent] INFO: supervisor_node
+   🌐 cache miss（调用 API）
+2026-11-17 18:17:30,821 [cache] INFO: [cache] miss key=19b11821c2eb
+2026-11-17 18:17:32,396 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:17:32,403 [PaperAgent] INFO: route
+
+🔍 正在搜索论文：graph neural network...
+2026-11-17 18:17:32,404 [PaperAgent] INFO: worker_search
+2026-11-17 18:17:32,404 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-17 18:17:32,404 [PaperAgent] INFO: search_papers
+2026-11-17 18:17:32,404 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 18:17:34,234 [arxiv] INFO: Got first page: 15 of 507061 total results
+2026-11-17 18:17:34,234 [PaperAgent] INFO: search_papers：返回 15 条
+📊 正在筛选最相关论文...
+2026-11-17 18:17:34,235 [PaperAgent] INFO: worker_select
+   🌐 cache miss（调用 API）
+2026-11-17 18:17:34,236 [cache] INFO: [cache] miss key=573cc66c62af
+2026-11-17 18:17:36,794 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:17:36,796 [PaperAgent] WARNING: 筛选组合跨子领域：{'深度图神经网络与效率优化', 'GNN 训练系统与优化'}
+2026-11-17 18:17:36,796 [PaperAgent] INFO: 筛选后保留 2 / 15 篇
+📝 正在并发总结 2 篇论文（并发度 3）...
+   🌐 cache miss（调用 API）
+2026-11-17 18:17:36,797 [cache] INFO: [cache] miss key=fd89833c5e86
+   🌐 cache miss（调用 API）
+2026-11-17 18:17:36,798 [cache] INFO: [cache] miss key=0b50a30ebd54
+2026-11-17 18:17:37,729 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:17:37,730 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
+2026-11-17 18:17:38,436 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:17:38,437 [PaperAgent] INFO: 已总结：Fast and Deep Graph Neural Networks
+2026-11-17 18:17:38,437 [PaperAgent] INFO: 总结阶段耗时 1.64s，2 篇
+2026-11-17 18:17:38,438 [PaperAgent] INFO: supervisor_node
+2026-11-17 18:17:38,438 [PaperAgent] INFO: route
+📝 正在进行总的汇总论文...
+2026-11-17 18:17:38,438 [PaperAgent] INFO: worker_summarize
+
+============================================================
+📝 正在生成研究报告...
+============================================================
+
+   🌐 cache miss（调用 API）
+2026-11-17 18:17:38,438 [cache] INFO: [cache] miss key=b06ce1e5434c
+2026-11-17 18:17:39,056 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+## 研究背景
+
+图神经网络训练系统通常关注不同训练策略对性能的影响，其中全图训练和 mini-batch 训练是常见比较方向；同时，深层图神经网络的构建还涉及模型深度、计算开销和收敛行为等效率问题。现有信息中，第一篇论文给出训练系统性能比较主题，第二篇论文提出不动点方法，但均未完整披露问题、方法与结果细节。因此，本报告仅整理已知线索，避免对缺失内容进行推断。
+
+## 论文对比
+
+| 论文 | 问题 | 方法 | 结果 |
+| --- | --- | --- | --- |
+| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 摘要未提供具体问题描述 | 摘要未提供具体方法细节 | 原文未提供 |
+| Fast and Deep Graph Neural Networks | 未明确深层图神经网络构建中的效率问题细节 | 提出将每个输入图表示为动力系统不动点的深度图神经网络方法 | 原文未提供 |
+
+## 研究空白
+
+未来研究应明确全图与 mini-batch 训练的比较对象、评价指标、实验环境和数据规模，并补充可复现结果；同时，需要厘清深层图神经网络不动点方法针对的具体效率问题，说明其训练与推理开销、适用图类型、稳定性表现和局限性，并与基线方法给出量化对比。2026-11-17 18:18:26,005 [PaperAgent] INFO: supervisor_node
+2026-11-17 18:18:26,005 [PaperAgent] INFO: route
+📝 正在判断总汇总论文的质量...
+2026-11-17 18:18:26,005 [PaperAgent] INFO: critic_node
+   🌐 cache miss（调用 API）
+2026-11-17 18:18:26,006 [cache] INFO: [cache] miss key=4dc97e6fbd5f
+2026-11-17 18:19:04,069 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:19:04,070 [PaperAgent] INFO: after_critic
+📝 推荐出你所感兴趣的相关论文...
+2026-11-17 18:19:04,071 [PaperAgent] INFO: followup_node
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:04,071 [cache] INFO: [cache] miss key=29acc6699cb8
+2026-11-17 18:19:05,776 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+
+============================================================
+📄 最终报告
+============================================================
+## 研究背景
+
+图神经网络训练系统通常关注不同训练策略对性能的影响，其中全图训练和 mini-batch 训练是常见比较方向；同时，深层图神经网络的构建还涉及模型深度、计算开销和收敛行为等效率问题。现有信息中，第一篇论文给出训练系统性能比较主题，第二篇论文提出不动点方法，但均未完整披露问题、方法与结果细节。因此，本报告仅整理已知线索，避免对缺失内容进行推断。
+
+## 论文对比
+
+| 论文 | 问题 | 方法 | 结果 |
+| --- | --- | --- | --- |
+| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 摘要未提供具体问题描述 | 摘要未提供具体方法细节 | 原文未提供 |
+| Fast and Deep Graph Neural Networks | 未明确深层图神经网络构建中的效率问题细节 | 提出将每个输入图表示为动力系统不动点的深度图神经网络方法 | 原文未提供 |
+
+## 研究空白
+
+未来研究应明确全图与 mini-batch 训练的比较对象、评价指标、实验环境和数据规模，并补充可复现结果；同时，需要厘清深层图神经网络不动点方法针对的具体效率问题，说明其训练与推理开销、适用图类型、稳定性表现和局限性，并与基线方法给出量化对比。
+
+✅ 数字校验：报告中的量化数字均来自摘要语料
+
+--- 评审意见 ---
+通过。
+
+--- 评审意见历史 ---
+['通过。']
+
+--- 追问推荐 ---
+1. 深入探究全图训练与 Mini-batch 训练在不同数据规模、硬件环境及评价指标下的性能差异与适用边界。
+2. 解析基于动力系统不动点的深层图神经网络方法在解决计算开销、收敛稳定性及特定图类型上的具体机制与局限。
+3. 构建可复现的基准测试框架，以量化对比现有训练策略与新型深度架构在效率及模型表现上的实际差距。
+
+============================================================
+💰 本次 run 统计
+============================================================
+  总耗时        = 94.97s
+  缓存          = hit 0 次 / miss 7 次
+本次 run 用量：
+  input tokens  = 2906
+  output tokens = 2659
+  total tokens  = 5565
+  LLM 调用次数  = 7（缓存命中 0 次，未发请求）
+  分模型 token（仅统计真实请求）：
+    Qwen/Qwen3.5-35B-A3B: input 2442 / output 393
+    Qwen/Qwen3.8-Flash-Next: input 464 / output 2266
+  估算成本      = 单价未知（Qwen/Qwen3.5-35B-A3B、Qwen/Qwen3.8-Flash-Next 不在价格表），仅报 token
+  价格表快照     = 2026-11-09（litellm 静态快照，成本为估算值）
+
+
+--------------------------------------------------------------------------------
+【历史旧版 · 留档】CHAOS=0.2，2026-11-17 18:19:14，筛选节点重试耗尽中止（未出报告）
+  说明：select 兜底补齐之前跑出的记录；当前代码 worker_select 失败按搜索顺序保留前 N 篇，
+  对应单测 test_select_falls_back_to_search_order。
+--------------------------------------------------------------------------------
+===== D48 复核复跑 CHAOS=0.2 2026-11-17 18:19:28 =====
+2026-11-17 18:19:14,208 [models] INFO: [models] 模型提供方已切换为: remote
+2026-11-17 18:19:14,225 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
+🚀 开始研究：graph neural network
+   搜索论文数：15，保留论文数：2，评审轮数：1
+   模型提供方：remote
+   Langfuse 观测：未配置（跳过上报）
+2026-11-17 18:19:14,233 [PaperAgent] INFO: supervisor_node
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:14,234 [cache] INFO: [cache] miss key=19b11821c2eb
+2026-11-17 18:19:15,745 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:19:15,753 [PaperAgent] INFO: route
+
+🔍 正在搜索论文：graph neural network...
+2026-11-17 18:19:15,753 [PaperAgent] INFO: worker_search
+2026-11-17 18:19:15,753 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-17 18:19:15,753 [PaperAgent] INFO: search_papers
+2026-11-17 18:19:15,754 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 18:19:17,681 [arxiv] INFO: Got first page: 15 of 507061 total results
+2026-11-17 18:19:17,681 [PaperAgent] INFO: search_papers：返回 15 条
+📊 正在筛选最相关论文...
+2026-11-17 18:19:17,683 [PaperAgent] INFO: worker_select
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:17,683 [cache] INFO: [cache] miss key=573cc66c62af
+2026-11-17 18:19:17,683 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 18:19:17,683 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s，切换下一个 key
+2026-11-17 18:19:17,683 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 18:19:17,683 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 18:19:22,734 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 18:19:22,734 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s，切换下一个 key
+2026-11-17 18:19:22,734 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 18:19:22,734 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 18:19:27,785 [PaperAgent] ERROR: 研究流程异常：ChaosInjectedError
+
+⚠️ 研究未能完成：模型连续失败或服务异常，已中止（未生成报告）。
+   建议稍后重试；混沌测试时可降低 CHAOS_FAILURE_RATE。
+
+🧪 混沌统计
+   注入失败   = 2 次
+   逻辑调用   = 2 次（其中重试 1 次）
+   请求尝试   = 3 次
+   重试次数   = 1 次（尝试 - 调用）
+   最终出报告 = 否
+
+============================================================
+💰 本次 run 统计
+============================================================
+  总耗时        = 13.56s
+本次 run 用量：
+  input tokens  = 785
+  output tokens = 1
+  total tokens  = 786
+  LLM 调用次数  = 1（缓存命中 0 次，未发请求）
+  分模型 token（仅统计真实请求）：
+    Qwen/Qwen3.5-35B-A3B: input 785 / output 1
+  估算成本      = 单价未知（Qwen/Qwen3.5-35B-A3B 不在价格表），仅报 token
+  价格表快照     = 2026-11-09（litellm 静态快照，成本为估算值）
+
+
+--------------------------------------------------------------------------------
+【当前代码 · 混沌达标组 B】CHAOS=0.2，2026-11-17 18:19:39，注入 2 / 重试 2，最终出报告（70.83s）
+--------------------------------------------------------------------------------
+===== D48 复核复跑 CHAOS=0.2（第2次） 2026-11-17 18:20:50 =====
+2026-11-17 18:19:39,763 [models] INFO: [models] 模型提供方已切换为: remote
+2026-11-17 18:19:39,781 [models] INFO: [main] 模型提供方=remote, 实现包=models.remote
+🚀 开始研究：graph neural network
+   搜索论文数：15，保留论文数：2，评审轮数：1
+   模型提供方：remote
+   Langfuse 观测：未配置（跳过上报）
+2026-11-17 18:19:39,786 [PaperAgent] INFO: supervisor_node
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:39,787 [cache] INFO: [cache] miss key=19b11821c2eb
+2026-11-17 18:19:39,787 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 18:19:39,787 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s，切换下一个 key
+2026-11-17 18:19:39,787 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 18:19:39,787 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 18:19:46,076 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:19:46,078 [PaperAgent] INFO: route
+
+🔍 正在搜索论文：graph neural network...
+2026-11-17 18:19:46,079 [PaperAgent] INFO: worker_search
+2026-11-17 18:19:46,079 [PaperAgent] INFO: 本次搜索论文数量：15
+2026-11-17 18:19:46,079 [PaperAgent] INFO: search_papers
+2026-11-17 18:19:46,079 [arxiv] INFO: Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=graph+neural+network&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=15
+2026-11-17 18:19:47,767 [arxiv] INFO: Got first page: 15 of 507061 total results
+2026-11-17 18:19:47,767 [PaperAgent] INFO: search_papers：返回 15 条
+📊 正在筛选最相关论文...
+2026-11-17 18:19:47,768 [PaperAgent] INFO: worker_select
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:47,768 [cache] INFO: [cache] miss key=573cc66c62af
+2026-11-17 18:19:50,296 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:19:50,298 [PaperAgent] WARNING: 筛选组合跨子领域：{'深度 GNN 效率优化', 'GNN 训练系统架构'}
+2026-11-17 18:19:50,298 [PaperAgent] INFO: 筛选后保留 2 / 15 篇
+📝 正在并发总结 2 篇论文（并发度 3）...
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:50,299 [cache] INFO: [cache] miss key=fd89833c5e86
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:50,301 [cache] INFO: [cache] miss key=0b50a30ebd54
+2026-11-17 18:19:50,301 [models.remote] WARNING: [chaos] 注入可重试故障（rate=0.20）
+2026-11-17 18:19:50,301 [models.remote] WARNING: key#0 服务端错误(5xx)，短暂冷却 5s，切换下一个 key
+2026-11-17 18:19:50,301 [models.remote] WARNING: key#0 临时网络/服务端错误（ChaosInjectedError），冷却后换下一个 key
+2026-11-17 18:19:50,301 [models.remote] WARNING: key#0 需等待 5s（限流冷却或全局 RPM 窗口已满），暂停后重试
+2026-11-17 18:19:51,746 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:19:51,746 [PaperAgent] INFO: 已总结：Graph Neural Network Training Systems: A Performan
+2026-11-17 18:19:56,159 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:19:56,160 [PaperAgent] INFO: 已总结：Fast and Deep Graph Neural Networks
+2026-11-17 18:19:56,160 [PaperAgent] INFO: 总结阶段耗时 5.86s，2 篇
+2026-11-17 18:19:56,161 [PaperAgent] INFO: supervisor_node
+2026-11-17 18:19:56,161 [PaperAgent] INFO: route
+📝 正在进行总的汇总论文...
+2026-11-17 18:19:56,161 [PaperAgent] INFO: worker_summarize
+
+============================================================
+📝 正在生成研究报告...
+============================================================
+
+   🌐 cache miss（调用 API）
+2026-11-17 18:19:56,161 [cache] INFO: [cache] miss key=48f087251d86
+2026-11-17 18:19:56,729 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+## 研究背景
+
+围绕图神经网络训练系统与深层图神经网络的研究正在推进。现有材料显示，相关论文分别关注“全图与迷你批次”的训练系统性能比较，以及深层图神经网络中的效率问题。不过，两篇论文的摘要均未提供足够完整的训练问题、方法细节、性能结果或局限说明。因此，本报告仅依据已有信息进行概述，不补充未经说明的数据或结论。
+
+## 论文对比
+
+| 论文 | 问题 | 方法 | 结果 |
+| --- | --- | --- | --- |
+| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 摘要未提供具体训练问题描述 | 摘要未提供具体提出的方法细节 | 原文未提供具体性能比较结果 |
+| Fast and Deep Graph Neural Networks | 构建深层图神经网络存在效率问题 | 将每个输入图表示为动力系统的不动点 | 原文未提供 |
+
+## 研究空白
+
+目前信息不足以形成完整判断：第一篇论文未说明具体训练问题、方法细节、性能结果和局限性；第二篇论文虽指出深层图神经网络的效率问题，并给出动力系统不动点表示方法，但未提供结果或局限分析。未来研究需补充可验证的训练流程、比较条件、性能指标和适用限制，才能评估相关方法在实际图神经网络训练中的效果与边界。2026-11-17 18:20:18,700 [PaperAgent] INFO: supervisor_node
+2026-11-17 18:20:18,700 [PaperAgent] INFO: route
+📝 正在判断总汇总论文的质量...
+2026-11-17 18:20:18,700 [PaperAgent] INFO: critic_node
+   🌐 cache miss（调用 API）
+2026-11-17 18:20:18,701 [cache] INFO: [cache] miss key=d8a1fbee0927
+2026-11-17 18:20:48,855 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-17 18:20:48,856 [PaperAgent] INFO: after_critic
+📝 推荐出你所感兴趣的相关论文...
+2026-11-17 18:20:48,857 [PaperAgent] INFO: followup_node
+   🌐 cache miss（调用 API）
+2026-11-17 18:20:48,857 [cache] INFO: [cache] miss key=e5d412ff884a
+2026-11-17 18:20:50,612 [httpx] INFO: HTTP Request: POST https://api-inference.modelscope.cn/v1/chat/completions "HTTP/1.1 200 OK"
+
+============================================================
+📄 最终报告
+============================================================
+## 研究背景
+
+围绕图神经网络训练系统与深层图神经网络的研究正在推进。现有材料显示，相关论文分别关注“全图与迷你批次”的训练系统性能比较，以及深层图神经网络中的效率问题。不过，两篇论文的摘要均未提供足够完整的训练问题、方法细节、性能结果或局限说明。因此，本报告仅依据已有信息进行概述，不补充未经说明的数据或结论。
+
+## 论文对比
+
+| 论文 | 问题 | 方法 | 结果 |
+| --- | --- | --- | --- |
+| Graph Neural Network Training Systems: A Performance Comparison of Full-Graph and Mini-Batch | 摘要未提供具体训练问题描述 | 摘要未提供具体提出的方法细节 | 原文未提供具体性能比较结果 |
+| Fast and Deep Graph Neural Networks | 构建深层图神经网络存在效率问题 | 将每个输入图表示为动力系统的不动点 | 原文未提供 |
+
+## 研究空白
+
+目前信息不足以形成完整判断：第一篇论文未说明具体训练问题、方法细节、性能结果和局限性；第二篇论文虽指出深层图神经网络的效率问题，并给出动力系统不动点表示方法，但未提供结果或局限分析。未来研究需补充可验证的训练流程、比较条件、性能指标和适用限制，才能评估相关方法在实际图神经网络训练中的效果与边界。
+
+✅ 数字校验：报告中的量化数字均来自摘要语料
+
+--- 评审意见 ---
+通过。
+
+--- 评审意见历史 ---
+['通过。']
+
+--- 追问推荐 ---
+1. 深入探究全图训练与迷你批次训练在大规模图数据下的具体性能瓶颈及系统架构差异。
+2. 解析将深层图神经网络建模为动力系统不动点的具体算法实现及其收敛效率机制。
+3. 评估上述两种方法在不同类型图结构（如稀疏或稠密图）中的适用边界与实际局限性。
+
+============================================================
+💰 本次 run 统计
+============================================================
+  总耗时        = 70.83s
+  缓存          = hit 0 次 / miss 7 次
+本次 run 用量：
+  input tokens  = 2900
+  output tokens = 1539
+  total tokens  = 4439
+  LLM 调用次数  = 7（缓存命中 0 次，未发请求）
+  分模型 token（仅统计真实请求）：
+    Qwen/Qwen3.5-35B-A3B: input 2439 / output 335
+    Qwen/Qwen3.8-Flash-Next: input 461 / output 1204
+  估算成本      = 单价未知（Qwen/Qwen3.5-35B-A3B、Qwen/Qwen3.8-Flash-Next 不在价格表），仅报 token
+  价格表快照     = 2026-11-09（litellm 静态快照，成本为估算值）
+
+🧪 混沌统计
+   注入失败   = 2 次
+   逻辑调用   = 7 次（其中重试 2 次）
+   请求尝试   = 9 次
+   重试次数   = 2 次（尝试 - 调用）
+   最终出报告 = 是
+
+
+===== D48 混沌对照汇总（当前代码） =====
+【对照组 · CHAOS=0.0】
+  15:33  run: injected=0, calls=7, attempts=7, retries=0, report=yes, 83.16s
+  18:17  run: injected=0, calls=7, attempts=7, retries=0, report=yes, 94.97s
+【混沌达标组 · CHAOS=0.2】
+  17:33  run: injected=4, calls=6, attempts=9, retries=3, report=yes, 243.76s
+  18:19  run: injected=2, calls=7, attempts=9, retries=2, report=yes, 70.83s
+【历史旧版 / 极端压测 · 不作为当前代码缺陷证据】
+  15:36  CHAOS=0.2 综述节点耗尽中止（旧版无综述兜底）；
+  18:19:14 CHAOS=0.2 筛选节点耗尽中止（旧版无 select 兜底）；
+  15:40  CHAOS=1.0 全失败中止（超出 20% 验收口径）。
+当前代码兜底覆盖：路由回退 _fallback_route / 筛选保留前 N 篇 / 综述 _fallback_report 简版 /
+单篇空结构 / critic 降级通过 / followup 占位；确定性单测见 test/chaos_test.py。

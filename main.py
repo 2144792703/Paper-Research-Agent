@@ -5,13 +5,30 @@ from diskcache import Cache
 
 from graph.graph_compile import graph
 from models import _resolve_provider
-from config import clamp_search_count, clamp_keep_papers, SEARCH_MIN, SEARCH_MAX, KEEP_MIN, KEEP_MAX, LANGFUSE_ENABLED, CACHE_DIR
+from models.remote import chaos_stats, reset_chaos_stats
+from config import (
+    clamp_search_count, clamp_keep_papers, SEARCH_MIN, SEARCH_MAX, KEEP_MIN, KEEP_MAX,
+    LANGFUSE_ENABLED, CACHE_DIR, CHAOS_FAILURE_RATE,
+)
 from observability import trace_config, trace_id, flush
 from security import sanitize_topic, flag_injection, MAX_TOPIC_LEN
 from logger import logger
 import usage
 import report_check
 from cache import reset_stats as reset_cache_stats, stats as cache_stats
+
+
+def _print_chaos_summary(report_ok: bool):
+    """开关打开时打印混沌对照数字；关闭时保持零输出"""
+    if CHAOS_FAILURE_RATE <= 0:
+        return
+    s = chaos_stats()
+    print("\n🧪 混沌统计")
+    print(f"   注入失败   = {s['injected']} 次")
+    print(f"   逻辑调用   = {s['calls']} 次（其中重试 {s['calls_retried']} 次）")
+    print(f"   请求尝试   = {s['attempts']} 次")
+    print(f"   重试次数   = {s['retries']} 次（尝试 - 调用）")
+    print(f"   最终出报告 = {'是' if report_ok else '否'}")
 
 
 def main():
@@ -57,6 +74,8 @@ def main():
         print(f"⚠️  保留数量 {args.papers} 超出范围，已修正为 {keep_papers}")
 
     provider = _resolve_provider()
+    if CHAOS_FAILURE_RATE > 0 and provider != "remote":
+        print("⚠️  CHAOS_FAILURE_RATE 仅远程模式生效，当前为本地模式，混沌注入已跳过")
 
     print(f"🚀 开始研究：{topic}")
     print(f"   搜索论文数：{search_count}，保留论文数：{keep_papers}，评审轮数：{args.max_retries}")
@@ -66,13 +85,30 @@ def main():
     config = trace_config(topic)
     usage.reset()
     reset_cache_stats()
+    reset_chaos_stats()
     started = time.perf_counter()
-    result = graph.invoke({
-        "topic": topic,
-        "critique_times": args.max_retries,
-        "search_max_results": search_count,
-        "keep_papers": keep_papers,
-    }, config=config)
+    try:
+        result = graph.invoke({
+            "topic": topic,
+            "critique_times": args.max_retries,
+            "search_max_results": search_count,
+            "keep_papers": keep_papers,
+        }, config=config)
+    except Exception as e:
+        elapsed = time.perf_counter() - started
+        flush()
+        # 终端不输出原始 traceback：只给类型名和友好提示，详情留在 debug 日志
+        logger.error(f"研究流程异常：{type(e).__name__}")
+        logger.debug("研究流程异常详情：%r", e)
+        print("\n⚠️ 研究未能完成：模型连续失败或服务异常，已中止（未生成报告）。")
+        print("   建议稍后重试；混沌测试时可降低 CHAOS_FAILURE_RATE。")
+        _print_chaos_summary(False)
+        print("\n" + "=" * 60)
+        print("💰 本次 run 统计")
+        print("=" * 60)
+        print(f"  总耗时        = {elapsed:.2f}s")
+        print(usage.format_summary())
+        return
     elapsed = time.perf_counter() - started
     flush()
 
@@ -108,6 +144,7 @@ def main():
     print(f"  总耗时        = {elapsed:.2f}s")
     print(f"  缓存          = hit {cs['hit']} 次 / miss {cs['miss']} 次")
     print(usage.format_summary())
+    _print_chaos_summary(bool((result.get("summary") or "").strip()))
 
 
 if __name__ == "__main__":

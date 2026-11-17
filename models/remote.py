@@ -1,6 +1,7 @@
 import time
 import threading
 import logging
+import random
 import httpx
 
 from collections import deque
@@ -18,9 +19,18 @@ from openai import (
 # 可轮换的"临时故障"异常集合：固定短暂冷却 + 换下一个 key，不计入限流退避
 _NETWORK_RETRYABLE = (InternalServerError, APIConnectionError, APITimeoutError)
 
+
+class ChaosInjectedError(APITimeoutError):
+    """混沌测试注入的超时异常（属于 _NETWORK_RETRYABLE，复用现有重试/换 key 逻辑）"""
+
+    def __init__(self, message: str = "chaos injected timeout"):
+        Exception.__init__(self, message)
+
+
 from config import (
     MODEL, API_KEYS, BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, KEY_COOLDOWN, RPM_LIMIT, RPM_WINDOW,
-    LLM_TEMPERATURE, LLM_TOP_P, PROVIDER_NAME,
+    LLM_TEMPERATURE, LLM_TOP_P, PROVIDER_NAME, CHAOS_FAILURE_RATE,
+    CHEAP_MODEL, STRONG_MODEL, CHEAP_MODEL_DISABLE_THINKING,
 )
 from cache import cache_get, cache_key, cache_put
 from usage import record_usage
@@ -34,7 +44,7 @@ MAX_ROUNDS = 4        # 完整遍历上限，耗尽后抛出最后一次限流�
 MAX_COOLDOWN = 60.0   # 单 key 冷却封顶（秒）
 
 # ===== 池状态（模块级，跨调用持久）=====
-_clients: dict[tuple[int, str], ChatOpenAI] = {}
+_clients: dict[tuple[int, str, bool], ChatOpenAI] = {}
 _pool_lock = threading.Lock()
 _current = 0                                   # 粘性指针：上次调用成功的 key 索引
 _fail_count = [0] * len(API_KEYS)              # 每个 key 的连续限流次数
@@ -43,10 +53,64 @@ _disabled: set[int] = set()                    # 401/403 永久禁用的 key（�
 _req_times: deque = deque()                    # 全局请求时间戳（所有 key 共享同一限流窗口）
 _last_req_ts = 0.0                             # 上一次请求的发起时间（用于最小间隔）
 
+# ===== 混沌开关（仅调试；CHAOS_FAILURE_RATE=0 时不介入，不产生日志）=====
+_chaos_stats = {
+    "injected": 0,      # 注入的可重试故障次数
+    "calls": 0,         # 逻辑调用次数（每次 invoke/stream 记 1 次）
+    "attempts": 0,      # 真实请求尝试次数
+    "retries": 0,       # 同一逻辑调用内的重试次数（= attempts - calls）
+    "calls_retried": 0, # 发生过重试的逻辑调用次数
+}
+_chaos_lock = threading.Lock()
 
-def _get_client(i: int, model: str) -> ChatOpenAI:
+
+def reset_chaos_stats() -> None:
+    with _chaos_lock:
+        for k in _chaos_stats:
+            _chaos_stats[k] = 0
+
+
+def chaos_stats() -> dict:
+    """返回本进程累计的混沌统计，供开/关对照记录"""
+    with _chaos_lock:
+        return dict(_chaos_stats)
+
+
+def _maybe_inject_chaos() -> None:
+    """在请求发出前按概率注入可重试超时；rate=0 时直接返回"""
+    if CHAOS_FAILURE_RATE <= 0 or random.random() >= CHAOS_FAILURE_RATE:
+        return
+    with _chaos_lock:
+        _chaos_stats["injected"] += 1
+    logger.warning(f"[chaos] 注入可重试故障（rate={CHAOS_FAILURE_RATE:.2f}）")
+    raise ChaosInjectedError()
+
+
+def _record_chaos_attempts(attempts: int) -> None:
+    """记录一次逻辑调用的尝试/重试次数（仅开关打开时统计）"""
+    if CHAOS_FAILURE_RATE <= 0 or attempts <= 0:
+        return
+    with _chaos_lock:
+        _chaos_stats["calls"] += 1
+        _chaos_stats["attempts"] += attempts
+        if attempts > 1:
+            _chaos_stats["calls_retried"] += 1
+            _chaos_stats["retries"] += attempts - 1
+
+
+def _no_think(model: str) -> bool:
+    """轻量模型是否需要关闭思考；与主模型相同时不处理，避免误伤强模型"""
+    return bool(
+        CHEAP_MODEL_DISABLE_THINKING
+        and model
+        and model == CHEAP_MODEL
+        and CHEAP_MODEL != STRONG_MODEL
+    )
+
+
+def _get_client(i: int, model: str, no_think: bool = False) -> ChatOpenAI:
     """按 key 索引获取客户端（缓存复用）"""
-    cache_key_ = (i, model)
+    cache_key_ = (i, model, no_think)
     with _pool_lock:
         if cache_key_ not in _clients:
             kwargs = dict(
@@ -61,6 +125,9 @@ def _get_client(i: int, model: str) -> ChatOpenAI:
                 kwargs["temperature"] = LLM_TEMPERATURE
             if LLM_TOP_P is not None:
                 kwargs["top_p"] = LLM_TOP_P
+            if no_think:
+                # ModelScope/vLLM 兼容写法：关闭 Qwen/GLM 的思考模式
+                kwargs["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
             _clients[cache_key_] = ChatOpenAI(**kwargs)
     return _clients[cache_key_]
 
@@ -178,13 +245,16 @@ def invoke_llm(prompt: str, model: str | None = None) -> str:
     先查磁盘缓存：命中直接返回，不发任何网络请求，也不产生 Langfuse Generation。
     """
     active = model or MODEL
-    key = cache_key(prompt, provider=PROVIDER, model=active)
+    no_think = _no_think(active)
+    # 思考/非思考响应不同，缓存键需区分，避免互相命中
+    key = cache_key(prompt, provider=PROVIDER, model=f"{active}|no-think" if no_think else active)
     cached = cache_get(key)
     if cached is not None:
         record_usage(model=active, cached=True)
         return cached
 
     last_err: Exception | None = None
+    attempts = 0
     for _ in range(MAX_ROUNDS):
         with _pool_lock:
             order = _scan_order()
@@ -208,12 +278,15 @@ def invoke_llm(prompt: str, model: str | None = None) -> str:
                     tried.add(target)
                 continue
             try:
-                response = _get_client(target, active).invoke(prompt)
+                attempts += 1
+                _maybe_inject_chaos()
+                response = _get_client(target, active, no_think).invoke(prompt)
                 with _pool_lock:
                     _mark_success(target)
                 in_tokens, out_tokens = _usage_tokens(response)
                 record_usage(in_tokens, out_tokens, model=active)
                 cache_put(key, response.content)
+                _record_chaos_attempts(attempts)
                 return response.content
             except (AuthenticationError, PermissionDeniedError) as e:
                 with _pool_lock:
@@ -229,6 +302,7 @@ def invoke_llm(prompt: str, model: str | None = None) -> str:
                 _log_rate_limit(target, e)
                 with _pool_lock:
                     _mark_limited(target)
+    _record_chaos_attempts(attempts)
     raise last_err if last_err else RuntimeError("API 请求失败：重试轮次耗尽")
 
 
@@ -238,7 +312,9 @@ def stream_llm(prompt: str, model: str | None = None):
     命中磁盘缓存时按固定窗口回放完整文本，不发请求、不产生 Langfuse Generation。
     """
     active = model or MODEL
-    key = cache_key(prompt, provider=PROVIDER, model=active)
+    no_think = _no_think(active)
+    # 思考/非思考响应不同，缓存键需区分，避免互相命中
+    key = cache_key(prompt, provider=PROVIDER, model=f"{active}|no-think" if no_think else active)
     cached = cache_get(key)
     if cached is not None:
         record_usage(model=active, cached=True)
@@ -247,6 +323,7 @@ def stream_llm(prompt: str, model: str | None = None):
         return
 
     last_err: Exception | None = None
+    attempts = 0
     for _ in range(MAX_ROUNDS):
         with _pool_lock:
             order = _scan_order()
@@ -270,7 +347,9 @@ def stream_llm(prompt: str, model: str | None = None):
                     tried.add(target)
                 continue
             try:
-                iterator = _get_client(target, active).stream(prompt)
+                attempts += 1
+                _maybe_inject_chaos()
+                iterator = _get_client(target, active, no_think).stream(prompt)
                 first = next(iterator)  # 首 chunk 前抛错可安全换 key
             except (AuthenticationError, PermissionDeniedError) as e:
                 with _pool_lock:
@@ -315,8 +394,11 @@ def stream_llm(prompt: str, model: str | None = None):
                 else:
                     with _pool_lock:
                         _mark_server_err(target)
+                _record_chaos_attempts(attempts)
                 raise
             record_usage(total_in, total_out, model=active)
             cache_put(key, "".join(parts))
+            _record_chaos_attempts(attempts)
             return
+    _record_chaos_attempts(attempts)
     raise last_err if last_err else RuntimeError("API 请求失败：重试轮次耗尽")
