@@ -100,7 +100,8 @@ def cache_put(key: str, value: str) -> None:
     try:
         store.set(key, value)
     except Exception as e:
-        logger.warning(f"[cache] 写入失败，忽略：{e}")
+        logger.warning(f"[cache] 写入失败，忽略：{type(e).__name__} key={key[:12]}")
+        logger.debug(f"[cache] 写入异常详情 key={key[:12]}：{e}")
 
 
 def stats() -> dict[str, int]:

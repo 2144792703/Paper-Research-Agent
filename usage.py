@@ -49,7 +49,11 @@ def _load_price_table() -> dict:
             _price_table = raw
             _lower_index = {k.lower(): v for k, v in raw.items()}
         except Exception as e:
-            logger.warning(f"[cost] 价格表加载失败，仅统计 token：{e}")
+            logger.warning(
+                f"[cost] 价格表加载失败，仅统计 token：{type(e).__name__} "
+                f"file={os.path.basename(MODEL_PRICES_PATH)} msg={str(e)[:80]}"
+            )
+            logger.debug(f"[cost] 价格表异常详情 file={MODEL_PRICES_PATH}：{e}")
             _price_table = {}
             _lower_index = {}
     return _price_table

@@ -17,6 +17,11 @@ from logger import logger
 import re
 from urllib.parse import urlparse
 
+import pytest
+
+# 真实 LLM 链路用例：默认由 pytest.ini 的 -m "not live" 排除
+pytestmark = pytest.mark.live
+
 # ---------- 间接注入用的 Mock ----------
 try:
     from tools.arxiv_tool import PaperMeta  # type: ignore

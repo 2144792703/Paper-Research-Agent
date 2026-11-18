@@ -796,3 +796,16 @@ CHAOS_FAILURE_RATE=1.0
   15:40  CHAOS=1.0 全失败中止（超出 20% 验收口径）。
 当前代码兜底覆盖：路由回退 _fallback_route / 筛选保留前 N 篇 / 综述 _fallback_report 简版 /
 单篇空结构 / critic 降级通过 / followup 占位；确定性单测见 test/chaos_test.py。
+
+## Day49 2026-11-18 全量回归与观察
+# 离线全量（pytest.ini：testpaths=test，默认 -m "not live"）
+19 passed, 5 deselected in 0.08s
+# cheap 档坏 JSON 观察（CHAOS_FAILURE_RATE=0，每主题先 --clear-cache，--papers 5）
+graph neural network             EXIT=0  select=5/15  summarize=5  耗时=2.74s  坏JSON=0  API异常=0
+retrieval augmented generation   EXIT=0  select=5/15  summarize=5  耗时=2.77s  坏JSON=0  API异常=0
+# 混沌附加（.env 当前 CHAOS_FAILURE_RATE=0.2，三主题均出报告）
+graph neural network             EXIT=0  injected=6  attempts=17  retries=5  出报告=是（1 次单篇总结注入耗尽，保留空结构）
+retrieval augmented generation   EXIT=0  injected=3  attempts=14  retries=2  出报告=是
+LLM agent planning               EXIT=0  injected=3  attempts=14  retries=2  出报告=是
+# 日志收敛验证
+本次运行无“价格表加载失败”“写入失败”告警；两处 warning 已只保留异常类型与关键字段
