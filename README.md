@@ -2,130 +2,57 @@
 
 > 输入一个研究主题，自动检索 arXiv 论文、筛选并逐篇结构化总结，最终生成一份可评审、可追问的中文综述报告。
 
-<details class="readme-toc">
-<summary>目录</summary>
-<div class="toc-body">
-<div><a href="#项目定位">项目定位</a></div>
-<div><a href="#技术栈">技术栈</a></div>
-<div><a href="#核心特性">核心特性</a></div>
-<div><a href="#架构与流程">架构与流程</a></div>
-<div class="sub"><a href="#主流程">主流程</a></div>
-<div class="sub"><a href="#节点职责与失败策略">节点职责与失败策略</a></div>
-<div class="sub"><a href="#llm-调用路径">LLM 调用路径</a></div>
-<div><a href="#快速开始">快速开始</a></div>
-<div class="sub"><a href="#1-前置依赖">1. 前置依赖</a></div>
-<div class="sub"><a href="#2-安装依赖">2. 安装依赖</a></div>
-<div class="sub"><a href="#3-配置-env">3. 配置 .env</a></div>
-<div class="sub"><a href="#4-cli-跑通">4. CLI 跑通</a></div>
-<div class="sub"><a href="#5-启动-http-服务">5. 启动 HTTP 服务</a></div>
-<div class="sub"><a href="#6-docker">6. Docker</a></div>
-<div><a href="#使用说明">使用说明</a></div>
-<div class="sub"><a href="#cli-参数">CLI 参数</a></div>
-<div class="sub"><a href="#http-接口">HTTP 接口</a></div>
-<div><a href="#配置参数">配置参数</a></div>
-<div class="sub"><a href="#模型路由">模型路由</a></div>
-<div class="sub"><a href="#远程调用与限流">远程调用与限流</a></div>
-<div class="sub"><a href="#本地模型ollama">本地模型（Ollama）</a></div>
-<div class="sub"><a href="#搜索与总结">搜索与总结</a></div>
-<div class="sub"><a href="#可观测性langfuse">可观测性（Langfuse）</a></div>
-<div class="sub"><a href="#缓存与成本">缓存与成本</a></div>
-<div><a href="#可靠性设计">可靠性设计</a></div>
-<div class="sub"><a href="#模型分级">模型分级</a></div>
-<div class="sub"><a href="#三层兜底">三层兜底</a></div>
-<div class="sub"><a href="#缓存策略">缓存策略</a></div>
-<div class="sub"><a href="#key-池与限流">Key 池与限流</a></div>
-<div class="sub"><a href="#输入安全与报告校验">输入安全与报告校验</a></div>
-<div class="sub"><a href="#混沌工程">混沌工程</a></div>
-<div><a href="#可观测性与成本">可观测性与成本</a></div>
-<div class="sub"><a href="#langfuse">Langfuse</a></div>
-<div class="sub"><a href="#本次-run-统计">本次 run 统计</a></div>
-<div><a href="#测试">测试</a></div>
-<div><a href="#设计决策与踩坑">设计决策与踩坑</a></div>
-<div class="sub"><a href="#1-为什么用-langgraph">1. 为什么用 LangGraph</a></div>
-<div class="sub"><a href="#2-为什么做模型分级">2. 为什么做模型分级</a></div>
-<div class="sub"><a href="#3-缓存为什么这样设计">3. 缓存为什么这样设计</a></div>
-<div class="sub"><a href="#4-兜底为什么选择降级而不是重试到底">4. 兜底为什么选择降级</a></div>
-<div class="sub"><a href="#5-429-与单-key-冷却的取舍">5. 429 与单 key 冷却</a></div>
-<div class="sub"><a href="#6-混沌开关为什么复用重试链路">6. 混沌开关复用重试链路</a></div>
-<div class="sub"><a href="#7-langfuse-为什么用双-key-即启用">7. Langfuse 双 key 即启用</a></div>
-<div><a href="#已知限制">已知限制</a></div>
-<div><a href="#项目结构">项目结构</a></div>
-<div><a href="#参考">参考</a></div>
-</div>
-</details>
+<details>
+<summary>目录（点击展开）</summary>
 
-<style>
-.readme-toc {
-  margin: 14px 0 18px;
-  padding: 10px 14px;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
-  background: #f6f8fa;
-  font-size: 13px;
-  line-height: 1.7;
-}
-.readme-toc summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: #24292f;
-  user-select: none;
-}
-.readme-toc .toc-body {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #d8dee4;
-}
-.readme-toc a {
-  display: block;
-  padding: 2px 0;
-  color: #0969da;
-  text-decoration: none;
-}
-.readme-toc a:hover {
-  text-decoration: underline;
-}
-.readme-toc .sub a {
-  padding-left: 14px;
-  color: #57606a;
-}
-@media (min-width: 1600px) {
-  .readme-toc {
-    position: fixed;
-    top: 88px;
-    right: 24px;
-    width: 240px;
-    max-height: 72vh;
-    overflow-y: auto;
-    margin: 0;
-    background: #ffffff;
-    box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
-    z-index: 10;
-  }
-}
-@media (prefers-color-scheme: dark) {
-  .readme-toc {
-    background: #161b22;
-    border-color: #30363d;
-  }
-  .readme-toc summary {
-    color: #c9d1d9;
-  }
-  .readme-toc .toc-body {
-    border-top-color: #30363d;
-  }
-  .readme-toc a {
-    color: #58a6ff;
-  }
-  .readme-toc .sub a {
-    color: #8b949e;
-  }
-}
-@media print {
-  .readme-toc {
-    display: none;
-  }
-}
-</style>
+- [项目定位](#项目定位)
+- [技术栈](#技术栈)
+- [核心特性](#核心特性)
+- [架构与流程](#架构与流程)
+  - [主流程](#主流程)
+  - [节点职责与失败策略](#节点职责与失败策略)
+  - [LLM 调用路径](#llm-调用路径)
+- [快速开始](#快速开始)
+  - [1. 前置依赖](#1-前置依赖)
+  - [2. 安装依赖](#2-安装依赖)
+  - [3. 配置 .env](#3-配置-env)
+  - [4. CLI 跑通](#4-cli-跑通)
+  - [5. 启动 HTTP 服务](#5-启动-http-服务)
+  - [6. Docker](#6-docker)
+- [使用说明](#使用说明)
+  - [CLI 参数](#cli-参数)
+  - [HTTP 接口](#http-接口)
+- [配置参数](#配置参数)
+  - [模型路由](#模型路由)
+  - [远程调用与限流](#远程调用与限流)
+  - [本地模型（Ollama）](#本地模型ollama)
+  - [搜索与总结](#搜索与总结)
+  - [可观测性（Langfuse）](#可观测性langfuse)
+  - [缓存与成本](#缓存与成本)
+- [可靠性设计](#可靠性设计)
+  - [模型分级](#模型分级)
+  - [三层兜底](#三层兜底)
+  - [缓存策略](#缓存策略)
+  - [Key 池与限流](#key-池与限流)
+  - [输入安全与报告校验](#输入安全与报告校验)
+  - [混沌工程](#混沌工程)
+- [可观测性与成本](#可观测性与成本)
+  - [Langfuse](#langfuse)
+  - [本次 run 统计](#本次-run-统计)
+- [测试](#测试)
+- [设计决策与踩坑](#设计决策与踩坑)
+  - [1. 为什么用 LangGraph](#1-为什么用-langgraph)
+  - [2. 为什么做模型分级](#2-为什么做模型分级)
+  - [3. 缓存为什么这样设计](#3-缓存为什么这样设计)
+  - [4. 兜底为什么选择降级](#4-兜底为什么选择降级而不是重试到底)
+  - [5. 429 与单 key 冷却](#5-429-与单-key-冷却的取舍)
+  - [6. 混沌开关复用重试链路](#6-混沌开关为什么复用重试链路)
+  - [7. Langfuse 双 key 即启用](#7-langfuse-为什么用双-key-即启用)
+- [已知限制](#已知限制)
+- [项目结构](#项目结构)
+- [参考](#参考)
+
+</details>
 
 ## 项目定位
 
