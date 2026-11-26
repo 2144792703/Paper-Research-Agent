@@ -8,6 +8,6 @@ __pycache__
 .idea
 .vscode
 .pytest_cache
-output.txt
+docs
 eval_results.md
 *.egg-info

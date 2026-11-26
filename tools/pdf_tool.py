@@ -1,3 +1,8 @@
+"""PDF 全文提取工具（预留）。
+
+主流程目前只用 arXiv 摘要，不调用本模块；保留给需要全文解析的后续场景。
+"""
+
 import requests
 import pdfplumber
 

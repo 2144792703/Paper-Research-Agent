@@ -12,7 +12,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 再拷全部源码（根目录：main.py / server.py / graph / models / tools）
 COPY . .
 
+# 非 root 运行；缓存目录先建好并授权，bind mount 时也便于写盘
+RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /app/.cache \
+    && chown -R appuser:appuser /app
+USER appuser
+
 EXPOSE 8000
 
-# FastAPI 实例在 server.py 的 app 对象
+# 用 Python 标准库做健康检查，镜像内无需额外安装 curl
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+
+# FastAPI 实例在 server.py 的 app 对象；必须单 worker（asyncio.Lock 只在进程内生效）
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]

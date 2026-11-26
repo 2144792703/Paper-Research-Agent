@@ -1,4 +1,6 @@
+import hashlib
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,21 +15,28 @@ def _clamp_float(value, low: float, high: float, default: float) -> float:
     return max(low, min(value, high))
 
 
+def _clamp_int(value, low: int, high: int, default: int) -> int:
+    """把非法或越界的整型参数收敛到 [low, high]，解析失败时退回 default"""
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(low, min(value, high))
+
+
 # ============================================================
 # 模块一：模型路由
 # ============================================================
 # local  -> 本地 Ollama 服务
 # remote -> 远程 OpenAI 兼容 API（BASE_URL 可配）
 MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "remote").strip().lower()
-# 缓存键的 provider 段：不同提供方即使用同一模型名也不会互相命中
-PROVIDER_NAME = MODEL_PROVIDER
 
 
 # ============================================================
 # 模块二：远程模型（OpenAI 兼容接口）
 # ============================================================
-REQUEST_TIMEOUT = os.getenv('REQUEST_TIMEOUT', '600.0')
-MAX_RETRIES = os.getenv('MAX_RETRIES', '2')
+REQUEST_TIMEOUT = _clamp_float(os.getenv('REQUEST_TIMEOUT', '300.0'), 10.0, 1800.0, 300.0)
+MAX_RETRIES = _clamp_int(os.getenv('MAX_RETRIES', '0'), 0, 5, 0)
 # 混沌测试：请求发出前按概率注入可重试异常（0 关闭；仅远程模式生效，调试时临时开启）
 CHAOS_FAILURE_RATE = _clamp_float(os.getenv('CHAOS_FAILURE_RATE', '0.0'), 0.0, 1.0, 0.0)
 
@@ -48,17 +57,38 @@ def _parse_key_pools() -> list[str]:
     return list(dict.fromkeys(keys))
 
 
-MODEL = os.getenv("MODEL")
+MODEL = (os.getenv("MODEL") or "").strip()
 BASE_URL = os.getenv("BASE_URL")
 API_KEYS = _parse_key_pools()
 
-# 仅远程模式强制要求 API key；本地模式不依赖
-if MODEL_PROVIDER != "local" and not API_KEYS:
-    raise RuntimeError("未配置任何 API key：请在 .env 中配置 API_KEY_POOLS 或 API_KEY")
+# 缓存键的 provider 段：remote 额外带 BASE_URL 指纹，换到另一家兼容服务不会串缓存
+PROVIDER_TAG = (
+    "local"
+    if MODEL_PROVIDER == "local"
+    else f"{MODEL_PROVIDER}:{hashlib.sha256((BASE_URL or '').encode('utf-8')).hexdigest()[:8]}"
+)
 
-KEY_COOLDOWN = float(os.getenv('KEY_COOLDOWN', '5'))  # 单 key 限流退避基数（秒）
-RPM_LIMIT = int(os.getenv('RPM_LIMIT', '10'))         # 全局（跨 key）每分钟请求上限，0 表示关闭节流
-RPM_WINDOW = 60.0                                      # 滑动窗口长度（秒）
+
+def validate_config() -> None:
+    """启动时校验必要配置。
+
+    放在函数里而不是模块顶层，避免 `--help` / `--clear-cache` 因缺少 key 无法运行。
+    """
+    if MODEL_PROVIDER not in ("local", "remote"):
+        raise RuntimeError(
+            f"不支持的 MODEL_PROVIDER={MODEL_PROVIDER!r}，仅支持 ('local', 'remote')"
+        )
+    if MODEL_PROVIDER != "local":
+        if not API_KEYS:
+            raise RuntimeError("未配置任何 API key：请在 .env 中配置 API_KEY_POOLS 或 API_KEY")
+        if not MODEL:
+            raise RuntimeError("未配置 MODEL：remote 模式必须在 .env 中指定模型名")
+
+
+KEY_COOLDOWN = _clamp_float(os.getenv('KEY_COOLDOWN', '5'), 1.0, 60.0, 5.0)  # 单 key 限流退避基数（秒）
+RPM_LIMIT = _clamp_int(os.getenv('RPM_LIMIT', '10'), 0, 600, 10)           # 全局（跨 key）每分钟请求上限，0 表示关闭节流
+RPM_WINDOW = 60.0                                                          # 滑动窗口长度（秒）
+SERVER_TIMEOUT = _clamp_float(os.getenv("SERVER_TIMEOUT", "540.0"), 30.0, 3600.0, 540.0)
 
 
 # ============================================================
@@ -66,10 +96,7 @@ RPM_WINDOW = 60.0                                      # 滑动窗口长度（�
 # ============================================================
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b-instruct-q5_K_M")
-try:
-    OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "300"))
-except ValueError:
-    OLLAMA_TIMEOUT = 300.0
+OLLAMA_TIMEOUT = _clamp_float(os.getenv("OLLAMA_TIMEOUT", "300"), 10.0, 3600.0, 300.0)
 
 
 # ============================================================
@@ -79,17 +106,16 @@ SEARCH_MIN, SEARCH_MAX = 1, 50   # 单次搜索拉取的论文数量合法区间
 KEEP_MIN, KEEP_MAX = 1, 10       # 最终保留论文数量的合法区间
 
 
-def _clamp_int(value, low: int, high: int, default: int) -> int:
-    """把非法或越界的参数收敛到 [low, high]，解析失败时退回 default"""
-    try:
-        value = int(value)
-    except (TypeError, ValueError):
-        return default
-    return max(low, min(value, high))
-
-
 SEARCH_MAX_RESULTS = _clamp_int(os.getenv("SEARCH_MAX_RESULTS", "15"), SEARCH_MIN, SEARCH_MAX, 15)
 KEEP_PAPERS = _clamp_int(os.getenv("KEEP_PAPERS", "5"), KEEP_MIN, KEEP_MAX, 5)
+# 筛选提示中单篇摘要截断字数：0=不限制单篇；仍受总预算约束
+SELECT_SUMMARY_CHARS = _clamp_int(os.getenv("SELECT_SUMMARY_CHARS", "600"), 0, 2000, 600)
+# 筛选提示摘要总预算（字符）：0=不限制；超出时按候选篇数均分单篇上限
+SELECT_TOTAL_CHARS = _clamp_int(os.getenv("SELECT_TOTAL_CHARS", "24000"), 0, 200000, 24000)
+# 连续空结果的最大搜索次数：超过即终止，避免 supervisor 在论文数为 0 时反复搜索
+MAX_SEARCH_ATTEMPTS = _clamp_int(os.getenv("MAX_SEARCH_ATTEMPTS", "3"), 1, 10, 3)
+# LangGraph 单次 run 的最大步数，防止条件边意外成环
+RECURSION_LIMIT = _clamp_int(os.getenv("RECURSION_LIMIT", "60"), 10, 200, 60)
 
 OLLAMA_MODEL_CHEAP = (os.getenv("OLLAMA_MODEL_CHEAP") or "").strip() or OLLAMA_MODEL
 MODEL_CHEAP = (os.getenv("MODEL_CHEAP") or "").strip() or MODEL or ""
@@ -148,7 +174,7 @@ def _optional_float(name: str):
 
 CACHE_ENABLED = (os.getenv("CACHE_ENABLED", "1") or "").strip().lower() not in ("0", "false", "no", "off")
 CACHE_DIR = os.getenv("CACHE_DIR") or os.path.join(_BASE_DIR, ".cache")
-# 方案8 规约：prompt 模板/缓存格式大改，或任何影响输出的代码逻辑变更时 +1，强制旧缓存全部失效
+# prompt 模板/缓存格式大改，或任何影响输出的代码逻辑变更时 +1，强制旧缓存全部失效
 # （缓存键只覆盖 prompt/模型/采样参数，覆盖不了代码行为变化与供应商侧模型更新）
 CACHE_VERSION = (os.getenv("CACHE_VERSION") or "1").strip()
 

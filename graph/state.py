@@ -17,6 +17,7 @@ class SupervisorState(TypedDict):
     revision_count 当前已重试次数，每次完成评审后加 1
     search_max_results 单次搜索拉取的论文数量（用户可配置，默认 15）
     keep_papers 最终保留的论文数量（用户可配置，默认 5）
+    search_attempts 已执行的搜索次数，用于在连续空结果时终止流程
     """
     topic: str
     papers: list[PaperMeta]
@@ -30,3 +31,4 @@ class SupervisorState(TypedDict):
     revision_count: int
     search_max_results: int
     keep_papers: int
+    search_attempts: int

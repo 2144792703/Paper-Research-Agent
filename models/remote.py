@@ -29,7 +29,7 @@ class ChaosInjectedError(APITimeoutError):
 
 from config import (
     MODEL, API_KEYS, BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, KEY_COOLDOWN, RPM_LIMIT, RPM_WINDOW,
-    LLM_TEMPERATURE, LLM_TOP_P, PROVIDER_NAME, CHAOS_FAILURE_RATE,
+    LLM_TEMPERATURE, LLM_TOP_P, PROVIDER_TAG, CHAOS_FAILURE_RATE,
     CHEAP_MODEL, STRONG_MODEL, CHEAP_MODEL_DISABLE_THINKING,
 )
 from cache import cache_get, cache_key, cache_put
@@ -37,8 +37,8 @@ from usage import record_usage
 
 logger = logging.getLogger(__name__)
 
-# 缓存键的 provider 段：换提供方即换键，避免同模型名串缓存
-PROVIDER = PROVIDER_NAME
+# 缓存键的 provider 段：remote 带 BASE_URL 指纹，换提供方/换地址都不会串缓存
+PROVIDER = PROVIDER_TAG
 
 MAX_ROUNDS = 4        # 完整遍历上限，耗尽后抛出最后一次限流异常
 MAX_COOLDOWN = 60.0   # 单 key 冷却封顶（秒）
@@ -56,7 +56,7 @@ _last_req_ts = 0.0                             # 上一次请求的发起时间�
 # ===== 混沌开关（仅调试；CHAOS_FAILURE_RATE=0 时不介入，不产生日志）=====
 _chaos_stats = {
     "injected": 0,      # 注入的可重试故障次数
-    "calls": 0,         # 逻辑调用次数（每次 invoke/stream 记 1 次）
+    "calls": 0,         # 真实请求调用次数（每次进入真实请求记 1 次；缓存命中不计）
     "attempts": 0,      # 真实请求尝试次数
     "retries": 0,       # 同一逻辑调用内的重试次数（= attempts - calls）
     "calls_retried": 0, # 发生过重试的逻辑调用次数
@@ -116,7 +116,7 @@ def _get_client(i: int, model: str, no_think: bool = False) -> ChatOpenAI:
             kwargs = dict(
                 model=model,
                 api_key=API_KEYS[i],
-                http_client=httpx.Client(trust_env=False, timeout=120.0),
+                http_client=httpx.Client(trust_env=False, timeout=float(REQUEST_TIMEOUT)),
                 base_url=BASE_URL,
                 timeout=float(REQUEST_TIMEOUT),
                 max_retries=int(MAX_RETRIES),

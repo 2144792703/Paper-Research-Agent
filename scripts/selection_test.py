@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# 允许从任意工作目录运行：把项目根目录加入 sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from graph.graph_compile import graph
 
 # topics = ["RAG retrieval", "LLM agent planning", "graph neural network"]

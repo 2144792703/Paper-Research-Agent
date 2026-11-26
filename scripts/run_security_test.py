@@ -1,7 +1,7 @@
 """安全测试纯脚本驱动（不依赖 pytest 也能跑；pytest 环境下亦可由 conftest 注入 graph）。
 
-用法（项目根目录，mybase 环境）：
-    python test/run_security_test.py
+用法（项目根目录）：
+    python scripts/run_security_test.py
 
 用例说明：
     - case1 直接注入：topic 套取系统提示词，走完整 graph.invoke
@@ -19,7 +19,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from graph.graph_compile import graph  # noqa: E402
-import test.security_injection_test as sec  # noqa: E402
+import tests.security_injection_test as sec  # noqa: E402
 
 
 def main() -> None:

@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# LLM disk cache (Day45)
+# LLM disk cache
 .cache/
 
 # Virtual environments
@@ -27,6 +27,9 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+
+# Eval output
+eval_results.md
 
 # Local environment files
 .env

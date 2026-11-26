@@ -1,3 +1,5 @@
+import re
+
 import arxiv
 
 from langchain_core.tools import tool
@@ -6,11 +8,20 @@ from pydantic import BaseModel, Field
 from logger import logger
 
 
+def _clean_query(query: str) -> str:
+    """清理控制字符/多余空白；引号不成对时去掉，避免构建出非法 arXiv 查询"""
+    query = re.sub(r"[\x00-\x1f\x7f]", " ", query or "")
+    query = " ".join(query.split())
+    if query.count('"') % 2:
+        query = query.replace('"', "")
+    return query
+
+
 class PaperMeta(BaseModel):
     title: str = Field(description="论文标题")
     authors: list[str] = Field(description="作者列表")
     published: str = Field(description="发布日期 YYYY-MM-DD")
-    summary: str = Field(description="摘要前200字")
+    summary: str = Field(description="完整摘要")
     url: str = Field(description="PDF链接或abs链接")
 
 
@@ -20,6 +31,11 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
     输出：论文元数据列表
     """
     logger.info("search_papers")
+
+    query = _clean_query(query)
+    if not query:
+        logger.info("search_papers：查询为空，返回 0 条")
+        return []
 
     # 调用函数时，预防不可预估的值
     max_results = max(1, min(int(max_results), 50))
@@ -43,7 +59,7 @@ def search_papers(query: str, max_results: int = 5) -> list[PaperMeta]:
                     title=sr.title,
                     authors=[a.name for a in sr.authors],
                     published=sr.published.strftime("%Y-%m-%d"),
-                    summary=sr.summary[:200],
+                    summary=sr.summary,
                     url=sr.pdf_url or sr.entry_id,
                 )
             )

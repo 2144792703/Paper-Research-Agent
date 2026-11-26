@@ -49,7 +49,7 @@ MAX_RETRIES=0
 # 单 key 限流退避基数（秒）
 KEY_COOLDOWN=5
 
-# 全局（跨 key）每分钟请求上限，默认 0 表示关闭节流；下例 10 仅演示开启节流
+# 全局（跨 key）每分钟请求上限，代码默认 10；0 表示关闭节流（下例 10 即默认值）
 RPM_LIMIT=10
 ```
 
@@ -65,10 +65,12 @@ def _parse_key_pools() -> list[str]:
     return list(dict.fromkeys(keys))
 
 API_KEYS = _parse_key_pools()
-if not API_KEYS:
+# 仅 remote 模式强制要求 key；local 模式不依赖
+if MODEL_PROVIDER != "local" and not API_KEYS:
     raise RuntimeError("未配置任何 API key：请在 .env 中配置 API_KEY_POOLS 或 API_KEY")
 
-KEY_COOLDOWN = float(os.getenv('KEY_COOLDOWN', '5'))
+KEY_COOLDOWN = _clamp_float(os.getenv('KEY_COOLDOWN', '5'), 1.0, 60.0, 5.0)
+RPM_LIMIT = _clamp_int(os.getenv('RPM_LIMIT', '10'), 0, 600, 10)
 ```
 
 ---
@@ -77,7 +79,7 @@ KEY_COOLDOWN = float(os.getenv('KEY_COOLDOWN', '5'))
 
 | 变量 | 类型 | 含义 |
 |---|---|---|
-| `_clients` | `dict[tuple[int, str], ChatOpenAI]` | (key 索引, 模型名) → 客户端缓存（按 key + 模型复用） |
+| `_clients` | `dict[tuple[int, str, bool], ChatOpenAI]` | (key 索引, 模型名, 是否关闭思考) → 客户端缓存（按 key + 模型 + 思考开关复用） |
 | `_current` | `int` | 粘性指针：上次成功的 key 索引，初始 0 |
 | `_fail_count` | `list[int]` | 每个 key 的连续限流次数（决定退避档位） |
 | `_cooldown_until` | `list[float]` | 每个 key 的解封时间戳（monotonic） |

@@ -19,6 +19,7 @@ import logging
 import os
 import re
 import threading
+import time
 
 from config import (
     MODEL_PRICE_INPUT_PER_1M,
@@ -36,26 +37,33 @@ _cached_calls = 0
 
 _price_table: dict | None = None
 _lower_index: dict[str, dict] | None = None
+# 加载失败后 60s 内不重复读盘/刷日志；到期自动重试（文件补齐后无需重启）
+_price_table_retry_at = 0.0
 
 
 def _load_price_table() -> dict:
-    """懒加载价格表；文件缺失或损坏时退化为空表（只报 token）"""
-    global _price_table, _lower_index
+    """懒加载价格表；文件缺失或损坏时退化为空表（只报 token），60s 后自动重试"""
+    global _price_table, _lower_index, _price_table_retry_at
     if _price_table is None:
+        if time.monotonic() < _price_table_retry_at:
+            return {}
         try:
             with open(MODEL_PRICES_PATH, encoding="utf-8") as f:
                 raw = json.load(f)
             raw.pop("sample_spec", None)
             _price_table = raw
             _lower_index = {k.lower(): v for k, v in raw.items()}
+            _price_table_retry_at = 0.0
         except Exception as e:
             logger.warning(
                 f"[cost] 价格表加载失败，仅统计 token：{type(e).__name__} "
                 f"file={os.path.basename(MODEL_PRICES_PATH)} msg={str(e)[:80]}"
             )
             logger.debug(f"[cost] 价格表异常详情 file={MODEL_PRICES_PATH}：{e}")
-            _price_table = {}
-            _lower_index = {}
+            _price_table = None
+            _lower_index = None
+            _price_table_retry_at = time.monotonic() + 60
+            return {}
     return _price_table
 
 

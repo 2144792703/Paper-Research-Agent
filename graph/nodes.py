@@ -4,7 +4,10 @@ from time import perf_counter
 
 from pydantic import BaseModel, Field
 
-from config import clamp_search_count, clamp_keep_papers, CHEAP_MODEL, STRONG_MODEL, SUMMARY_CONCURRENCY
+from config import (
+    clamp_search_count, clamp_keep_papers, CHEAP_MODEL, STRONG_MODEL, SUMMARY_CONCURRENCY,
+    SELECT_SUMMARY_CHARS, SELECT_TOTAL_CHARS, MAX_SEARCH_ATTEMPTS,
+)
 from graph.state import SupervisorState
 from llm import invoke_llm, stream_llm
 from logger import logger
@@ -20,7 +23,7 @@ class SelectedPaper(BaseModel):
 
 class SelectionResult(BaseModel):
     """LLM 筛选结果"""
-    selected: list[SelectedPaper] = Field(description="选中的论文，3-5篇")
+    selected: list[SelectedPaper] = Field(description="选中的论文，数量不超过本次要求的篇数")
 
 
 class PaperSummary(BaseModel):
@@ -55,7 +58,7 @@ def supervisor_node(state: SupervisorState):
     critique = (state.get("critique") or "").strip()
     previous = (state.get("next") or "").strip() or "none"
     revision_count = state.get("revision_count", 0)
-    critique_times = state.get("critique_times", 3)
+    critique_times = state.get("critique_times", 2)
 
     # 确定性护栏：综述已生成或已有论文时不再交给 LLM 判定，
     # 避免 LLM 缓存回放/输出抖动把 summarize ↔ supervisor 判成死循环
@@ -63,6 +66,14 @@ def supervisor_node(state: SupervisorState):
         return {"next": "summarize" if previous == "critic" else "critic"}
     if papers:
         return {"next": "summarize"}
+
+    # 连续多次搜索都没有结果时终止，避免 papers=0 时无限 search
+    search_attempts = state.get("search_attempts", 0)
+    if search_attempts >= MAX_SEARCH_ATTEMPTS:
+        logger.warning(f"连续 {search_attempts} 次搜索无结果，终止研究：{state['topic']!r}")
+        print(f"\n❌ 连续 {search_attempts} 次未检索到论文，已终止。")
+        print("   请检查网络/arXiv 可用性，或换一个更常见的研究主题。")
+        return {"next": "end"}
 
     # 评审意见：只在上一步是 critic 时才是当前待处理的，否则标注过期截断
     critique_display = "无"
@@ -84,7 +95,7 @@ def supervisor_node(state: SupervisorState):
     else:
         judge_hint = (
             f"【本次判定】论文数=0；主题「{state['topic']}」长度为{len(state['topic'])}。"
-            "若主题不含任何可识别的学科名/研究术语/英文单词（如纯符号、asdfghjkl、qwertyuiop、zzzz、超过64字符），只输出 invalid；"
+            "若主题不含任何可识别的学科名/研究术语/英文单词（如纯符号、asdfghjkl、qwertyuiop、zzzz），只输出 invalid；"
             "只有主题是真实研究方向时才输出 search。只输出一个单词："
         )
 
@@ -119,7 +130,7 @@ def supervisor_node(state: SupervisorState):
 决策规则（严格按优先级判断，命中即停）：
 0. 研究主题无效（最高优先级）→ 输出 invalid。
    判定标准：主题为空、纯数字或纯符号、明显乱码或随机字符串（如 zzzznotaword123、asdfghjkl、qwertyuiop）、
-   连续键盘序列、无实际语义的拼凑字符、长度异常（超过 64 个字符）。
+   连续键盘序列、无实际语义的拼凑字符。长度上限由入口层统一校验，不在此判断。
    命中时只输出 invalid，禁止输出 search、summarize、critic。
 1. 上次决策是 critic → 输出 summarize。
    必须按评审意见修改综述，不要跳步去 search 或 critic。
@@ -179,7 +190,25 @@ def worker_search(state: SupervisorState):
     existing = state.get("papers") or []
     seen = {p.url for p in existing}
     merged = existing + [p for p in new_papers if p.url not in seen]
-    return {'papers': merged}
+    return {'papers': merged, 'search_attempts': state.get("search_attempts", 0) + 1}
+
+
+def _clip_summary(text: str, limit: int) -> str:
+    """按字符数截断摘要；limit<=0 表示不限制单篇"""
+    text = (text or "").strip()
+    if limit <= 0 or len(text) <= limit:
+        return text
+    return text[:max(0, limit - 1)] + "…"
+
+
+def _select_summary_limit(n: int, per_limit: int, total_limit: int) -> int:
+    """筛选提示的单篇摘要上限：单篇限制与总预算均分取较小值"""
+    if n <= 0:
+        return per_limit
+    if total_limit > 0:
+        budget = max(1, total_limit // n)
+        return budget if per_limit <= 0 else min(per_limit, budget)
+    return per_limit
 
 
 def worker_select(state: SupervisorState):
@@ -193,8 +222,9 @@ def worker_select(state: SupervisorState):
     keep_count = clamp_keep_papers(state.get("keep_papers"))
     keep_count = min(keep_count, len(papers))
 
+    summary_limit = _select_summary_limit(len(papers), SELECT_SUMMARY_CHARS, SELECT_TOTAL_CHARS)
     paper_list = "\n".join([
-        f"[{i}] 标题：{p.title}\n      摘要：{p.summary[:150]}"
+        f"[{i}] 标题：{p.title}\n      摘要：{_clip_summary(p.summary, summary_limit)}"
         for i, p in enumerate(papers)
     ])
 
@@ -241,7 +271,7 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
         if not selected_papers:
             logger.warning("筛选结果为空或序号无效，按搜索顺序保留前 N 篇")
             return {"papers": papers[:keep_count]}
-        # 方案6：同子领域不足 N 篇时允许跨领域补足，不硬性减产
+        # 同子领域不足 N 篇时允许跨领域补足，不硬性减产
         if len(selected_papers) < keep_count:
             before = len(selected_papers)
             for p in papers:
@@ -251,8 +281,12 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
                     if len(selected_papers) >= keep_count:
                         break
             logger.warning(f"筛选数量不足 {before}/{keep_count}，按搜索顺序补齐 {len(selected_papers) - before} 篇")
-        # 方案6：组合跨子领域时留下可检索的日志（验收可观测）
-        subfields = {i.subfield.strip() for i in parsed.selected if (i.subfield or "").strip()}
+        # 组合跨子领域时留下可检索的日志（验收可观测）
+        subfields = {
+            i.subfield.strip()
+            for i in parsed.selected
+            if (i.subfield or "").strip() and 0 <= i.index < len(papers)
+        }
         if len(subfields) > 1:
             logger.warning(f"筛选组合跨子领域：{subfields}")
         logger.info(f"筛选后保留 {len(selected_papers)} / {len(papers)} 篇")
@@ -378,9 +412,9 @@ def worker_summarize(state: SupervisorState):
             for s in paper_summaries
         ])
     else:
-        # 使用原始摘要
+        # 使用原始摘要（兜底路径，仅在缺少结构化总结时触发）
         paper_texts = "\n".join([
-            f"- {p.title}: {p.summary[:150]}" for p in papers
+            f"- {p.title}: {p.summary}" for p in papers
         ])
 
     message = f"""请根据以下论文信息，写一份 Markdown 格式的研究报告：
@@ -461,9 +495,9 @@ def critic_node(state: SupervisorState):
     try:
         result = invoke_llm(prompt, model=STRONG_MODEL)
     except Exception as e:
-        # 报告已生成，评审是非关键路径：失败时降级为通过，避免整次 run 无谓中止
+        # 报告已生成，评审是非关键路径：失败时精确返回“通过”，避免多跑一轮 summarize
         logger.warning(f"评审节点降级：{type(e).__name__}，本轮按通过处理")
-        result = "通过。评审服务暂不可用，已跳过本轮评审。"
+        result = "通过"
 
     new_history = history + [result.strip()]
 

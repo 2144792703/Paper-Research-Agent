@@ -1,5 +1,15 @@
+import sys
 import time
+from pathlib import Path
+
+# 允许从任意工作目录运行：把项目根目录加入 sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from config import RECURSION_LIMIT, validate_config
 from graph.graph_compile import graph
+import cache
+import usage
+from security import MAX_TOPIC_LEN, sanitize_topic
 
 # 20个测试主题
 TEST_TOPICS = [
@@ -31,17 +41,23 @@ TEST_TOPICS = [
 
 
 def run_one(topic: str) -> dict:
-    """跑一个主题，返回结果；空主题在入口层就会被拒绝，不进入图"""
-    if not topic.strip():
+    """跑一个主题，返回结果；空主题/超长主题在入口层就会被拒绝，不进入图"""
+    topic = sanitize_topic(topic)
+    if not topic:
         return {"topic": topic, "passed": False, "elapsed": 0.0,
                 "summary_len": 0, "error": "空主题（入口校验拒绝，未调用图）"}
+    if len(topic) > MAX_TOPIC_LEN:
+        return {"topic": topic, "passed": False, "elapsed": 0.0,
+                "summary_len": 0, "error": f"主题超长（>{MAX_TOPIC_LEN} 字符，入口校验拒绝）"}
     t0 = time.time()
     try:
+        usage.reset()
+        cache.reset_stats()
         result = graph.invoke({
             "topic": topic,
             "critique_times": 1,
             "keep_papers": 3,
-        })
+        }, config={"recursion_limit": RECURSION_LIMIT})
         elapsed = time.time() - t0
         summary = result.get("summary", "")
 
@@ -55,6 +71,7 @@ def run_one(topic: str) -> dict:
 
 
 if __name__ == "__main__":
+    validate_config()
     results = []
     for i, topic in enumerate(TEST_TOPICS):
         print(f"[{i + 1}/{len(TEST_TOPICS)}] 测试: {topic[:40]}")

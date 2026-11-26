@@ -1,5 +1,5 @@
 """
-报告数字事后校验（方案7）。
+报告数字事后校验。
 
 比对报告中的量化数字是否存在于喂给模型的原始摘要语料，拦截"摘要里没有、模型编出来"的数字。
 覆盖形态：百分比（1.5%）、时间（12ms / 3 秒）、倍数（3 倍）、小数（0.62）。
@@ -17,8 +17,12 @@ _PATTERNS = [
     re.compile(r"\d+(?:\.\d+)?\s*(?:ms|sec(?:onds?)?|s)\b"),                # 12ms / 3s / 2 sec
     re.compile(r"\d+(?:\.\d+)?\s*(?:毫秒|秒)"),                              # 3 秒 / 200 毫秒
     re.compile(r"\d+(?:\.\d+)?\s*倍"),                                      # 3 倍
-    re.compile(r"\d+\.\d+"),                                                # 0.62 / 3.2
+    # 前面是字母/数字/点/连字符时不匹配：避免把 GPT-3.5、v1.5 这类版本号当成量化结论
+    re.compile(r"(?<![\w.-])\d+\.\d+"),                                      # 0.62 / 3.2
 ]
+
+# 年份/年代（1990s、2020s）不是量化实验结论，跳过
+_YEAR_LIKE = re.compile(r"(?:19|20)\d{2}s")
 
 
 def _field(p, name: str) -> str:
@@ -41,7 +45,10 @@ def _find_numbers(text: str) -> list[str]:
     for start, end, raw in hits:
         if start < last_end:  # 落在上一个匹配内部（如 1.5% 里的 1.5），跳过
             continue
-        tokens.append(raw.replace(" ", ""))
+        token = raw.replace(" ", "")
+        if _YEAR_LIKE.fullmatch(token):  # 2020s 不是实验数字
+            continue
+        tokens.append(token)
         last_end = end
     return tokens
 

@@ -1,6 +1,6 @@
 """report_check 数字事后校验的本地单元测试（不调 LLM）。
 
-运行：python -m pytest test/report_check_test.py -q
+运行：python -m pytest tests/report_check_test.py -q
 """
 
 from tools.arxiv_tool import PaperMeta
@@ -90,3 +90,13 @@ def test_percentage_not_split_into_decimal():
 def test_plain_integer_not_flagged():
     # 年份、篇数等纯整数不检，避免误报
     assert check_report("2020 年以来共 5 篇", "语料无关") == []
+
+
+def test_year_decade_not_flagged():
+    # 1990s / 2020s 是年代，不是量化实验结论
+    assert check_report("2020s 以来该方法持续演进", "语料无关") == []
+
+
+def test_version_number_not_flagged():
+    # 版本号（GPT-3.5 / v1.5）不是实验数字
+    assert check_report("对比 GPT-3.5 与 v1.5", "语料无关") == []
