@@ -1,6 +1,7 @@
 """图节点边界行为的离线单测（不调 LLM/arXiv）。"""
 
 import graph.nodes as nodes
+from graph.graph_compile import after_critic
 
 
 def test_supervisor_terminates_after_max_attempts(monkeypatch):
@@ -37,3 +38,19 @@ def test_worker_search_increments_attempts(monkeypatch):
     })
     assert out["search_attempts"] == 2
     assert out["papers"] == []
+
+
+def test_after_critic_accepts_trailing_punctuation():
+    # 模型常输出「通过。」，不能因此多跑一轮评审
+    assert after_critic({"critique": "通过。", "revision_count": 1, "critique_times": 2}) == "finish"
+    assert after_critic({"critique": " 通过！", "revision_count": 1, "critique_times": 2}) == "finish"
+    assert after_critic({"critique": "需要补充对比", "revision_count": 1, "critique_times": 2}) == "supervisor"
+    assert after_critic({"critique": "需要补充对比", "revision_count": 2, "critique_times": 2}) == "finish"
+
+
+def test_degrade_reasons_accumulate_and_dedupe():
+    out = nodes._degrade({"degraded_reasons": ["select_fallback"]}, "summarize_fallback")
+    assert out == {"degraded": True, "degraded_reasons": ["select_fallback", "summarize_fallback"]}
+    assert nodes._degrade(out, "summarize_fallback")["degraded_reasons"] == [
+        "select_fallback", "summarize_fallback",
+    ]

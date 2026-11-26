@@ -70,6 +70,7 @@ def test_done_event_marks_truncated(monkeypatch):
     assert "event: done" in resp.text
     assert '"truncated": true' in resp.text
     assert '"status": "ok"' in resp.text
+    assert '"degraded": false' in resp.text
 
 
 def test_done_event_marks_aborted(monkeypatch):

@@ -18,6 +18,8 @@ class SupervisorState(TypedDict):
     search_max_results 单次搜索拉取的论文数量（用户可配置，默认 15）
     keep_papers 最终保留的论文数量（用户可配置，默认 5）
     search_attempts 已执行的搜索次数，用于在连续空结果时终止流程
+    degraded 本次 run 是否发生过兜底降级（报告质量标记）
+    degraded_reasons 降级原因列表，供 CLI 与 SSE 输出
     """
     topic: str
     papers: list[PaperMeta]
@@ -32,3 +34,5 @@ class SupervisorState(TypedDict):
     search_max_results: int
     keep_papers: int
     search_attempts: int
+    degraded: bool
+    degraded_reasons: list[str]

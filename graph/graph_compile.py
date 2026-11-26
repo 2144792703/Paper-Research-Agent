@@ -19,9 +19,14 @@ def route(state: SupervisorState):
     return state["next"]
 
 
+def _passed(critique: str) -> bool:
+    """评审是否通过：去掉首尾标点再比较，避免模型输出「通过。」被判为未通过"""
+    return (critique or "").strip().strip("。.!！?？;；,， ").lower() == "通过"
+
+
 def after_critic(state: SupervisorState):
     logger.info("after_critic")
-    if state["critique"].strip() == "通过" or state["revision_count"] >= state["critique_times"]:
+    if _passed(state["critique"]) or state["revision_count"] >= state["critique_times"]:
         return "finish"
     return "supervisor"
 

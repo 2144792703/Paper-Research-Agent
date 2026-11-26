@@ -110,6 +110,8 @@ async def research(req: ResearchRequest):
                 "report": report[:2000],
                 "truncated": len(report) > 2000,
                 "status": "aborted" if (result.get("next") == "end" and not report.strip()) else "ok",
+                "degraded": bool(result.get("degraded")),
+                "degraded_reasons": result.get("degraded_reasons") or [],
                 "trace_id": trace_id(langfuse_config) or "",
                 "usage": usage.summary(),
                 "report_warnings": report_warnings,

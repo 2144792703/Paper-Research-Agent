@@ -107,6 +107,8 @@ def test_summarize_falls_back_to_structured_summaries(monkeypatch):
     assert "## 研究空白" in result["summary"]
     assert "降级汇总" in result["summary"]
     assert "Paper \\| B" in result["summary"]
+    assert result["degraded"] is True
+    assert "summarize_fallback" in result["degraded_reasons"]
 
 
 def test_select_falls_back_to_search_order(monkeypatch):
@@ -124,6 +126,8 @@ def test_select_falls_back_to_search_order(monkeypatch):
     result = nodes.worker_select({"topic": "graph neural network", "papers": papers, "keep_papers": 2})
 
     assert result["papers"] == papers[:2]
+    assert result["degraded"] is True
+    assert "select_fallback" in result["degraded_reasons"]
 
 
 def test_supervisor_falls_back_to_deterministic_route(monkeypatch):
@@ -135,7 +139,10 @@ def test_supervisor_falls_back_to_deterministic_route(monkeypatch):
     monkeypatch.setattr(nodes, "invoke_llm", _boom)
     state = {"topic": "graph neural network", "papers": [], "summary": "", "next": "none"}
 
-    assert nodes.supervisor_node(state)["next"] == "search"
+    result = nodes.supervisor_node(state)
+    assert result["next"] == "search"
+    assert result["degraded"] is True
+    assert "router_error" in result["degraded_reasons"]
 
 
 def test_fallback_route_matches_state_table():

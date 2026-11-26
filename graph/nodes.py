@@ -34,6 +34,14 @@ class PaperSummary(BaseModel):
     limitation: str = Field(description="用一句话总结该论文的局限性或者未来方向")
 
 
+def _degrade(state: SupervisorState, reason: str) -> dict:
+    """记录一次兜底降级，供 CLI / SSE 输出质量标记（同因去重，跨节点累加）"""
+    reasons = list(state.get("degraded_reasons") or [])
+    if reason not in reasons:
+        reasons.append(reason)
+    return {"degraded": True, "degraded_reasons": reasons}
+
+
 def _fallback_route(state: SupervisorState) -> str:
     """模型不可用时的确定性路由，与 supervisor prompt 的状态判定表保持一致"""
     if (state.get("summary") or "").strip():
@@ -159,12 +167,15 @@ def supervisor_node(state: SupervisorState):
         logger.warning(f"路由判定失败，按确定性状态回退：{type(e).__name__}")
         logger.debug(f"路由判定异常详情：{e}")
         next_step = _fallback_route(state)
+        degrade_reason = "router_error"
         print(f"\n⚠️ 路由模型不可用，已按当前状态回退到 {next_step}。")
     else:
         next_step = responses.strip().lower().strip("。.!！\"'`")
+        degrade_reason = ""
         if not next_step:
             logger.warning("路由输出为空，按确定性状态回退")
             next_step = _fallback_route(state)
+            degrade_reason = "router_empty"
     if next_step == "invalid":
         if papers:
             # 已有论文说明主题有效，视为模型误判，不影响正常流程
@@ -178,7 +189,10 @@ def supervisor_node(state: SupervisorState):
     if next_step not in {"search", "summarize", "critic"}:
         logger.warning(f"路由输出不合法：{responses!r}，默认走 search")
         next_step = "search"
-    return {'next': next_step}
+    result = {'next': next_step}
+    if degrade_reason:
+        result.update(_degrade(state, degrade_reason))
+    return result
 
 
 def worker_search(state: SupervisorState):
@@ -250,7 +264,7 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
         logger.warning(f"筛选模型不可用，按搜索顺序保留前 {keep_count} 篇：{type(e).__name__}")
         logger.debug(f"筛选模型异常详情：{e}")
         print(f"⚠️ 筛选失败，已按搜索顺序保留前 {keep_count} 篇。")
-        return {"papers": papers[:keep_count]}
+        return {"papers": papers[:keep_count], **_degrade(state, "select_fallback")}
     result = re.sub(r"^\s*```(?:json)?\s*", "", result)
     result = re.sub(r"\s*```\s*$", "", result)
 
@@ -270,7 +284,7 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
                 break
         if not selected_papers:
             logger.warning("筛选结果为空或序号无效，按搜索顺序保留前 N 篇")
-            return {"papers": papers[:keep_count]}
+            return {"papers": papers[:keep_count], **_degrade(state, "select_fallback")}
         # 同子领域不足 N 篇时允许跨领域补足，不硬性减产
         if len(selected_papers) < keep_count:
             before = len(selected_papers)
@@ -294,7 +308,7 @@ index 必须是上面列表中的序号。只返回 JSON，不要代码块或额
     except Exception as e:
         logger.warning(f"筛选解析失败，按搜索顺序保留前 N 篇：{type(e).__name__}")
         logger.debug(f"筛选解析异常详情：{e}")
-        return {"papers": papers[:keep_count]}
+        return {"papers": papers[:keep_count], **_degrade(state, "select_fallback")}
 
 def _summarize_one(p) -> dict:
     try:
@@ -344,7 +358,12 @@ def worker_summarize_one(state: SupervisorState):
     if mismatched:
         logger.error(f"总结结果与论文顺序不一致：{'; '.join(mismatched)}")
     logger.info(f"总结阶段耗时 {perf_counter() - started:.2f}s，{len(papers)} 篇")
-    return {"paper_summaries": summaries}
+    result = {"paper_summaries": summaries}
+    failed = [s for s in summaries if not any((s.get("summary") or {}).values())]
+    if failed:
+        logger.warning(f"单篇总结失败 {len(failed)}/{len(papers)} 篇，已保留空结构")
+        result.update(_degrade(state, "summarize_one_partial"))
+    return result
 
 
 def _md_cell(value) -> str:
@@ -450,6 +469,7 @@ def worker_summarize(state: SupervisorState):
     # 失败或空响应时不再冒泡，也不把空内容当作“综述已生成”，直接用单篇摘要兜底
     if stream_failed or not full_text.strip():
         full_text = _fallback_report(paper_summaries, papers)
+        return {'summary': full_text.lstrip(), **_degrade(state, "summarize_fallback")}
 
     return {'summary': full_text.lstrip()}
 
@@ -498,13 +518,17 @@ def critic_node(state: SupervisorState):
         # 报告已生成，评审是非关键路径：失败时精确返回“通过”，避免多跑一轮 summarize
         logger.warning(f"评审节点降级：{type(e).__name__}，本轮按通过处理")
         result = "通过"
+        degraded = _degrade(state, "critic_unavailable")
+    else:
+        degraded = {}
 
     new_history = history + [result.strip()]
 
     return {
         "critique": result.strip(),
         "revision_count": state.get("revision_count", 0) + 1,
-        "critique_history": new_history
+        "critique_history": new_history,
+        **degraded,
     }
 
 

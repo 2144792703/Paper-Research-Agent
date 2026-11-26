@@ -336,7 +336,7 @@ SSE 事件：
 | 事件 | 时机 | 内容 |
 | --- | --- | --- |
 | `progress` | 请求进入 | `{"step":"start","topic":"..."}` |
-| `done` | 正常结束 | 报告前 2000 字、`truncated`、`status`、`trace_id`、`usage`、`report_warnings` |
+| `done` | 正常结束 | 报告前 2000 字、`truncated`、`status`、`degraded`、`degraded_reasons`、`trace_id`、`usage`、`report_warnings` |
 | `timeout` | 超过 `SERVER_TIMEOUT`（默认 540s） | 超时提示 |
 | `partial` | 内部异常 | 通用错误提示（详情只进服务端日志） |
 
@@ -468,7 +468,7 @@ docker compose up --build
 | `select` | 模型异常或 JSON 解析失败 | 按搜索顺序保留前 N 篇 |
 | `summarize` | 流式异常或返回空串 | 用单篇结构化摘要拼简版 Markdown；无摘要时输出「研究未能完成」提示 |
 
-此外，`summarize_one` 单篇失败保留空结构，`critic` 失败返回降级文本但不阻断报告，`followup` 失败返回占位提示。
+此外，`summarize_one` 单篇失败保留空结构，`critic` 失败返回降级文本但不阻断报告，`followup` 失败返回占位提示。任一兜底触发时会写入 `degraded / degraded_reasons`，CLI 打印质量标记，SSE `done` 事件一并返回。
 
 ### 缓存策略
 
@@ -528,7 +528,7 @@ CHAOS_FAILURE_RATE=0.2
 ```bash
 # 离线全量回归（不发网络请求）
 python -m pytest
-# 46 passed, 5 deselected
+# 48 passed, 5 deselected
 
 # 真实链路用例（需要 .env 与可用模型额度）
 python -m pytest -m live
@@ -542,7 +542,7 @@ python -m pytest -m live
 - `tests/cache_test.py`：缓存键隔离、空白归一化、空值不写不命（6 个）
 - `tests/security_test.py`：入口清洗与注入标记（4 个）
 - `tests/server_test.py`：参数校验、timeout/done 事件、截断与 aborted 标记（7 个）
-- `tests/graph_test.py`：空搜索终止、主题长度规则、搜索次数累加（3 个）
+- `tests/graph_test.py`：空搜索终止、提示词无 64 字符规则、搜索次数累加、评审标点兼容、降级原因累加（5 个）
 - `tests/security_injection_test.py`：真实链路注入用例，标记为 `live`，默认不跑
 
 `scripts/` 存放会真实调用模型或网络的脚本，不参与 pytest 收集，按需手动执行（内部已把项目根目录加入 `sys.path`，可在任意工作目录运行）：
@@ -569,7 +569,7 @@ python scripts/eval.py                # 20 主题批量评估，输出 eval_resu
 | 缓存键覆盖版本、provider、BASE_URL 指纹、模型、采样参数与 prompt | 换模型或换服务地址都不会串缓存；空响应不写入、不命中 | 改动影响输出的代码时需手动提升 `CACHE_VERSION` |
 | 失败时降级而非重试到底 | 单次模型抖动不毁整次 run；非关键路径可带质量标记继续 | 降级报告质量下降，需要人工复核 |
 | 429 指数退避 + 单 key 冷却 | 多 key 可平滑限流；单 key 在 4 轮遍历内可能耗尽，是已知边界 | `RPM_LIMIT` 节流会变慢；模型侧过载时换模型或提供方更有效 |
-| 混沌注入复用重试链路 | 继承 `APITimeoutError`，同时验证换 key、退避、重试与兜底 | 与真实 5xx 共用 5s 冷却，后续再拆分 |
+| 混沌注入复用重试链路 | 继承 `APITimeoutError`，同时验证换 key、退避、重试与兜底 | 与真实 5xx 共用 5s 冷却；已决策不拆分（混沌仅调试、默认关闭，拆分收益低于新增配置面） |
 | Langfuse 双 key 即启用 | 观测是可选能力，缺任一 key 自动跳过，无需额外开关 | 未配置时没有调用链，只剩本地统计 |
 
 最大的坑是「模型返回空 → 空值写入缓存 → supervisor 反复要求重写」：现在空响应不写缓存、读取时删除历史空值，并加了确定性路由护栏与综述兜底。Windows 下缓存文件有锁，清缓存统一用 `python main.py --clear-cache`。
@@ -584,6 +584,7 @@ python scripts/eval.py                # 20 主题批量评估，输出 eval_resu
 - 连续 3 次（`MAX_SEARCH_ATTEMPTS`）搜索都没有结果时流程会终止；CLI 以退出码 2 区分「主题无效/检索失败」与正常完成。
 - 流式生成中途失败时不写缓存，也不计该次已产出的 token，统计会偏低。
 - 输入注入防护只覆盖入口侧可疑短语标记；论文标题/摘要中的间接注入不在当前防线内。
+- 质量标记只区分「是否发生过兜底降级」，不区分降级程度与影响范围。
 
 ## 项目结构
 
@@ -614,6 +615,12 @@ python scripts/eval.py                # 20 主题批量评估，输出 eval_resu
 ├── scripts/                # 手动执行的链路脚本与 eval.py
 ├── docs/
 │   ├── API_KEY_POOL.md     # key 池配置说明
+│   ├── pitch_3min.md       # 3 分钟项目介绍稿
+│   ├── pitch_10min.md      # 10 分钟深挖稿
+│   ├── interview_q20.md    # 面试高频 20 题与回补清单
+│   ├── mock_d54.md         # 脱稿 Mock 纪要与疑问销项
+│   ├── p2_backlog.md       # 缓冲日 P2 清单
+│   ├── final_review.md     # 56 天总复盘
 │   └── evidence/
 │       └── day48-chaos-test-runs.txt  # 混沌测试运行记录归档
 ├── demo/                   # README 运行截图

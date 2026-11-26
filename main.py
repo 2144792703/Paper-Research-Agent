@@ -138,6 +138,10 @@ def main():
     print("=" * 60)
     print(result.get("summary", "（无报告）"))
 
+    if result.get("degraded"):
+        reasons = "、".join(result.get("degraded_reasons") or [])
+        print(f"\n⚠️  质量标记：本次为降级产出（{reasons}），请人工复核")
+
     # 报告数字事后校验（量化数字须来自喂给模型的原始摘要）
     missing_nums = report_check.check_report(result.get("summary", ""), report_check.build_corpus(result))
     if missing_nums:
